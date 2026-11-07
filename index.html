@@ -1490,6 +1490,8 @@ async function cargarCatalogo(){
     }
     if (!ts.empty) {
       const lista = ts.docs.map(d => Object.assign({ id: d.id }, d.data())).filter(t => t.activo !== false && (t.colores || []).some(c => c.activo !== false)).sort((a, b) => (a.orden || 0) - (b.orden || 0));
+      const nombresBase = {}; TELAS.forEach(t => t.colores.forEach(c => { if (c.nombre) nombresBase[c.codigo] = c.nombre; }));
+      lista.forEach(t => (t.colores || []).forEach(c => { if (!c.nombre && nombresBase[c.codigo]) c.nombre = nombresBase[c.codigo]; }));
       if (lista.length) TELAS.splice(0, TELAS.length, ...lista);
     }
     if (!ps.empty) {

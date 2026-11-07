@@ -403,6 +403,7 @@ function pintarTelas(){
   const el = $("t-telas");
   const total = TELAS.reduce((a, t) => a + (t.colores || []).length, 0), agot = TELAS.reduce((a, t) => a + (t.colores || []).filter(c => c.activo === false).length, 0);
   el.innerHTML = `<div class="barra"><h2>Telas y colores <small style="color:var(--muted);font-size:.9rem">(${TELAS.length} colecciones · ${total} colores${agot ? ` · ${agot} agotados` : ""})</small></h2>
+      ${TELAS.some(t => (t.colores || []).some(c => !c.nombre)) ? '<button class="btn borde" id="t-nombres" type="button">Poner nombres sugeridos</button>' : ""}
       <button class="btn oro" id="t-nueva" type="button">+ NUEVA COLECCIÓN</button></div>
     <p class="ayuda" style="margin:-8px 0 16px">Toca un color para marcarlo <b>agotado</b> (se oculta en la página) o volver a activarlo. Escribe debajo el <b>nombre</b> que verá el cliente; se guarda al salir del campo. El código es solo de referencia para el taller y nunca se repite.</p>
     ${nuevaTela ? `<div class="card coleccion"><h3 style="font-size:1rem">Nueva colección</h3>
@@ -423,6 +424,16 @@ function pintarTelas(){
         <div class="sws">${(t.colores || []).map((c, i) => `<div class="sw-cel"><button type="button" class="sw ${c.activo === false ? "agotado" : ""}" style='${estiloColor(c)}' data-t="${esc(t.id)}" data-i="${i}" title="${c.activo === false ? "Agotado · toca para activar" : "Disponible · toca para marcar agotado"}"><span class="cod">${esc(c.codigo)}</span></button><input type="text" class="sw-nom" value="${esc(c.nombre || "")}" placeholder="Nombre" data-nt="${esc(t.id)}" data-ni="${i}" aria-label="Nombre del color ${esc(c.codigo)}"></div>`).join("")}
           <label class="sw-add">+ Agregar colores<input type="file" accept="image/*" multiple hidden data-add="${esc(t.id)}"></label></div>
       </div>`; }).join("")}`;
+  if ($("t-nombres")) $("t-nombres").addEventListener("click", async () => {
+    const b = $("t-nombres"); b.disabled = true; b.textContent = "Aplicando…";
+    try {
+      const d = await (await fetch("catalogo-inicial.json")).json(); const N = {};
+      d.telas.forEach(t => t.colores.forEach(c => { if (c.nombre) N[c.codigo] = c.nombre; }));
+      let n = 0;
+      for (const t of TELAS) { let cambio = false; (t.colores || []).forEach(c => { if (!c.nombre && N[c.codigo]) { c.nombre = N[c.codigo]; cambio = true; n++; } }); if (cambio) await db.collection("telas").doc(t.id).update({ colores: t.colores }); }
+      toast(`Listo: ${n} colores con nombre.`); pintarTelas();
+    } catch (err) { toast("No se pudieron aplicar los nombres."); b.disabled = false; b.textContent = "Poner nombres sugeridos"; }
+  });
   $("t-nueva").addEventListener("click", () => { nuevaTela = true; pintarTelas(); $("nt-nombre").focus(); });
   if (nuevaTela) {
     $("nt-cancelar").addEventListener("click", () => { nuevaTela = false; pintarTelas(); });
