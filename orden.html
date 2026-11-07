@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orden de fabricación · Muebles Ideal</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="logo-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Karla:wght@400;500;600;700&display=swap">
+<style>
+/* Hoja de taller: A4, tinta negra, dorado solo como acento */
+:root { --ink:#141414; --muted:#615d56; --line:#d9d4ca; --soft:#f5f1e8; --gold:#9a7230; --warn:#b3261e; --paper:#ffffff; --bg:#ebe9e5;
+  --display:"Lexend","Segoe UI",system-ui,sans-serif; --body:"Karla","Helvetica Neue",Arial,sans-serif; color-scheme: light; }
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+.barra { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 12px max(16px, 3vw); background: #141414; color: #fff; }
+.barra span { font-family: var(--display); font-size: .9rem; letter-spacing: .04em; }
+.barra button { font: 600 .9rem var(--display); letter-spacing: .06em; padding: 11px 20px; border-radius: 999px; border: 0; background: #d4ad62; color: #141414; cursor: pointer; }
+.hoja { width: min(215.9mm, 100% - 24px); min-height: 279.4mm; margin: 18px auto; background: var(--paper); padding: 11mm 12mm 9mm; box-shadow: 0 20px 50px -30px rgba(0,0,0,.45); display: flex; flex-direction: column; }
+.hoja .cuerpo { flex: 1; }
+.minicab { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; }
+.minicab img { height: 34px; width: auto; }
+.minicab .t1 { font-family: var(--display); font-size: .95rem; text-transform: uppercase; letter-spacing: .04em; }
+.minicab .t2 { font-family: var(--display); font-weight: 600; letter-spacing: .04em; text-align: right; }
+.hojaN { font-size: .75rem; color: var(--muted); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.compacta table.t th, .compacta table.t td { padding: 2px 7px; font-size: .8rem; line-height: 1.3; }
+.compacta .chk { width: 12px; height: 12px; }
+.compacta .sec { margin-top: 11px; }
+.cargos td.r, .cargos th.r { text-align: right; }
+.hoja:first-child table.t th, .hoja:first-child table.t td { padding: 3px 8px; font-size: .88rem; }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; margin: 0; letter-spacing: .02em; }
+.cab { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; border-bottom: 3px solid var(--ink); padding-bottom: 12px; }
+.cab img { height: 58px; width: auto; }
+.cab h1 { font-size: 1.45rem; text-transform: uppercase; }
+.cab .dpto { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+.num { text-align: right; }
+.num b { display: block; font-family: var(--display); font-size: 1.25rem; font-weight: 600; letter-spacing: .04em; }
+.num small { color: var(--muted); }
+.sec { margin-top: 12px; break-inside: avoid; }
+.sec > h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); font-weight: 600; padding-bottom: 6px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.kv { width: 100%; border-collapse: collapse; }
+.kv th, .kv td { text-align: left; vertical-align: top; padding: 3px 0; border-bottom: 1px dotted var(--line); }
+.kv th { width: 42%; color: var(--muted); font-weight: 500; padding-right: 10px; }
+.kv td { font-weight: 700; }
+.prod { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: start; }
+.prod img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+.telas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tela { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; padding: 8px; border: 1.5px solid var(--ink); border-radius: 8px; }
+.sw { width: 64px; height: 64px; border-radius: 6px; border: 1px solid var(--line); background-repeat: no-repeat; }
+.tela .cod { font-family: var(--display); font-size: 1.6rem; font-weight: 600; letter-spacing: .06em; line-height: 1; }
+.tela .lbl { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.tela .nom { font-weight: 700; }
+table.t { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.t th, table.t td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+table.t thead th { background: var(--soft); font-family: var(--display); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+table.t td.c, table.t th.c { text-align: center; }
+table.t tfoot td { font-weight: 700; background: var(--soft); }
+.cat td { background: #faf8f3; font-family: var(--display); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.blank { color: #b9b3a8; }
+.chk { width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 3px; display: inline-block; }
+.plano { border: 1.5px solid var(--ink); border-radius: 8px; padding: 8px; }
+.plano svg { width: 100%; height: auto; max-height: 118mm; display: block; margin: 0 auto; }
+.aviso { margin-top: 8px; padding: 8px 10px; border-left: 4px solid var(--warn); background: #fdecea; color: #6d1a14; font-size: .86rem; }
+.ok { border-left-color: #2e7d32; background: #eaf4ea; color: #1b4d1e; }
+.firmas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
+.firmas div { border-top: 1.5px solid var(--ink); padding-top: 4px; font-size: .78rem; color: var(--muted); text-align: center; }
+.pie { margin-top: 18px; font-size: .74rem; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.error { width: min(560px, 100% - 32px); margin: 60px auto; background: #fff; padding: 28px; border-radius: 14px; text-align: center; }
+@media (max-width: 640px) {
+  .hoja { padding: 16px; } .grid2, .telas { grid-template-columns: 1fr; }
+  .prod { grid-template-columns: 100px 1fr; } .prod img { width: 100px; height: 100px; }
+  .cab { grid-template-columns: auto 1fr; } .num { grid-column: 1 / -1; text-align: left; }
+  table.t { font-size: .82rem; }
+}
+@page { size: letter; margin: 0; }
+@media print {
+  html, body { background: #fff; }
+  .barra { display: none; }
+  .hoja { width: 215.9mm; height: 279.4mm; min-height: 0; margin: 0; box-shadow: none; overflow: hidden; break-after: page; page-break-after: always; }
+  .hoja:last-child { break-after: auto; page-break-after: auto; }
+}
+</style>
+</head>
+<body>
+<div class="barra"><span id="b-num">ORDEN DE FABRICACIÓN</span><button type="button" id="imprimir">IMPRIMIR / GUARDAR PDF</button></div>
+<main id="app"></main>
+
+<script>
+/* Lee los datos del pedido que vienen en el enlace (después de #) */
+function leer(){
+  try {
+    const h = location.hash.slice(1).replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(decodeURIComponent(escape(atob(h + "===".slice((h.length + 3) % 4)))));
+  } catch (e) { return null; }
+}
+const D = leer(), app = document.getElementById("app");
+const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const kv = rows => `<table class="kv">${rows.filter(r => r && r[1] !== "" && r[1] != null).map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>`;
+const fecha = iso => { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleString("es-VE", { dateStyle: "long", timeStyle: "short" }); };
+
+/* ===== Geometría ===== */
+function sofaGeom(fab, lado){
+  let piezas = fab.piezas.map((p, i) => Object.assign({ num: i + 1 }, p));
+  const izq = /izquierda/i.test(lado || "");
+  if (izq) piezas.reverse();
+  let x = 0;
+  piezas.forEach(p => { p.x = x; p.y = 0; x += p.w; p.lado = izq ? "izq" : "der"; });
+  return { piezas, W: x, F: Math.max(...piezas.map(p => p.d)) };
+}
+function camaGeom(o){
+  const m = /(\d+)\s*×\s*(\d+)/.exec(o.talla || "");
+  const ref = !m;
+  const cw = m ? +m[1] : 160, cl = m ? +m[2] : 190;
+  const W = cw + 10, L = cl + 6, dos = /dos piezas/i.test(o.base || "");
+  const gav = /ambos/i.test(o.gav) ? 2 : /un lado/i.test(o.gav) ? 1 : 0;
+  return { cw, cl, W, L, dos, gav, ref, cabW: W + 10, cabAlto: 130, baseAlto: 35 };
+}
+
+/* ===== Plano en SVG (medidas en cm, vista superior) ===== */
+function cota(x1, y1, x2, y2, txt, vertical){
+  const a = 3;
+  const lin = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#141414" stroke-width=".6"/>`;
+  const ext = vertical
+    ? `<line x1="${x1 - a}" y1="${y1}" x2="${x1 + a}" y2="${y1}" stroke="#141414" stroke-width=".6"/><line x1="${x2 - a}" y1="${y2}" x2="${x2 + a}" y2="${y2}" stroke="#141414" stroke-width=".6"/>`
+    : `<line x1="${x1}" y1="${y1 - a}" x2="${x1}" y2="${y1 + a}" stroke="#141414" stroke-width=".6"/><line x1="${x2}" y1="${y2 - a}" x2="${x2}" y2="${y2 + a}" stroke="#141414" stroke-width=".6"/>`;
+  const tx = vertical
+    ? `<text x="${x1 + 5}" y="${(y1 + y2) / 2}" font-size="7" font-family="Lexend,Arial" font-weight="600" fill="#141414" dominant-baseline="middle">${txt}</text>`
+    : `<rect x="${(x1 + x2) / 2 - (String(txt).length * 2.3 + 5)}" y="${y1 - 5}" width="${String(txt).length * 4.6 + 10}" height="10" fill="#fff"/><text x="${(x1 + x2) / 2}" y="${y1 + .5}" font-size="7" font-family="Lexend,Arial" font-weight="600" fill="#141414" text-anchor="middle" dominant-baseline="middle">${txt}</text>`;
+  return lin + ext + tx;
+}
+const pata = (x, y) => `<circle cx="${x}" cy="${y}" r="2.6" fill="#141414"/>`;
+function planoSofa(g){
+  const M = { l: 22, t: 46, r: 64, b: 28 };
+  let s = "";
+  g.piezas.forEach((p, i) => {
+    const X = p.x, Y = p.y;
+    s += `<rect x="${X}" y="${Y}" width="${p.w}" height="${p.d}" fill="#f5f1e8" stroke="#141414" stroke-width="1.4"/>`;
+    s += `<rect x="${X}" y="${Y}" width="${p.w}" height="18" fill="#d9d4ca" stroke="#141414" stroke-width=".6"/>`;
+    if (p.brazo) { const bx = p.lado === "der" ? X : X + p.w - 15; s += `<rect x="${bx}" y="${Y}" width="15" height="${p.d}" fill="#d9d4ca" stroke="#141414" stroke-width=".6"/>`; }
+    const i6 = 6; [[X + i6, Y + i6], [X + p.w - i6, Y + i6], [X + i6, Y + p.d - i6], [X + p.w - i6, Y + p.d - i6]].forEach(([a, b]) => s += pata(a, b));
+    const bz = p.brazo ? 15 : 0, cx = X + (p.brazo && p.lado === "der" ? bz : 0) + (p.w - bz) / 2, cy = Y + 18 + (p.d - 18) / 2;
+    s += `<text x="${cx}" y="${cy - 8}" font-size="${p.w - bz < 55 ? 7 : 8.5}" font-family="Lexend,Arial" font-weight="600" text-anchor="middle" fill="#141414">${esc(p.n.toUpperCase())}</text>`;
+    s += `<text x="${cx}" y="${cy + 3}" font-size="${p.w - bz < 55 ? 5.6 : 6.5}" font-family="Karla,Arial" text-anchor="middle" fill="#141414">${p.w} × ${p.d} cm</text>`;
+    s += `<text x="${cx}" y="${cy + 12}" font-size="${p.w - bz < 55 ? 5 : 6}" font-family="Karla,Arial" text-anchor="middle" fill="#615d56">Pieza ${p.num} · ${p.patas} patas</text>`;
+    s += cota(X, -14, X + p.w, -14, `${p.w}`);
+  });
+  s += cota(0, -32, g.W, -32, `${g.W} cm`);
+  const div = g.piezas.find(p => p.d === g.F);
+  const xr = g.W + 12;
+  s += cota(xr, 0, xr, g.F, `${g.F} cm`, true);
+  const corto = g.piezas.find(p => p.d < g.F);
+  if (corto) { const xl = (div.lado === "der") ? -10 : g.W + 30; s += cota(div.lado === "der" ? -12 : xr + 40, 0, div.lado === "der" ? -12 : xr + 40, corto.d, `${corto.d}`, true); }
+  s += `<text x="${g.W / 2}" y="${g.F + 18}" font-size="8" font-family="Lexend,Arial" font-weight="600" text-anchor="middle" fill="#9a7230" letter-spacing="2">▼ FRENTE (lado donde se sienta el cliente) ▼</text>`;
+  return `<svg viewBox="${-M.l - 8} ${-M.t} ${g.W + M.l + M.r + 8} ${g.F + M.t + M.b}" role="img" aria-label="Plano en vista superior del sofá">${s}</svg>`;
+}
+function planoCama(g){
+  let s = ""; const W = g.W, L = g.L, cabX = -(g.cabW - W) / 2;
+  s += `<rect x="${cabX}" y="-12" width="${g.cabW}" height="12" fill="#d9d4ca" stroke="#141414" stroke-width="1.4"/>`;
+  s += `<text x="${W / 2}" y="-4" font-size="6.5" font-family="Lexend,Arial" font-weight="600" text-anchor="middle">CABECERO</text>`;
+  s += `<rect x="0" y="0" width="${W}" height="${L}" fill="#f5f1e8" stroke="#141414" stroke-width="1.4"/>`;
+  s += `<rect x="5" y="5" width="${W - 10}" height="${L - 10}" fill="none" stroke="#9a7230" stroke-width=".6" stroke-dasharray="3 2"/>`;
+  s += `<text x="${g.dos ? W / 4 : W / 2}" y="${L - 14}" font-size="6" font-family="Karla,Arial" text-anchor="middle" fill="#9a7230">Colchón ${g.cw} × ${g.cl}</text>`;
+  if (g.dos) {
+    s += `<line x1="${W / 2}" y1="0" x2="${W / 2}" y2="${L}" stroke="#b3261e" stroke-width="1.2" stroke-dasharray="5 3"/>`;
+    s += `<text x="${W / 4}" y="${L / 2}" font-size="8.5" font-family="Lexend,Arial" font-weight="600" text-anchor="middle">PIEZA A</text><text x="${W * 3 / 4}" y="${L / 2}" font-size="8.5" font-family="Lexend,Arial" font-weight="600" text-anchor="middle">PIEZA B</text>`;
+    s += `<text x="${W / 4}" y="${L / 2 + 10}" font-size="6.5" text-anchor="middle" font-family="Karla,Arial">${W / 2} × ${L}</text><text x="${W * 3 / 4}" y="${L / 2 + 10}" font-size="6.5" text-anchor="middle" font-family="Karla,Arial">${W / 2} × ${L}</text>`;
+  } else {
+    s += `<text x="${W / 2}" y="${L / 2}" font-size="9" font-family="Lexend,Arial" font-weight="600" text-anchor="middle">BASE (UNA PIEZA)</text><text x="${W / 2}" y="${L / 2 + 10}" font-size="6.5" text-anchor="middle" font-family="Karla,Arial">${W} × ${L} cm</text>`;
+  }
+  const gv = side => { const x = side === "i" ? 0 : W - 9; let r = ""; [L * .38, L * .66].forEach(y0 => r += `<rect x="${x}" y="${y0}" width="9" height="${L * .24}" fill="#fff" stroke="#141414" stroke-width=".8"/><text x="${x + 4.5}" y="${y0 + L * .12}" font-size="4.6" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 ${x + 4.5} ${y0 + L * .12})">GAVETA</text>`); return r; };
+  if (g.gav >= 1) s += gv("d"); if (g.gav === 2) s += gv("i");
+  const i6 = 6; let pts = [[i6, i6], [W - i6, i6], [i6, L - i6], [W - i6, L - i6]];
+  if (g.dos) pts = pts.concat([[W / 2 - i6, i6], [W / 2 + i6, i6], [W / 2 - i6, L - i6], [W / 2 + i6, L - i6]]);
+  else pts = pts.concat([[W / 2, L / 3], [W / 2, L * 2 / 3]]);
+  pts.forEach(([a, b]) => s += pata(a, b));
+  s += cota(0, -26, W, -26, `${W} cm`); s += cota(cabX, -40, cabX + g.cabW, -40, `Cabecero ${g.cabW}`);
+  s += cota(W + 12, 0, W + 12, L, `${L} cm`, true);
+  s += `<text x="${W / 2}" y="${L + 16}" font-size="8" font-family="Lexend,Arial" font-weight="600" text-anchor="middle" fill="#9a7230" letter-spacing="2">▼ PIES DE LA CAMA ▼</text>`;
+  return `<svg viewBox="-30 -50 ${W + 90} ${L + 76}" role="img" aria-label="Plano en vista superior de la cama">${s}</svg>`;
+}
+
+/* ===== Materiales (las cantidades se cargarán por modelo) ===== */
+function materiales(D, patasTotal){
+  const m = D.mat || (D.fab && D.fab.materiales) || {};
+  const q = (k, def) => m[k] != null ? m[k] : (def != null ? def : null);
+  const acc = (D.o.acc || []);
+  const cama = D.p.cat === "camas";
+  const grupos = [
+    ["Estructura", [["Tablas / listones de madera", "unid.", "", "tablas"], ["Láminas de MDF o contraenchapado", "unid.", "", "mdf"], ["Tornillos", "unid.", "", "tornillos"], ["Grapas", "cajas", "", "grapas"], ["Pegamento de contacto", "L", "", "pegamento"]]],
+    ["Relleno y tapizado", [["Goma espuma (alta densidad)", "láminas", "", "goma"], ["Guata / fibra", "m", "", "guata"], [`Tela principal · ${D.tela.n}${D.tela.c ? " · código " + D.tela.c : ""}`, "m", "", "tela"], ["Cincha elástica", "m", "", "cincha"], ["Tafeta (tela de fondo)", "m", "", "tafeta"]]],
+    ["Herrajes", [[D.o.sop === "Deslizadores" ? "Deslizadores" : `Patas de metal${D.o.cp ? " " + D.o.cp.toLowerCase() : ""}`, "unid.", "patas"],
+      cama ? ["Herrajes de unión cabecero-base", "juego", "", "herrajes"] : ["Conectores entre módulos", "unid.", "", "conectores"],
+      ...(cama && D.o.base && /dos/.test(D.o.base) ? [["Herrajes de unión pieza A-B", "juego", "", "herrajesAB"]] : []),
+      ...(cama && /gaveta/i.test(D.o.gav) && !/sin/i.test(D.o.gav) ? [["Rieles para gavetas", "pares", "", "rieles"]] : [])]],
+    ...(acc.length ? [["Accesorios", acc.map(a => [a, "unid.", "acc"])]] : []),
+    ...(D.cojin ? [["Cojines (obsequio)", [[`Tela de cojines · ${D.cojin.n}${D.cojin.c ? " · código " + D.cojin.c : ""}`, "m", "", "telaCojin"], ["Relleno de cojines", "kg", "", "rellenoCojin"], ["Cierres", "unid.", "cierres"]]]] : [])
+  ];
+  let filas = "";
+  grupos.forEach(([g, items]) => {
+    filas += `<tr class="cat"><td colspan="4">${esc(g)}</td></tr>`;
+    items.forEach(([n, u, tipo, clave]) => {
+      let v = clave ? q(clave) : null;
+      if (tipo === "patas") v = patasTotal;
+      if (tipo === "acc") v = 1;
+      if (tipo === "cierres" && D.cojin) v = D.cojin.cant;
+      filas += `<tr><td>${esc(n)}</td><td class="c">${u}</td><td class="c">${v != null ? `<b>${esc(v)}</b>` : '<span class="blank">________</span>'}</td><td class="c"><span class="chk"></span></td></tr>`;
+    });
+  });
+  return `<table class="t"><thead><tr><th>Material</th><th class="c" style="width:70px">Unidad</th><th class="c" style="width:110px">Cantidad</th><th class="c" style="width:44px">Listo</th></tr></thead><tbody>${filas}</tbody></table>`;
+}
+
+function swatch(t){
+  if (!t || !t.c) return `<div class="sw" style="background:#eee"></div>`;
+  const sp = t.sp || (t.id ? { f: `colores-${t.id}.jpg`, i: t.i, n: t.k } : null);
+  if (!sp) return `<div class="sw" style="background-color:${t.h}"></div>`;
+  const pos = sp.n > 1 ? (sp.i / (sp.n - 1)) * 100 : 0;
+  return `<div class="sw" style="background-color:${t.h};background-image:url('${sp.f}');background-size:${sp.n * 100}% 100%;background-position:${pos}% 0"></div>`;
+}
+function bloqueTela(titulo, t, extra){
+  return `<div class="tela">${swatch(t)}<div><div class="lbl">${titulo}</div><div class="cod">${t && t.c ? esc(t.c) : "—"}</div><div class="nom">${esc(t ? t.n : "")}</div>${extra ? `<div style="font-size:.84rem;color:#615d56">${extra}</div>` : ""}</div></div>`;
+}
+
+function render(){
+  if (!D || !D.p) { app.innerHTML = `<div class="error"><h2>No se pudo abrir la orden</h2><p>El enlace está incompleto. Ábrelo de nuevo desde el correo de la cotización.</p></div>`; document.getElementById("imprimir").hidden = true; return; }
+  document.title = `Orden ${D.n} · ${D.p.n}`;
+  document.getElementById("b-num").textContent = `ORDEN ${D.n}`;
+  const o = D.o, cama = D.p.cat === "camas";
+  let despiece = "", plano = "", notaPlano = "", patasTotal = 0, resumenProd = [];
+  if (cama) {
+    const g = camaGeom(o);
+    const nB = g.dos ? 2 : 1, patas = g.dos ? 8 : 6; patasTotal = patas;
+    const filas = [["Cabecero", `${g.cabW} × ${g.cabAlto} cm (alto)`, 1, "—"]];
+    if (g.dos) { filas.push(["Base · pieza A", `${g.W / 2} × ${g.L} × ${g.baseAlto} cm`, 1, 4], ["Base · pieza B", `${g.W / 2} × ${g.L} × ${g.baseAlto} cm`, 1, 4]); }
+    else filas.push(["Base (una pieza)", `${g.W} × ${g.L} × ${g.baseAlto} cm`, 1, 6]);
+    if (g.gav) filas.push(["Gavetas", `2 por lado · ${g.gav === 2 ? "ambos lados" : "un lado"}`, g.gav * 2, "—"]);
+    despiece = `<table class="t"><thead><tr><th>Pieza</th><th>Medidas</th><th class="c">Cant.</th><th class="c">Patas</th></tr></thead><tbody>${filas.map(f => `<tr><td><b>${f[0]}</b></td><td>${f[1]}</td><td class="c">${f[2]}</td><td class="c">${f[3]}</td></tr>`).join("")}</tbody>
+      <tfoot><tr><td colspan="4">Total de ${o.sop === "Deslizadores" ? "deslizadores" : "patas"}: ${g.dos ? "4 × 2 = 8" : "4 esquinas + 2 centrales = 6"}</td></tr></tfoot></table>`;
+    plano = planoCama(g);
+    notaPlano = `<div class="aviso">Plano REFERENCIAL: base = colchón + 10 cm de ancho y + 6 cm de largo; cabecero 130 cm de alto y base 35 cm. ${g.ref ? "<b>El cliente pidió medida especial: usar las medidas de las notas.</b> " : ""}Confirmar con las medidas del taller.</div>`;
+    resumenProd = [["Tamaño", o.talla || "Por definir"], ["Medidas especiales", o.medida], ["Va para", o.viv], ["Fabricación de la base", o.base], ["Gavetas", o.gav]];
+  } else if (D.fab) {
+    const g = sofaGeom(D.fab, o.lado);
+    patasTotal = g.piezas.reduce((a, p) => a + p.patas, 0);
+    const iguales = g.piezas.every(p => p.patas === g.piezas[0].patas);
+    despiece = `<table class="t"><thead><tr><th>Pieza</th><th>Medidas (ancho × fondo)</th><th class="c">Cant.</th><th class="c">Patas</th></tr></thead><tbody>${D.fab.piezas.map((p, i) => `<tr><td><b>${i + 1}. ${esc(p.n)}</b>${p.brazo ? " · con brazo" : ""}</td><td>${p.w} × ${p.d} cm</td><td class="c">1</td><td class="c">${p.patas}</td></tr>`).join("")}</tbody>
+      <tfoot><tr><td colspan="4">Total de ${o.sop === "Deslizadores" ? "deslizadores" : "patas"}: ${iguales ? `${g.piezas[0].patas} × ${g.piezas.length} = ${patasTotal}` : patasTotal}${o.cp ? ` · color ${o.cp.toLowerCase()}` : ""}</td></tr></tfoot></table>`;
+    plano = planoSofa(g);
+    notaPlano = D.fab.medidasConfirmadas && D.fab.piezasConfirmadas ? `<div class="aviso ok">Medidas confirmadas del modelo.</div>`
+      : `<div class="aviso">${D.fab.medidasConfirmadas ? `Medida total confirmada (${D.fab.ancho} × ${D.fab.fondo} cm). ` : "<b>Medidas REFERENCIALES: confirmar las medidas de este modelo.</b> "}${D.fab.piezasConfirmadas ? "" : "El reparto entre piezas es referencial. "}${o.talla === "Medida especial" ? "<b>El cliente pidió medida especial: ver notas.</b>" : ""}</div>`;
+    resumenProd = [["Tipo", D.fab.tipo], ["Piezas", `${D.fab.piezas.length}: ${D.fab.piezas.map(p => p.n).join(" + ")}`], ["Medidas", o.talla || "Por definir"], ["Medidas especiales", o.medida], ["Diván", o.lado], ["Va para", o.viv]];
+  }
+  const precios = o.precios || { "Puerto USB": 50, "Portavasos": 25 };
+  const acc = o.acc || [];
+  const accTxt = acc.length ? acc.map(a => precios[a] ? `${a} (+$${precios[a]})` : `${a} (por cotizar)`).join(", ") : "Ninguno";
+  const totalCargos = acc.reduce((t, a) => t + (precios[a] || 0), 0);
+  const cargos = cama ? "" : `<section class="sec"><h2>Cargos adicionales</h2>
+    <table class="t cargos"><thead><tr><th>Concepto</th><th class="c" style="width:80px">Cant.</th><th class="r" style="width:130px">Monto</th></tr></thead><tbody>
+    ${acc.length ? acc.map(a => `<tr><td>${esc(a)}</td><td class="c">1</td><td class="r">${precios[a] ? "$" + precios[a] : "Por cotizar"}</td></tr>`).join("") : `<tr><td colspan="3">Sin accesorios adicionales</td></tr>`}
+    ${D.cojin ? `<tr><td>Cojines decorativos (${D.cojin.cant})</td><td class="c">${D.cojin.cant}</td><td class="r">Obsequio</td></tr>` : ""}
+    </tbody><tfoot><tr><td colspan="2">Total cargos adicionales${acc.some(a => !precios[a]) ? " (más accesorios por cotizar)" : ""}</td><td class="r">$${totalCargos}</td></tr></tfoot></table></section>`;
+  const cab = n => `<header class="minicab"><img src="logo-v.png" alt="Muebles Ideal"><div class="t1">Orden de fabricación · ${esc(D.p.n)}</div><div class="t2">${esc(D.n)}<div class="hojaN">Hoja ${n} de 3</div></div></header>`;
+  const pie = n => `<footer class="pie"><span>Muebles Ideal · Dpto. Fábrica · Mariara, Carabobo</span><span>Orden ${esc(D.n)} · Hoja ${n} de 3</span></footer>`;
+  app.innerHTML = `
+  <article class="hoja"><div class="cuerpo">
+    <header class="cab">
+      <img src="logo-v.png" alt="Muebles Ideal">
+      <div><div class="dpto">Dpto. Fábrica</div><h1>Orden de fabricación</h1><div class="hojaN">Hoja 1 de 3 · Pedido y despiece</div></div>
+      <div class="num"><b>${esc(D.n)}</b><small>${esc(fecha(D.f))}</small></div>
+    </header>
+    <section class="sec"><h2>Producto</h2>
+      <div class="prod"><img src="${esc(D.p.img)}" alt="${esc(D.p.n)}">
+        <div><h3 style="font-size:1.2rem;text-transform:uppercase;margin-bottom:4px">${esc(D.p.n)}</h3>
+        ${kv([["Línea", D.p.l], ...resumenProd, ["Soporte", `${o.sop || ""}${o.cp ? " · " + o.cp : ""}`], ...(cama ? [] : [["Accesorios", acc.length ? "Ver cargos adicionales" : "Ninguno"]])])}</div>
+      </div>
+    </section>
+    <section class="sec"><h2>Tela y color</h2>
+      <div class="telas">${bloqueTela("Tela principal", D.tela)}${D.cojin ? bloqueTela("Cojines (obsequio)", D.cojin, `${D.cojin.cant} cojines`) : (cama ? "" : `<div class="tela" style="grid-template-columns:1fr"><div><div class="lbl">Cojines</div><div class="nom">No lleva cojines</div></div></div>`)}</div>
+    </section>
+    <section class="sec"><h2>Despiece</h2>${despiece}</section>
+    ${cargos}
+  </div>${pie(1)}</article>
+
+  <article class="hoja"><div class="cuerpo">
+    ${cab(2)}
+    <section class="sec"><h2>Plano · vista superior (medidas en cm)</h2><div class="plano">${plano}</div>${notaPlano}</section>
+    <section class="sec"><h2>Resumen para el taller</h2>
+      <div class="grid2">${kv([["Modelo", D.p.n], ...resumenProd.slice(0, 4)])}${kv([["Tela", `${D.tela.n}${D.tela.c ? " · " + D.tela.c : ""}`], ["Cojines", D.cojin ? `${D.cojin.n}${D.cojin.c ? " · " + D.cojin.c : ""} (${D.cojin.cant})` : (cama ? "" : "No")], ["Soporte", `${o.sop || ""}${o.cp ? " · " + o.cp : ""} · ${patasTotal} unid.`], ...(cama ? [] : [["Accesorios", acc.length ? `${acc.length} (ver hoja 1)` : "Ninguno"]])])}</div>
+    </section>
+    <section class="sec"><h2>Cliente y entrega</h2>
+      <div class="grid2">${kv([["Cliente", D.c.n], ["Teléfono", D.c.t || "No indicado"], ["Correo", D.c.e]])}${kv([["Ciudad", D.c.ci || "No indicada"], ["Entrega", (o.ent || "") + (o.ent === "Delivery" && o.envGratis ? " (gratis por promoción)" : "")], ["Dirección", D.c.d]])}</div>
+    </section>
+  </div>${pie(2)}</article>
+
+  <article class="hoja compacta"><div class="cuerpo">
+    ${cab(3)}
+    <section class="sec"><h2>Lista de materiales</h2>${materiales(D, patasTotal)}
+      <p style="font-size:.76rem;color:#615d56;margin:4px 0 0">Las cantidades en blanco se completan en el taller hasta cargar el consumo exacto de este modelo.</p></section>
+    <section class="sec"><h2>Control de producción</h2>
+      <table class="t"><thead><tr><th>Etapa</th><th style="width:30%">Responsable</th><th style="width:18%">Fecha</th><th class="c" style="width:44px">Listo</th></tr></thead><tbody>
+      ${["Corte de madera", "Armado de estructura", "Espumado", "Corte y costura de tela", "Tapizado", cama ? "Patas y gavetas" : "Patas, accesorios y cojines", "Control de calidad", "Embalaje y despacho"].map(e => `<tr><td>${e}</td><td></td><td></td><td class="c"><span class="chk"></span></td></tr>`).join("")}
+      </tbody></table>
+      <div style="margin-top:8px;border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-height:34px"><span style="font-size:.74rem;color:#615d56">Notas del taller:</span></div>
+      <div class="firmas" style="margin-top:16px"><div>Recibido por (taller)</div><div>Fecha de inicio</div><div>Fecha de entrega</div></div>
+    </section>
+  </div>${pie(3)}</article>`;
+}
+document.getElementById("imprimir").addEventListener("click", () => window.print());
+window.addEventListener("hashchange", () => location.reload());
+render();
+</script>
+</body>
+</html>

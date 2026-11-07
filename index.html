@@ -293,21 +293,33 @@ input[aria-invalid="true"] { border-color: #c0392b; }
 .opt .extra { display: block; font-style: normal; font-size: .7rem; color: var(--accent); font-weight: 600; margin-top: 2px; }
 .nota-op { font-size: .86rem; color: var(--muted); text-align: left; margin-top: -2px; }
 
-/* Mostrador de telas */
-.telas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 22px; }
-.tela-card { display: flex; flex-direction: column; text-align: left; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; overflow: hidden; animation: flotar 6s ease-in-out infinite, flotar-sombra 6s ease-in-out infinite; transition: border-color .2s ease; min-width: 0; }
-.tela-card:hover { border-color: #d4ad62; animation-play-state: paused; }
-.tela-img { display: block; aspect-ratio: 4 / 1.25; max-width: 100%; overflow: hidden; background: var(--line); }
-.tela-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
-.tela-card:hover .tela-img img { transform: scale(1.06); }
-.tela-info { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 18px; }
-.tela-tipo { font-family: var(--font-display); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
-.tela-n { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; text-transform: uppercase; letter-spacing: .03em; }
-.tela-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
+/* Selector de tela y color */
+.tela-btn { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 14px 16px; border-radius: 14px; border: 1.5px dashed #b8913f; background: var(--accent-soft); color: var(--ink); font: inherit; cursor: pointer; transition: border-color .2s ease, transform .2s ease; }
+.tela-btn:hover { transform: translateY(-2px); }
+.tela-btn.lista { border-style: solid; background: var(--surface); }
+.tela-sel { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.tela-sel b { font-family: var(--font-display); font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.tela-sel small { color: var(--muted); font-size: .84rem; }
+.tela-cambiar { font-family: var(--font-display); font-size: .85rem; font-weight: 500; color: var(--accent); }
+.sw-mini { width: 48px; height: 48px; border-radius: 10px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.tela-menu { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); animation: aparece .3s ease both; }
+.tela-cols { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.tela-col { flex: none; display: flex; flex-direction: column; gap: 6px; width: 104px; padding: 6px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font: 500 .78rem var(--font-display); text-transform: uppercase; letter-spacing: .03em; cursor: pointer; text-align: left; }
+.tela-col[aria-selected="true"] { border-color: #b8913f; background: var(--accent-soft); }
+.sw-strip { display: block; height: 22px; border-radius: 6px; background-size: cover; background-position: left center; }
+.tela-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.tela-hn { font-family: var(--font-display); font-weight: 500; text-transform: uppercase; letter-spacing: .04em; font-size: .95rem; }
+.tela-ht { display: flex; gap: 6px; flex-wrap: wrap; }
 .tela-tag { font-size: .74rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
-#tmodal .sheet-photo img { width: auto; aspect-ratio: auto; height: auto; object-fit: contain; }
-@media (max-width: 760px) { #tmodal .sheet-photo img { max-height: 55vh !important; } }
-@media (prefers-reduced-motion: reduce) { .tela-card { animation: none; } }
+.swatches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; }
+.sw { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 10px; border: 0; padding: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); transition: transform .18s ease, box-shadow .18s ease; }
+.sw:hover { transform: scale(1.06); }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px #b8913f; }
+.sw-code { position: absolute; left: 4px; bottom: 4px; padding: 1px 5px; border-radius: 5px; background: rgba(20,20,20,.78); color: #fff; font: 600 .66rem/1.4 var(--font-display); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.link-asesor { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+
+.admin-link { color: inherit; opacity: .55; text-decoration: none; }
+.admin-link:hover { opacity: 1; text-decoration: underline; }
 
 /* Iconos de redes sociales */
 .redes { display: flex; gap: 12px; margin-top: 6px; }
@@ -462,7 +474,6 @@ footer img { animation: flotar 6s ease-in-out infinite; }
     <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menú</button>
     <nav class="nav" id="nav">
       <a href="#catalogo-completo">Catálogo</a>
-      <a href="#telas">Telas</a>
       <a href="#nosotros">Nosotros</a>
       <a href="#envios">Envíos</a>
       <a href="#ofertas">Ofertas</a>
@@ -517,25 +528,6 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       </div>
       <div class="grid" id="grid-catalogo"></div>
       <div class="ver-mas"><button type="button" class="btn btn-primary" id="ver-mas" aria-expanded="false" aria-controls="grid-catalogo">VER MÁS</button></div>
-    </div>
-  </section>
-
-  <section class="band telas" id="telas">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="eyebrow">Mostrador de telas</span>
-        <h2>Elige la tela y el color de tu mueble</h2>
-        <p class="lead">Trabajamos con colecciones de tapicería de alta calidad, muchas antifluido y amigables con las mascotas. Toca una colección para verla completa.</p>
-      </div>
-      <div class="filters" role="group" aria-label="Filtrar telas">
-        <button class="chip tchip" data-t="todas" aria-pressed="true">Todas</button>
-        <button class="chip tchip" data-t="Aterciopelada" aria-pressed="false">Aterciopeladas</button>
-        <button class="chip tchip" data-t="Tipo lino" aria-pressed="false">Tipo lino</button>
-        <button class="chip tchip" data-t="Bouclé" aria-pressed="false">Bouclé</button>
-        <span class="count" id="tcount"></span>
-      </div>
-      <div class="telas-grid" id="telas-grid"></div>
-      <div class="ver-mas" id="telas-mas-box"><button type="button" class="btn btn-primary" id="telas-mas" aria-expanded="false">VER TODAS LAS TELAS</button></div>
     </div>
   </section>
 
@@ -688,7 +680,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       <img src="logo-v.png" alt="Muebles Ideal" width="138" height="92">
       <p class="slogan">Soñado por otros, diseñado por nosotros.</p>
     </div>
-    <div><h4>Productos</h4><ul><li><a href="#catalogo" data-go="camas">Camas</a></li><li><a href="#catalogo" data-go="sofas">Sofás</a></li><li><a href="#catalogo-completo">Catálogo completo</a></li><li><a href="#telas">Mostrador de telas</a></li></ul></div>
+    <div><h4>Productos</h4><ul><li><a href="#catalogo" data-go="camas">Camas</a></li><li><a href="#catalogo" data-go="sofas">Sofás</a></li><li><a href="#catalogo-completo">Catálogo completo</a></li></ul></div>
     <div><h4>Ayuda</h4><ul><li><a href="#envios">Envíos y tarifas</a></li><li><a href="#proceso">Cómo trabajamos</a></li><li><a href="#contacto">Asesoría</a></li></ul></div>
     <div><h4>Envíos</h4><ul><li>Caracas</li><li>Maracay</li><li>Valencia</li><li>Todo el país*</li></ul></div>
     <div><h4>Contacto</h4><ul><li>Mariara, Carabobo</li></ul>
@@ -699,7 +691,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
         <a href="https://www.facebook.com/share/1CLPTUJma5/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a>
       </div>
     </div>
-    <p class="legal"><span>© 2026 Muebles Ideal. Todos los derechos reservados.</span><span>*Envíos al resto del país con cargo adicional.</span></p>
+    <p class="legal"><span>© 2026 Muebles Ideal. Todos los derechos reservados.</span><span>*Envíos al resto del país con cargo adicional. · <a href="admin.html" target="_blank" rel="noopener" class="admin-link">Admin</a></span></p>
   </div>
 </footer>
 
@@ -736,25 +728,6 @@ footer img { animation: flotar 6s ease-in-out infinite; }
   <div class="panel-body"><div style="max-width: 1100px; margin: 0 auto" id="envios-body"></div></div>
 </div>
 
-<div class="modal" id="tmodal" role="dialog" aria-modal="true" aria-labelledby="t-nombre" hidden>
-  <div class="modal-bg" data-tclose></div>
-  <div class="sheet">
-    <button class="close" data-tclose aria-label="Cerrar">×</button>
-    <div class="sheet-photo"><img id="t-img" src="tela-marmol.jpg" alt="" style="aspect-ratio:auto;max-height:78vh;width:auto;max-width:100%"></div>
-    <div class="sheet-info">
-      <div style="display:flex; flex-direction:column; gap:8px">
-        <span class="eyebrow" id="t-tipo">Tela</span>
-        <h2 id="t-nombre">Tela</h2>
-        <p class="lead" id="t-desc"></p>
-      </div>
-      <div class="tela-tags" id="t-tags"></div>
-      <table class="spec-table"><tbody id="t-specs"></tbody></table>
-      <button type="button" class="btn btn-wa" id="t-elegir">ELEGIR ESTA TELA</button>
-      <p class="note">Al elegirla, la marcamos en la ficha del modelo que quieras cotizar. Los colores pueden variar un poco según la pantalla. ¿Quieres ver la muestra en persona? <a id="t-wa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
-    </div>
-  </div>
-</div>
-
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-nombre" hidden>
   <div class="modal-bg" data-close></div>
   <div class="sheet">
@@ -768,7 +741,6 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       </div>
       <div style="display:flex; flex-direction:column; gap:10px"><span class="sub">Características</span><ul class="feat" id="m-feat"></ul></div>
       <div style="display:flex; flex-direction:column; gap:10px"><span class="sub" id="m-size-label">Tamaño</span><div class="opts" id="m-sizes"></div></div>
-      <div style="display:flex; flex-direction:column; gap:10px"><span class="sub">Color de tela</span><div class="opts" id="m-colors"></div></div>
       <div class="pers" id="m-pers"></div>
       <div style="display:flex; flex-direction:column; gap:6px"><span class="sub">Especificaciones técnicas</span><table class="spec-table"><tbody id="m-specs"></tbody></table></div>
       <div class="price-row"><span class="price ask" id="m-price">Precio a consultar</span></div>
@@ -782,6 +754,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
           <div class="field"><label for="m-tel">Teléfono (opcional)</label><input id="m-tel" type="tel" autocomplete="tel" placeholder="0414-0000000"></div>
           <div class="field"><label for="m-ciudad">Ciudad</label><input id="m-ciudad" placeholder="Ej. Caracas"></div>
         </div>
+        <div class="field" id="m-medida-box" hidden><label for="m-medida">Medidas especiales que necesitas</label><input id="m-medida" placeholder="Ej. 300 × 180 cm, o el espacio disponible en tu sala"></div>
         <div class="field" id="m-dir-box" hidden><label for="m-dir">Dirección de entrega</label><input id="m-dir" autocomplete="street-address" placeholder="Urbanización, calle, edificio o casa, punto de referencia"></div>
         <button class="btn btn-wa" type="submit" id="m-enviar">SOLICITAR COTIZACIÓN</button>
         <p class="estado" id="m-estado" role="status" hidden></p>
@@ -822,30 +795,40 @@ const LINEAS = {
   signature: { nombre: "Signature", desc: "Cabeceros de diseño con costuras y canales que se vuelven el centro de tu habitación." },
   prestige:  { nombre: "Prestige",  desc: "Camas tipo nube y piezas de autor, con acolchado envolvente y máximo confort." }
 };
-/* ===== MOSTRADOR DE TELAS =====
-   Para agregar una tela: sube tela-ID.jpg y tela-card-ID.jpg y añade una línea aquí. */
+/* ===== TELAS Y COLORES =====
+   Código de color: los 2 primeros dígitos son la colección y los 2 últimos el color.
+   Cada colección usa la imagen colores-ID.jpg (una fila de muestras de 120×120). */
 const TELAS = [
-  { id: "marmol",     nombre: "Mármol",          tipo: "Aterciopelada", desc: "Terciopelo con veteado tipo mármol, en tonos intensos y neutros.", tags: [] },
-  { id: "armonica",   nombre: "Armónica Plus",   tipo: "Aterciopelada", desc: "Terciopelo liso de colores vivos y neutros. Una de las más versátiles.", tags: ["Pet friendly"] },
-  { id: "mariscal",   nombre: "Mariscal",        tipo: "Aterciopelada", desc: "Terciopelo con textura jaspeada, en tonos claros y profundos.", tags: ["Antifluido", "Pet friendly"] },
-  { id: "yorkie",     nombre: "Yorkie",          tipo: "Aterciopelada", desc: "Efecto envejecido tipo cuero, muy suave al tacto.", tags: ["Antifluido", "Pet friendly"] },
-  { id: "carrasco",   nombre: "Carrasco",        tipo: "Aterciopelada", desc: "Veteado tipo mármol con vetas claras que resaltan.", tags: ["Antifluido", "Pet friendly"] },
-  { id: "estacion",   nombre: "Estación",        tipo: "Aterciopelada", desc: "Textura arrugada con brillo suave, en tonos pastel.", tags: ["Antifluido", "Pet friendly"] },
-  { id: "mirandela",  nombre: "Mirandela",       tipo: "Aterciopelada", desc: "Pelo con movimiento y acabado marmolado.", tags: ["Antifluido", "Pet friendly"] },
-  { id: "acuarela",   nombre: "Acuarela",        tipo: "Aterciopelada", desc: "Textura marmolada en tonos pastel, azules y grises.", tags: ["Antifluido", "Pet friendly"] },
-  { id: "gamuza",     nombre: "Gamuza",          tipo: "Aterciopelada", desc: "Acabado tipo gamuza en tonos tierra y grises.", tags: [] },
-  { id: "terciopelo", nombre: "Terciopelo Liso", tipo: "Aterciopelada", desc: "Color sólido y uniforme, desde neutros hasta colores vivos.", tags: [] },
-  { id: "otawa",      nombre: "Otawa",           tipo: "Tipo lino",     desc: "Tejido tipo lino de trama gruesa, muy resistente al uso diario.", tags: [] },
-  { id: "cortijo",    nombre: "Cortijo",         tipo: "Tipo lino",     desc: "Tejido texturizado con efecto jaspeado.", tags: ["Antifluido"] },
-  { id: "zaga",       nombre: "Zaga",            tipo: "Tipo lino",     desc: "Trama tipo lino en tonos neutros y vivos.", tags: [] },
-  { id: "lino",       nombre: "Lino Natural",    tipo: "Tipo lino",     desc: "Tejido tipo lino clásico en tonos naturales y grises.", tags: [] },
-  { id: "damasco",    nombre: "Lino Damasco",    tipo: "Tipo lino",     desc: "Lino de color profundo: chocolate, negro, rojo, gris y plomo.", tags: [] },
-  { id: "oasis",      nombre: "Oasis",           tipo: "Bouclé",        desc: "Tela de pelo corto muy suave. Ideal para camas tipo nube.", tags: ["Antifluido"] }
+  { id: "marmol",     nombre: "Mármol",          tipo: "Aterciopelada", desc: "Terciopelo con veteado tipo mármol, en tonos intensos y neutros.", tags: [], colores: [["0101", "#447a84"], ["0102", "#033673"], ["0103", "#343e2e"], ["0104", "#c8bebf"], ["0105", "#948c8d"], ["0106", "#bcb4b5"], ["0107", "#e9eeec"], ["0108", "#afa18b"], ["0109", "#947764"], ["0110", "#a05b5e"], ["0111", "#706f68"]] },
+  { id: "armonica",   nombre: "Armónica Plus",   tipo: "Aterciopelada", desc: "Terciopelo liso de colores vivos y neutros. Una de las más versátiles.", tags: ["Pet friendly"], colores: [["0201", "#016877"], ["0202", "#013e5e"], ["0203", "#092c61"], ["0204", "#405f5d"], ["0205", "#606b64"], ["0206", "#8cb9c6"], ["0207", "#281f17"], ["0208", "#da3134"], ["0209", "#b53996"], ["0210", "#e7b1c1"], ["0211", "#d0bfd1"], ["0212", "#7f6750"], ["0213", "#dbe8d7"], ["0214", "#e1f2e9"]] },
+  { id: "mariscal",   nombre: "Mariscal",        tipo: "Aterciopelada", desc: "Terciopelo con textura jaspeada, en tonos claros y profundos.", tags: ["Antifluido", "Pet friendly"], colores: [["0301", "#fafdfd"], ["0302", "#f8eeeb"], ["0303", "#d7cccc"], ["0304", "#b8aeba"], ["0305", "#bc819e"], ["0306", "#0c5f84"], ["0307", "#1f3f40"], ["0308", "#1e4378"], ["0309", "#9598ab"], ["0310", "#6f6b70"], ["0311", "#0a0c0d"]] },
+  { id: "yorkie",     nombre: "Yorkie",          tipo: "Aterciopelada", desc: "Efecto envejecido tipo cuero, muy suave al tacto.", tags: ["Antifluido", "Pet friendly"], colores: [["0401", "#132419"], ["0402", "#081430"], ["0403", "#b2b9c9"], ["0404", "#5c595f"], ["0405", "#3a2e34"], ["0406", "#e5e2db"], ["0407", "#a98a71"], ["0408", "#8a8270"]] },
+  { id: "carrasco",   nombre: "Carrasco",        tipo: "Aterciopelada", desc: "Veteado tipo mármol con vetas claras que resaltan.", tags: ["Antifluido", "Pet friendly"], colores: [["0501", "#dce2e3"], ["0502", "#c1c2c2"], ["0503", "#bdb9b1"], ["0504", "#c5b7c2"], ["0505", "#193d43"], ["0506", "#092868"], ["0507", "#9d9fac"], ["0508", "#80818e"], ["0509", "#0e070f"], ["0510", "#790a26"]] },
+  { id: "estacion",   nombre: "Estación",        tipo: "Aterciopelada", desc: "Textura arrugada con brillo suave, en tonos pastel.", tags: ["Antifluido", "Pet friendly"], colores: [["0601", "#eeebe8"], ["0602", "#ae9e92"], ["0603", "#a8968f"], ["0604", "#91a9b6"], ["0605", "#244566"], ["0606", "#081940"], ["0607", "#9d7b94"], ["0608", "#8b7591"], ["0609", "#8f94a7"], ["0610", "#494252"]] },
+  { id: "mirandela",  nombre: "Mirandela",       tipo: "Aterciopelada", desc: "Pelo con movimiento y acabado marmolado.", tags: ["Antifluido", "Pet friendly"], colores: [["0701", "#e5e1db"], ["0702", "#d9c9c3"], ["0703", "#b8aba5"], ["0704", "#c4a1b3"], ["0705", "#a4c7d4"], ["0706", "#b5b6bc"], ["0707", "#8e9aa2"], ["0708", "#41444a"]] },
+  { id: "acuarela",   nombre: "Acuarela",        tipo: "Aterciopelada", desc: "Textura marmolada en tonos pastel, azules y grises.", tags: ["Antifluido", "Pet friendly"], colores: [["0801", "#efe6d0"], ["0802", "#e7dec5"], ["0803", "#c8b6a5"], ["0804", "#d0e7e3"], ["0805", "#7498b0"], ["0806", "#3a5b84"], ["0807", "#e7c2c4"], ["0808", "#c7acbb"], ["0809", "#d9e3ea"], ["0810", "#abbbcd"], ["0811", "#7b889b"]] },
+  { id: "gamuza",     nombre: "Gamuza",          tipo: "Aterciopelada", desc: "Acabado tipo gamuza en tonos tierra y grises.", tags: [], colores: [["0901", "#dadad5"], ["0902", "#ebe9de"], ["0903", "#666460"], ["0904", "#c3d2e3"], ["0905", "#8b9caa"], ["0906", "#334a56"]] },
+  { id: "terciopelo", nombre: "Terciopelo Liso", tipo: "Aterciopelada", desc: "Color sólido y uniforme, desde neutros hasta colores vivos.", tags: [], colores: [["1001", "#3e434b"], ["1002", "#f0f7f6"], ["1003", "#bbc1c0"], ["1004", "#426bb8"], ["1005", "#e93f49"], ["1006", "#fa4f7f"], ["1007", "#fcbbcb"], ["1008", "#dcc8b2"], ["1009", "#9a806c"]] },
+  { id: "otawa",      nombre: "Otawa",           tipo: "Tipo lino",     desc: "Tejido tipo lino de trama gruesa, muy resistente al uso diario.", tags: [], colores: [["1101", "#e8decf"], ["1102", "#b9aca3"], ["1103", "#b0a297"], ["1104", "#433630"], ["1105", "#918486"], ["1106", "#3e5a78"], ["1107", "#1e3f5d"], ["1108", "#0a385f"]] },
+  { id: "cortijo",    nombre: "Cortijo",         tipo: "Tipo lino",     desc: "Tejido texturizado con efecto jaspeado.", tags: ["Antifluido"], colores: [["1201", "#cecac9"], ["1202", "#bab5b3"], ["1203", "#bebab8"], ["1204", "#9d9b9a"], ["1205", "#99a5ac"], ["1206", "#527e98"], ["1207", "#7d9ca2"], ["1208", "#a59aae"], ["1209", "#afbfcf"], ["1210", "#7b8795"], ["1211", "#99a5b8"]] },
+  { id: "zaga",       nombre: "Zaga",            tipo: "Tipo lino",     desc: "Trama tipo lino en tonos neutros y vivos.", tags: [], colores: [["1301", "#f4f3f1"], ["1302", "#e8e6e1"], ["1303", "#e8dbcb"], ["1304", "#cac1be"], ["1305", "#816c6c"], ["1306", "#596d80"], ["1307", "#b6c4cb"], ["1308", "#788691"], ["1309", "#c2c3bd"], ["1310", "#234e70"], ["1311", "#233b6b"], ["1312", "#cabfd7"], ["1313", "#ddbcc8"], ["1314", "#cd4371"]] },
+  { id: "lino",       nombre: "Lino Natural",    tipo: "Tipo lino",     desc: "Tejido tipo lino clásico en tonos naturales y grises.", tags: [], colores: [["1401", "#d4cfbe"], ["1402", "#a29b92"], ["1403", "#988679"], ["1404", "#bdc1ca"], ["1405", "#a4a8ae"], ["1406", "#666d76"], ["1407", "#222526"]] },
+  { id: "damasco",    nombre: "Lino Damasco",    tipo: "Tipo lino",     desc: "Lino de color profundo: chocolate, negro, rojo, gris y plomo.", tags: [], colores: [["1501", "#4c3933"], ["1502", "#0e1317"], ["1503", "#b10a1a"], ["1504", "#717b8a"], ["1505", "#4b5359"]] },
+  { id: "oasis",      nombre: "Oasis",           tipo: "Bouclé",        desc: "Tela de pelo corto muy suave. Ideal para camas tipo nube.", tags: ["Antifluido"], colores: [["1601", "#f4f2f0"], ["1602", "#cdc9c9"], ["1603", "#d3ccc8"], ["1604", "#aba39f"], ["1605", "#657667"], ["1606", "#618094"], ["1607", "#26699e"], ["1608", "#a0829e"], ["1609", "#848897"], ["1610", "#555868"]] }
 ];
-let telaElegida = "";
 
 /* Pon true cuando haya promoción de despacho gratis. */
-const ENVIO_GRATIS = false;
+let ENVIO_GRATIS = false;
+/* Carpeta de imágenes (en GitHub queda vacía) y colores como objetos { codigo, hex, activo, sp | img } */
+const IMG_BASE = "";
+function normalizarTelas(){
+  TELAS.forEach(t => { const n = t.colores.length; t.colores = t.colores.map((c, i) => Array.isArray(c) ? { codigo: c[0], hex: c[1], activo: true, sp: { f: `colores-${t.id}.jpg`, i, n } } : c); });
+}
+normalizarTelas();
+const coloresActivos = t => t.colores.filter(c => c.activo !== false);
+const colorStyle = c => c.img ? `background-image:url("${c.img}");background-size:cover;background-position:center`
+  : `background-color:${c.hex};background-image:url("${IMG_BASE}${c.sp.f}");background-size:${c.sp.n * 100}% 100%;background-position:${c.sp.n > 1 ? (c.sp.i / (c.sp.n - 1)) * 100 : 0}% 0`;
+const tiraStyle = t => { const h = coloresActivos(t).slice(0, 8).map(c => c.hex); return `background:linear-gradient(90deg,${h.map((x, i) => `${x} ${i / h.length * 100}% ${(i + 1) / h.length * 100}%`).join(",")})`; };
 
 const fmt = n => "$" + Number(n).toLocaleString("es-VE");
 const waLink = txt => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`;
@@ -866,8 +849,8 @@ const gridCat = document.getElementById("grid-catalogo");
 const chips = [...document.querySelectorAll(".chip")];
 const VISIBLES = 3;
 const btnMas = document.getElementById("ver-mas");
-const ordenados = [...PRODUCTOS.filter(p => p.destacado), ...PRODUCTOS.filter(p => !p.destacado)];
-const porCat = f => f === "todos" ? ordenados : ordenados.filter(p => LINEAS[f] ? p.linea === f : p.cat === f);
+const ordenadosLista = () => [...PRODUCTOS.filter(p => p.destacado), ...PRODUCTOS.filter(p => !p.destacado)];
+const porCat = f => f === "todos" ? ordenadosLista() : ordenadosLista().filter(p => LINEAS[f] ? p.linea === f : p.cat === f);
 let filtroActual = "todos";
 function filtrar(f){
   filtroActual = f;
@@ -905,6 +888,7 @@ document.getElementById("panel-close").addEventListener("click", cerrarPanel);
 btnMas.addEventListener("click", () => { location.hash = "catalogo-completo"; });
 chips.forEach(c => c.addEventListener("click", () => filtrar(c.dataset.f)));
 /* Tarjetas de las 3 líneas */
+function renderLineas(){
 document.getElementById("lineas").innerHTML = Object.entries(LINEAS).map(([k, l], i) => `
   <button type="button" class="linea-card" data-l="${k}">
     <span class="linea-n">0${i + 1}</span>
@@ -913,13 +897,28 @@ document.getElementById("lineas").innerHTML = Object.entries(LINEAS).map(([k, l]
     <span class="linea-c">${PRODUCTOS.filter(p => p.linea === k).length} modelos →</span>
   </button>`).join("");
 document.querySelectorAll(".linea-card").forEach(b => b.addEventListener("click", () => filtrar(b.dataset.l)));
+}
+renderLineas();
 document.querySelectorAll("[data-go]").forEach(a => a.addEventListener("click", () => filtrar(a.dataset.go)));
 filtrar("todos");
 
 /* ===== FICHA TÉCNICA =====
    Revisa y corrige estos datos según tu fabricación real. */
 const TAMANOS_CAMA = ["Individual 100×190 cm","Matrimonial 135×190 cm","Queen 160×190 cm","King 190×200 cm","Medida especial"];
-const TAMANOS_SOFA = ["Chaise a la izquierda","Chaise a la derecha","Medida especial"];
+/* ===== DATOS DE FABRICACIÓN (sofás) =====
+   Medidas en cm. Cada pieza lleva "patas" patas. "materiales" se llenará con las cantidades reales.
+   medidasConfirmadas / piezasConfirmadas en false muestran el plano como REFERENCIAL. */
+const PIEZAS_L = [ { n: "Poltrona", w: 60, d: 95, patas: 4, brazo: true }, { n: "2 puestos", w: 130, d: 95, patas: 4 }, { n: "Diván", w: 90, d: 170, patas: 4 } ];
+const FABRICACION = {
+  grafito: { tipo: "Sofá modular en L", ancho: 280, fondo: 170, medidasConfirmadas: true,  piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} },
+  perla:   { tipo: "Sofá modular en L", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} },
+  noir:    { tipo: "Sofá modular en L", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} }
+};
+/* Cargos adicionales de accesorios (USD). Los que no estén aquí se cotizan aparte. */
+const PRECIOS_EXTRA = { "Puerto USB": 50, "Portavasos": 25 };
+/* Consumo de materiales por modelo (se carga desde el panel admin) */
+const MATERIALES = {};
+const medidasSofa = id => { const f = FABRICACION[id]; return f ? `${f.ancho} × ${f.fondo} cm` : "por confirmar"; };
 const COLORES = [["Beige","#d8cbbb"],["Arena","#b9a48e"],["Gris perla","#bdbab6"],["Gris grafito","#4a4d50"],["Marrón","#7a6656"],["Petróleo","#1d5a60"],["Negro","#1b1b1b"],["Blanco hueso","#ece7de"]];
 const FICHA = {
   chevron:   { cabecero:"Alto, con costuras en V (chevron)", base:"Tapizada, líneas rectas", patas:"Ocultas", feat:["Cabecero acolchado de diseño exclusivo","Costuras en V que alargan visualmente la pared","Ideal para habitaciones principales"] },
@@ -944,9 +943,11 @@ function especificaciones(p, f){
     ["Colchón","No incluido (consúltanos)"],["Fabricación","Hecha a mano en Mariara, Carabobo"],["Entrega","Retiro en fábrica o delivery a todo el país"]
   ];
   return [
-    ["Tipo","Sofá en L con chaise"],["Capacidad",f.asiento],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],
+    ["Tipo",(FABRICACION[p.id] || {}).tipo || "Sofá en L"],["Piezas",(FABRICACION[p.id] ? FABRICACION[p.id].piezas.map(x => x.n).join(" + ") : "—")],
+    ["Medidas", FABRICACION[p.id] && FABRICACION[p.id].medidasConfirmadas ? medidasSofa(p.id) + " (ancho × fondo)" : "Por confirmar · también a medida"],
+    ["Diván","A la izquierda o a la derecha, tú eliges"],["Cojines decorativos","De obsequio, en la tela y color que elijas"],
+    ["Accesorios","Puerto USB (+$50), portavasos (+$25) y más"],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],
     ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
-    ["Tapizado","Lino, pana o felpa a elegir"],["Medidas","A medida según tu espacio"],
     ["Fabricación","Hecho a mano en Mariara, Carabobo"],["Entrega","Retiro en fábrica o delivery a todo el país"]
   ];
 }
@@ -964,6 +965,8 @@ const PREGUNTAS = [
   { id: "vivienda", cat: "sofas", label: "¿Dónde va el sofá?", requerida: true, opciones: [
     { v: "Casa (planta baja)", nota: "" },
     { v: "Apartamento o piso alto (por escaleras)", nota: "Lo fabricamos pensando en el acceso por escaleras." } ] },
+  { id: "lado", cat: "sofas", label: "Lado del diván (mirando el sofá de frente)", requerida: true, opciones: [
+    { v: "Diván a la izquierda" }, { v: "Diván a la derecha" } ] },
   { id: "gavetas", cat: "camas", label: "Gavetas laterales", requerida: false, defecto: "Sin gavetas", opciones: [
     { v: "Sin gavetas" },
     { v: "Gavetas en un lado", extra: true, nota: "Las gavetas tienen un costo adicional." },
@@ -973,7 +976,11 @@ const PREGUNTAS = [
     { v: "Deslizadores", nota: "Sin costo adicional." } ] },
   { id: "colorPatas", label: "Color de las patas", requerida: true, si: e => e.soporte === "Patas de metal", opciones: [
     { v: "Plateada" }, { v: "Dorada" }, { v: "Negra" } ] },
-  { id: "tela", label: "Colección de tela", requerida: false, defecto: "Aún no sé", opciones: [{ v: "Aún no sé", nota: "Te ayudamos a elegir. Puedes ver todas en el mostrador de telas." }, ...TELAS.map(t => ({ v: t.nombre }))] },
+  { id: "accesorios", cat: "sofas", label: "Accesorios (puedes elegir varios)", multi: true, opciones: [
+    { v: "Puerto USB", extra: true }, { v: "Portavasos", extra: true }, { v: "Luz LED inferior", extra: true },
+    { v: "Bandeja de madera en el brazo", extra: true }, { v: "Baúl de almacenamiento en el diván", extra: true } ] },
+  { id: "cojines", cat: "sofas", label: "Cojines decorativos (obsequio)", requerida: true, defecto: "Sí, quiero mis cojines", opciones: [
+    { v: "Sí, quiero mis cojines", nota: "¡Van de regalo! Elige abajo la tela y el color de tus cojines." }, { v: "No, gracias" } ] },
   { id: "entrega", label: "Entrega", requerida: true, opciones: [
     { v: "Retiro en fábrica (Mariara)", nota: "Retiras tu pedido en nuestro taller en Mariara, Carabobo." },
     { v: "Delivery", nota: ENVIO_GRATIS ? "¡Despacho gratis por promoción vigente!" : "El costo del delivery depende de tu ciudad. Te lo indicamos en la cotización." } ] }
@@ -985,16 +992,19 @@ function renderPreguntas(){
   const cont = $("m-pers");
   cont.innerHTML = `<span class="sub pers-t">Personaliza tu pedido</span>` + preguntasDe(actual).map(q => {
     if (q.si && !q.si(elec)) return "";
-    const sel = elec[q.id] || "";
-    const nota = (q.opciones.find(o => o.v === sel) || {}).nota || "";
+    const sel = elec[q.id] || (q.multi ? [] : "");
+    const on = v => q.multi ? sel.includes(v) : v === sel;
+    const nota = q.multi ? (sel.length ? (() => { const t = sel.reduce((a, x) => a + (PRECIOS_EXTRA[x] || 0), 0), otros = sel.filter(x => !PRECIOS_EXTRA[x]); return `Cargo adicional por accesorios: $${t}${otros.length ? ` + ${otros.join(", ")} (se cotiza aparte)` : ""}.`; })() : "") : ((q.opciones.find(o => o.v === sel) || {}).nota || "");
     return `<div class="grupo" data-q="${q.id}">
       <span class="grupo-l">${q.label}${q.requerida ? ' <b aria-hidden="true">*</b>' : ""}</span>
-      <div class="opts">${q.opciones.map(o => `<button type="button" class="opt" data-q="${q.id}" data-v="${o.v}" aria-pressed="${o.v === sel}">${o.v}${o.extra ? '<em class="extra">+ costo adicional</em>' : ""}</button>`).join("")}</div>
+      <div class="opts">${q.opciones.map(o => `<button type="button" class="opt" data-q="${q.id}" data-v="${o.v}" aria-pressed="${on(o.v)}">${o.v}${o.extra ? `<em class="extra">${PRECIOS_EXTRA[o.v] ? "+ $" + PRECIOS_EXTRA[o.v] : "+ costo adicional"}</em>` : ""}</button>`).join("")}</div>
       ${nota ? `<p class="nota-op">${nota}</p>` : ""}
     </div>`;
   }).join("");
   cont.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
-    elec[b.dataset.q] = b.dataset.v;
+    const q = PREGUNTAS.find(x => x.id === b.dataset.q && (!x.cat || x.cat === actual.cat));
+    if (q && q.multi) { const a = elec[q.id] || []; elec[q.id] = a.includes(b.dataset.v) ? a.filter(x => x !== b.dataset.v) : [...a, b.dataset.v]; }
+    else elec[b.dataset.q] = b.dataset.v;
     if (b.dataset.q === "soporte" && b.dataset.v !== "Patas de metal") delete elec.colorPatas;
     renderPreguntas();
     const nuevo = cont.querySelector(`.opt[data-q="${b.dataset.q}"][data-v="${CSS.escape(b.dataset.v)}"]`);
@@ -1002,8 +1012,63 @@ function renderPreguntas(){
     $("m-dir-box").hidden = elec.entrega !== "Delivery";
     mensaje();
   }));
+  const ent = cont.querySelector('.grupo[data-q="entrega"]');
+  cont.insertBefore(pickTela.box, ent);
+  if (actual.cat === "sofas" && elec.cojines && elec.cojines.startsWith("Sí")) cont.insertBefore(pickCojin.box, ent);
 }
+
+/* Selector de tela y color (se usa para la tela principal y para los cojines) */
+const swStyle = (t, i) => colorStyle(coloresActivos(t)[i]);
+function crearSelector(k, titulo, textoBoton, asesor){
+  const box = document.createElement("div");
+  box.className = "grupo tela-grupo"; box.dataset.q = k;
+  box.innerHTML = `<span class="grupo-l">${titulo} <b aria-hidden="true">*</b></span>
+    <button type="button" class="tela-btn" aria-expanded="false"></button>
+    <div class="tela-menu" hidden>
+      <div class="tela-cols" role="tablist" aria-label="Colecciones de tela"></div>
+      <div class="tela-head"><span class="tela-hn"></span><span class="tela-ht"></span></div>
+      <div class="swatches-grid"></div>
+      <p class="nota-op">Los colores pueden variar un poco según la pantalla. Cada muestra tiene su código para que tu pedido sea exacto.${asesor ? ` <button type="button" class="link-asesor">${asesor}</button>` : ""}</p>
+    </div>`;
+  const q = sel => box.querySelector(sel), btn = q(".tela-btn"), menu = q(".tela-menu");
+  let vista = TELAS[0].id;
+  function pintarBtn(){
+    const n = elec[k], c = elec[k + "Codigo"];
+    if (n && c) { const t = TELAS.find(x => x.nombre === n), i = coloresActivos(t).findIndex(x => x.codigo === c);
+      btn.innerHTML = `<span class="sw-mini" style='${swStyle(t, i)}'></span><span class="tela-sel"><b>${t.nombre}</b><small>Color código ${c}</small></span><span class="tela-cambiar">Cambiar</span>`; }
+    else if (n) btn.innerHTML = `<span class="tela-sel"><b>${n}</b><small>Te ayudamos a elegir la tela y el color</small></span><span class="tela-cambiar">Cambiar</span>`;
+    else btn.innerHTML = `<span class="tela-sel"><b>${textoBoton}</b><small>${TELAS.length} colecciones · ${TELAS.reduce((a, t) => a + coloresActivos(t).length, 0)} colores</small></span><span class="tela-cambiar">▾</span>`;
+    btn.classList.toggle("lista", !!n);
+  }
+  function pintarMenu(){
+    const t = TELAS.find(x => x.id === vista);
+    q(".tela-cols").innerHTML = TELAS.map(x => `<button type="button" role="tab" class="tela-col" data-id="${x.id}" aria-selected="${x.id === vista}"><span class="sw-strip" style='${tiraStyle(x)}'></span>${x.nombre}</button>`).join("");
+    q(".tela-hn").textContent = `${t.nombre} · ${t.tipo}`;
+    q(".tela-ht").innerHTML = t.tags.map(x => `<span class="tela-tag">${x}</span>`).join("");
+    q(".swatches-grid").innerHTML = coloresActivos(t).map((c, i) => `<button type="button" class="sw" aria-pressed="${elec[k] === t.nombre && elec[k + "Codigo"] === c.codigo}" aria-label="${t.nombre}, color código ${c.codigo}" data-i="${i}" style='${swStyle(t, i)}'><span class="sw-code">${c.codigo}</span></button>`).join("");
+    box.querySelectorAll(".tela-col").forEach(b => b.addEventListener("click", () => { vista = b.dataset.id; pintarMenu(); }));
+    box.querySelectorAll(".sw").forEach(b => b.addEventListener("click", () => {
+      const i = +b.dataset.i, c = coloresActivos(t)[i];
+      elec[k] = t.nombre; elec[k + "Codigo"] = c.codigo; elec[k + "Hex"] = c.hex; elec[k + "Id"] = t.id; elec[k + "Idx"] = i; elec[k + "Sp"] = c.sp || null;
+      abrirMenu(false); pintarBtn(); mensaje(); btn.focus({ preventScroll: true });
+    }));
+  }
+  function abrirMenu(on){
+    menu.hidden = !on; btn.setAttribute("aria-expanded", on);
+    if (on) { pintarMenu(); const a = q(`.tela-col[data-id="${vista}"]`); if (a) a.scrollIntoView({ block: "nearest", inline: "center" }); }
+  }
+  btn.addEventListener("click", () => abrirMenu(menu.hidden));
+  const as = q(".link-asesor");
+  if (as) as.addEventListener("click", () => { ["Codigo", "Hex", "Id", "Idx", "Sp"].forEach(x => delete elec[k + x]); elec[k] = "Por asesorar"; abrirMenu(false); pintarBtn(); mensaje(); });
+  return { box, reset(){ vista = TELAS[0].id; abrirMenu(false); pintarBtn(); } };
+}
+const pickTela = crearSelector("tela", "Tela y color del mueble", "ELEGIR TELA Y COLOR", "Prefiero que me asesoren con la tela");
+const pickCojin = crearSelector("cojin", "Tela y color de los cojines", "ELEGIR COLOR DE COJINES", "Que combinen con el sofá (asesoría)");
 function faltante(){
+  const q = preguntasDe(actual).find(q => q.id !== "entrega" && q.requerida && (!q.si || q.si(elec)) && !elec[q.id]);
+  if (q) return q;
+  if (!elec.tela) return { id: "tela", label: "Tela y color del mueble" };
+  if (actual.cat === "sofas" && elec.cojines && elec.cojines.startsWith("Sí") && !elec.cojin) return { id: "cojin", label: "Tela y color de los cojines" };
   return preguntasDe(actual).find(q => q.requerida && (!q.si || q.si(elec)) && !elec[q.id]);
 }
 function piezas(){
@@ -1013,11 +1078,14 @@ function piezas(){
 function mensaje(){
   const art = actual.cat === "sofas" ? "el" : "la";
   let t = `Hola Muebles Ideal, me interesa ${art} ${actual.nombre}.`;
-  if (talla) t += ` ${actual.cat === "sofas" ? "Configuración" : "Tamaño"}: ${talla}.`;
-  if (color) t += ` Color: ${color}.`;
+  if (talla) t += ` ${actual.cat === "sofas" ? "Medidas" : "Tamaño"}: ${talla}.`;
+  if (elec.lado) t += ` ${elec.lado}.`;
+  if (elec.accesorios && elec.accesorios.length) t += ` Accesorios: ${elec.accesorios.map(a => PRECIOS_EXTRA[a] ? `${a} (+$${PRECIOS_EXTRA[a]})` : a).join(", ")}.`;
   if (elec.vivienda) t += ` Va para: ${elec.vivienda}.`;
   if (elec.gavetas) t += ` ${elec.gavetas}.`;
   if (elec.soporte) t += ` ${elec.soporte}${elec.colorPatas ? " " + elec.colorPatas.toLowerCase() + "s" : ""}.`;
+  if (elec.tela) t += ` Tela: ${elec.tela}${elec.telaCodigo ? ", color código " + elec.telaCodigo : ""}.`;
+  if (elec.cojin) t += ` Cojines: ${elec.cojin}${elec.cojinCodigo ? ", color código " + elec.cojinCodigo : ""}.`;
   if (elec.entrega) t += ` Entrega: ${elec.entrega}.`;
   $("m-wa").href = waLink(t + " ¿Me pueden dar precio y tiempo de entrega?");
 }
@@ -1029,7 +1097,7 @@ function opciones(cont, lista, esColor){
     const on = b.getAttribute("aria-pressed") !== "true";
     cont.querySelectorAll(".opt").forEach(o => o.setAttribute("aria-pressed", "false"));
     b.setAttribute("aria-pressed", on);
-    if (esColor) color = on ? b.dataset.v : ""; else talla = on ? b.dataset.v : "";
+    if (esColor) color = on ? b.dataset.v : ""; else { talla = on ? b.dataset.v : ""; $("m-medida-box").hidden = talla !== "Medida especial"; }
     mensaje();
   }));
 }
@@ -1039,17 +1107,16 @@ function abrir(id){
   const f = FICHA[id] || {};
   actual = p; talla = ""; color = "";
   elec = {}; PREGUNTAS.forEach(q => { if (q.defecto && (!q.cat || q.cat === p.cat)) elec[q.id] = q.defecto; });
-  if (telaElegida) elec.tela = telaElegida;
   $("m-dir-box").hidden = true;
+  pickTela.reset(); pickCojin.reset(); $("m-medida-box").hidden = true;
   $("m-img").src = p.img; $("m-img").alt = p.nombre;
   modal.querySelector(".sheet-photo").style.setProperty("--m-img", `url("${p.img}")`);
   $("m-cat").textContent = p.linea ? `Línea ${LINEAS[p.linea].nombre} · Hecha a medida` : "Sofás · Hecho a medida";
   $("m-nombre").textContent = p.nombre;
   $("m-desc").textContent = p.desc;
   $("m-feat").innerHTML = (f.feat || []).map(t => `<li><svg><use href="#i-check"/></svg>${t}</li>`).join("");
-  $("m-size-label").textContent = p.cat === "camas" ? "Tamaño (medida del colchón)" : "Configuración";
-  opciones($("m-sizes"), p.cat === "camas" ? TAMANOS_CAMA : TAMANOS_SOFA, false);
-  opciones($("m-colors"), COLORES, true);
+  $("m-size-label").textContent = p.cat === "camas" ? "Tamaño (medida del colchón)" : "Medidas";
+  opciones($("m-sizes"), p.cat === "camas" ? TAMANOS_CAMA : [`Estándar ${FABRICACION[p.id] && FABRICACION[p.id].medidasConfirmadas ? "(" + medidasSofa(p.id) + ")" : "(medidas por confirmar)"}`, "Medida especial"], false);
   renderPreguntas();
   $("m-specs").innerHTML = especificaciones(p, f).map(([k,v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
   const tiene = p.precio !== "" && p.precio != null;
@@ -1137,56 +1204,6 @@ document.getElementById("copy-mail").addEventListener("click", () => {
   });
 })();
 
-/* ===== Mostrador de telas ===== */
-(function(){
-  const grid = $("telas-grid"), mas = $("telas-mas"), tm = $("tmodal");
-  const tchips = [...document.querySelectorAll(".tchip")];
-  const VIS = 6; let filtroT = "todas", todasT = false, actualT = null, volverT = null;
-  const tagsHtml = t => t.tags.map(x => `<span class="tela-tag">${x}</span>`).join("");
-  function pintar(){
-    const lista = filtroT === "todas" ? TELAS : TELAS.filter(t => t.tipo === filtroT);
-    const muestra = todasT ? lista : lista.slice(0, VIS);
-    grid.innerHTML = muestra.map((t, i) => `<button type="button" class="tela-card" data-t="${t.id}" style="animation-delay:${-i * 1.1}s">
-      <span class="tela-img"><img src="tela-card-${t.id}.jpg" alt="Muestrario de la tela ${t.nombre}" loading="lazy"></span>
-      <span class="tela-info"><span class="tela-tipo">${t.tipo}</span><span class="tela-n">${t.nombre}</span><span class="tela-tags">${tagsHtml(t)}</span></span>
-    </button>`).join("");
-    grid.querySelectorAll(".tela-card").forEach(b => b.addEventListener("click", () => abrirT(b.dataset.t)));
-    tchips.forEach(c => c.setAttribute("aria-pressed", c.dataset.t === filtroT));
-    $("tcount").textContent = `${lista.length} colecciones`;
-    $("telas-mas-box").hidden = lista.length <= VIS;
-    mas.textContent = todasT ? "VER MENOS" : "VER TODAS LAS TELAS";
-    mas.setAttribute("aria-expanded", todasT);
-  }
-  tchips.forEach(c => c.addEventListener("click", () => { filtroT = c.dataset.t; todasT = false; pintar(); }));
-  mas.addEventListener("click", () => { const cerrarT = todasT; todasT = !todasT; pintar(); if (cerrarT) $("telas").scrollIntoView({ behavior: "smooth" }); });
-  function abrirT(id){
-    const t = TELAS.find(x => x.id === id); if (!t) return; actualT = t;
-    $("t-img").src = `tela-${t.id}.jpg`; $("t-img").alt = `Muestrario completo de la tela ${t.nombre}`;
-    tm.querySelector(".sheet-photo").style.setProperty("--m-img", `url("tela-${t.id}.jpg")`);
-    $("t-tipo").textContent = `Tela ${t.tipo.toLowerCase()}`;
-    $("t-nombre").textContent = t.nombre; $("t-desc").textContent = t.desc;
-    $("t-tags").innerHTML = tagsHtml(t);
-    $("t-specs").innerHTML = [["Tipo", t.tipo], ["Antifluido", t.tags.includes("Antifluido") ? "Sí, repele líquidos" : "No"], ["Pet friendly", t.tags.includes("Pet friendly") ? "Sí, resiste uñas de mascotas" : "No"], ["Disponible para", "Camas y sofás"]].map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
-    $("t-wa").href = waLink(`Hola Muebles Ideal, me interesa la tela ${t.nombre}. ¿Me pueden mostrar los colores disponibles?`);
-    volverT = document.activeElement;
-    tm.hidden = false; document.body.classList.add("lock");
-    tm.querySelector(".sheet").scrollTop = 0; tm.querySelector(".close").focus({ preventScroll: true });
-  }
-  function cerrarT(){
-    if (tm.hidden) return; tm.hidden = true;
-    if (modal.hidden && panel.hidden && pEnv.hidden) document.body.classList.remove("lock");
-    if (volverT && volverT.focus) volverT.focus({ preventScroll: true });
-  }
-  tm.querySelectorAll("[data-tclose]").forEach(el => el.addEventListener("click", cerrarT));
-  document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarT(); });
-  $("t-elegir").addEventListener("click", () => {
-    telaElegida = actualT.nombre; cerrarT();
-    aviso(`Tela ${actualT.nombre} elegida. Ahora escoge tu modelo.`);
-    $("catalogo").scrollIntoView({ behavior: "smooth" });
-  });
-  pintar();
-})();
-
 /* Menú móvil */
 const nav = document.getElementById("nav"), mb = document.getElementById("menu-btn");
 mb.addEventListener("click", () => { const o = nav.classList.toggle("open"); mb.setAttribute("aria-expanded", o); });
@@ -1233,9 +1250,16 @@ try { if (window.emailjs) emailjs.init({ publicKey: EMAILJS.publicKey }); } catc
 const emailOk = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 const conLimite = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("tiempo")), ms))]);
 const escHtml = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const valorHtml = (k, v) => {
+  const m = /^(\d{4})\|(#[0-9a-f]{6})$/i.exec(String(v));
+  if (/^ORDEN\|/.test(String(v))) return `<a href="${String(v).slice(6)}" target="_blank" style="display:inline-block;padding:13px 22px;background:#141414;color:#ffffff;border-radius:999px;font-weight:bold;font-size:13px;letter-spacing:1px;text-decoration:none">ABRIR ORDEN DE FABRICACIÓN</a><br><span style="font-size:11px;color:#7a7368;font-weight:normal">Ábrela e imprímela o guárdala en PDF.</span>`;
+  if (m) return `<span style="display:inline-block;width:22px;height:22px;border-radius:5px;background:${m[2]};border:1px solid #cfc8bb;vertical-align:middle;margin-right:10px"></span><span style="font-size:18px;letter-spacing:1px;vertical-align:middle">${m[1]}</span>`;
+  return escHtml(v);
+};
+const valorTexto = v => String(v).replace(/^(\d{4})\|#[0-9a-f]{6}$/i, "$1").replace(/^ORDEN\|/, "");
 const filasHtml = pares => pares.map(([k, v]) =>
   `<tr><td style="padding:11px 12px 11px 0;border-bottom:1px solid #e6e1d6;color:#7a7368;font-size:13px;width:40%;vertical-align:top">${escHtml(k)}</td>` +
-  `<td style="padding:11px 0;border-bottom:1px solid #e6e1d6;color:#141414;font-size:14px;font-weight:bold;vertical-align:top">${escHtml(v)}</td></tr>`).join("");
+  `<td style="padding:11px 0;border-bottom:1px solid #e6e1d6;color:#141414;font-size:14px;font-weight:bold;vertical-align:top">${valorHtml(k, v)}</td></tr>`).join("");
 async function enviarCotizacion(campos, asunto, respuesta, registro){
   const esClub = !!respuesta;
   const mensajeCliente = esClub
@@ -1245,14 +1269,14 @@ async function enviarCotizacion(campos, asunto, respuesta, registro){
   const titulo = esClub ? "¡Bienvenido al Club!" : "¡Recibimos tu solicitud!";
   const etiquetas = { name: "Nombre", email: "Correo" };
   const pares = Object.entries(campos).map(([k, v]) => [etiquetas[k] || k, v]);
-  const detalle = pares.map(([k, v]) => `${k}: ${v}`).join("  |  ");
+  const detalle = pares.map(([k, v]) => `${k}: ${valorTexto(v)}`).join("  |  ");
   const SITIO = "https://mueblesideal2020-commits.github.io/muebles-ideal/";
   const prod = PRODUCTOS.find(p => p.nombre === campos.Modelo || p.nombre === campos["Producto de interés"]);
-  const foto = SITIO + "email-" + (prod ? prod.img.replace(/^img\//, "") : "hero-cama.jpg");
+  const foto = SITIO + "email-" + (prod && !/^data:/.test(prod.img) ? prod.img.replace(/^img\//, "") : "hero-cama.jpg");
   const modeloFoto = prod ? prod.nombre : "Muebles Ideal";
   const paraCliente = esClub
     ? [["Membresía", "Club Muebles Ideal"], ["Correo registrado", campos.email]]
-    : pares.filter(([k]) => !["Nombre", "Correo", "Teléfono"].includes(k));
+    : pares.filter(([k]) => !["Nombre", "Correo", "Teléfono", "Orden de fabricación"].includes(k));
 
   const guardar = (baseDatos && registro)
     ? conLimite(baseDatos.collection(registro.col).add({ ...registro.data, fecha: firebase.firestore.FieldValue.serverTimestamp() }), 15000)
@@ -1321,6 +1345,30 @@ document.getElementById("of-form").addEventListener("submit", async e => {
   } finally { btn.disabled = false; btn.textContent = "REGISTRARME"; }
 });
 
+/* ===== ORDEN DE FABRICACIÓN =====
+   El correo del taller trae un enlace a orden.html con todos los datos del pedido. */
+function numeroOrden(){
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return `MI-${String(d.getFullYear()).slice(2)}${p(d.getMonth() + 1)}${p(d.getDate())}-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+function enlaceOrden(orden, v){
+  const esCama = actual.cat === "camas";
+  const tel = k => elec[k + "Codigo"] ? { n: elec[k], c: elec[k + "Codigo"], h: elec[k + "Hex"], sp: elec[k + "Sp"] } : { n: elec[k] || "Por asesorar" };
+  const datos = {
+    v: 1, n: orden, f: new Date().toISOString(),
+    c: { n: v("m-nom"), e: v("m-email"), t: v("m-tel"), ci: v("m-ciudad"), d: v("m-dir") },
+    p: { id: actual.id, n: actual.nombre, cat: actual.cat, l: actual.linea ? LINEAS[actual.linea].nombre : "", img: /^data:/.test(actual.img) ? "" : actual.img.replace(/^img\//, "") },
+    o: { talla: talla || "", medida: v("m-medida"), viv: elec.vivienda, base: piezas(), gav: elec.gavetas || "", sop: elec.soporte, cp: elec.colorPatas || "",
+         lado: elec.lado || "", acc: elec.accesorios || [], precios: PRECIOS_EXTRA, coj: elec.cojines || "", ent: elec.entrega, envGratis: ENVIO_GRATIS },
+    tela: tel("tela"),
+    cojin: !esCama && elec.cojines && elec.cojines.startsWith("Sí") ? Object.assign(tel("cojin"), { cant: (FABRICACION[actual.id] || {}).cojines || 4 }) : null,
+    fab: esCama ? null : FABRICACION[actual.id] || null,
+    mat: MATERIALES[actual.id] || null
+  };
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(datos)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return "https://mueblesideal2020-commits.github.io/muebles-ideal/orden.html#" + b64;
+}
+
 document.getElementById("m-form").addEventListener("submit", async e => {
   e.preventDefault();
   if (!actual) return;
@@ -1341,24 +1389,80 @@ document.getElementById("m-form").addEventListener("submit", async e => {
     Modelo: actual.nombre
   };
   if (actual.linea) campos["Línea"] = LINEAS[actual.linea].nombre;
-  campos[esCama ? "Tamaño" : "Configuración"] = talla || "Por definir";
-  campos.Color = color || "Por definir";
-  campos.Tela = elec.tela || "Aún no sé";
+  const orden = numeroOrden();
+  campos[esCama ? "Tamaño" : "Medidas"] = (talla || "Por definir") + (talla === "Medida especial" && v("m-medida") ? `: ${v("m-medida")}` : "");
+  if (!esCama) { campos.Tipo = (FABRICACION[actual.id] || {}).tipo || "Sofá"; campos["Diván"] = elec.lado; }
+  campos.Tela = elec.tela;
+  campos["Código de color"] = elec.telaCodigo ? `${elec.telaCodigo}|${elec.telaHex}` : "Por asesorar";
+  if (!esCama) {
+    const acc = elec.accesorios || [];
+    campos.Accesorios = acc.length ? acc.map(a => PRECIOS_EXTRA[a] ? `${a} (+$${PRECIOS_EXTRA[a]})` : `${a} (por cotizar)`).join(", ") : "Ninguno";
+    if (acc.length) campos["Cargos adicionales"] = `$${acc.reduce((t, a) => t + (PRECIOS_EXTRA[a] || 0), 0)}${acc.some(a => !PRECIOS_EXTRA[a]) ? " + accesorios por cotizar" : ""}`;
+    const quiere = elec.cojines && elec.cojines.startsWith("Sí");
+    campos["Cojines (obsequio)"] = quiere ? `Sí · ${(FABRICACION[actual.id] || {}).cojines || 4} unidades · ${elec.cojin}` : "No";
+    if (quiere) campos["Código color cojines"] = elec.cojinCodigo ? `${elec.cojinCodigo}|${elec.cojinHex}` : "Por asesorar";
+  }
   campos["Va para"] = elec.vivienda;
   if (esCama) { campos["Fabricación de la base"] = piezas(); campos.Gavetas = elec.gavetas || "Sin gavetas"; }
   campos.Soporte = elec.soporte + (elec.colorPatas ? ` (${elec.colorPatas.toLowerCase()})` : "");
   campos.Entrega = elec.entrega + (elec.entrega === "Delivery" && ENVIO_GRATIS ? " (gratis por promoción)" : "");
   if (elec.entrega === "Delivery") campos["Dirección"] = v("m-dir");
+  campos["N° de orden"] = orden;
+  campos["Orden de fabricación"] = "ORDEN|" + enlaceOrden(orden, v);
   await procesar(document.getElementById("m-enviar"), est, campos,
-    `Nueva cotización: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN", { col: "cotizaciones", data: {
+    `Nueva cotización ${orden}: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN", { col: "cotizaciones", data: {
     nombre: v("m-nom"), email: v("m-email"), telefono: v("m-tel"), ciudad: v("m-ciudad"),
-    modelo: actual.nombre, tamano: talla || "Por definir", color: (color || "Por definir") + " · Tela: " + (elec.tela || "Aún no sé"), origen: "ficha",
+    modelo: actual.nombre, tamano: talla || "Por definir", color: elec.telaCodigo ? `${elec.tela} · código ${elec.telaCodigo}` : "Tela por asesorar", origen: "ficha", orden,
+    lado: elec.lado || "", accesorios: (elec.accesorios || []).join(", "), cojines: campos["Cojines (obsequio)"] || "",
+    colorCojines: elec.cojinCodigo ? `${elec.cojin} · código ${elec.cojinCodigo}` : (elec.cojin || ""), medida: v("m-medida"),
     linea: actual.linea ? LINEAS[actual.linea].nombre : "Sofás", vivienda: elec.vivienda, piezas: piezas(),
     gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte, colorPatas: elec.colorPatas || "",
     entrega: elec.entrega, direccion: elec.entrega === "Delivery" ? v("m-dir") : ""
   } });
 });
 armar();
+
+/* ===== CATÁLOGO DESDE FIREBASE (lo que cambies en el panel admin) =====
+   Si la base de datos está vacía o no responde, la página usa el catálogo incluido arriba. */
+const resolverImg = src => !src ? IMG_BASE + "hero-cama.jpg" : /^(data:|https?:|img\/)/.test(src) ? src : IMG_BASE + src;
+async function cargarCatalogo(){
+  if (!baseDatos) return;
+  try {
+    const [ps, ts, cf] = await conLimite(Promise.all([
+      baseDatos.collection("productos").get(), baseDatos.collection("telas").get(), baseDatos.collection("config").doc("general").get()
+    ]), 9000);
+    if (cf.exists) {
+      const c = cf.data();
+      if (c.lineas) { Object.keys(LINEAS).forEach(k => delete LINEAS[k]); Object.assign(LINEAS, c.lineas); }
+      if (c.preciosExtra) { Object.keys(PRECIOS_EXTRA).forEach(k => delete PRECIOS_EXTRA[k]); Object.assign(PRECIOS_EXTRA, c.preciosExtra); }
+      if (Array.isArray(c.tamanosCama) && c.tamanosCama.length) TAMANOS_CAMA.splice(0, TAMANOS_CAMA.length, ...c.tamanosCama);
+      if (typeof c.envioGratis === "boolean") ENVIO_GRATIS = c.envioGratis;
+      if (Array.isArray(c.accesorios)) { const q = PREGUNTAS.find(x => x.id === "accesorios"); if (q) q.opciones = c.accesorios.map(v => ({ v, extra: true })); }
+      if (c.pagos) window.DATOS_PAGO = c.pagos;
+      const qe = PREGUNTAS.find(x => x.id === "entrega");
+      if (qe) qe.opciones[1].nota = ENVIO_GRATIS ? "¡Despacho gratis por promoción vigente!" : "El costo del delivery depende de tu ciudad. Te lo indicamos en la cotización.";
+    }
+    if (!ts.empty) {
+      const lista = ts.docs.map(d => Object.assign({ id: d.id }, d.data())).filter(t => t.activo !== false && (t.colores || []).some(c => c.activo !== false)).sort((a, b) => (a.orden || 0) - (b.orden || 0));
+      if (lista.length) TELAS.splice(0, TELAS.length, ...lista);
+    }
+    if (!ps.empty) {
+      const lista = ps.docs.map(d => Object.assign({ id: d.id }, d.data())).filter(p => p.activo !== false).sort((a, b) => (a.orden || 0) - (b.orden || 0));
+      if (lista.length) {
+        Object.keys(FICHA).forEach(k => delete FICHA[k]); Object.keys(FABRICACION).forEach(k => delete FABRICACION[k]);
+        PRODUCTOS.splice(0, PRODUCTOS.length, ...lista.map(p => {
+          FICHA[p.id] = p.ficha || {}; if (p.cat === "sofas" && p.fab) FABRICACION[p.id] = p.fab;
+          if (p.materiales) MATERIALES[p.id] = p.materiales;
+          return { id: p.id, cat: p.cat, linea: p.linea || undefined, nombre: p.nombre, img: resolverImg(p.img), desc: p.desc || "", tela: "Tela a elegir", precio: p.precio == null ? "" : p.precio, destacado: !!p.destacado, tag: p.tag || "" };
+        }));
+      }
+    }
+    renderLineas(); filtrar(filtroActual);
+    if (!panel.hidden) filtrarPanel(filtroActual);
+    if (location.hash.startsWith("#p-")) leerHash();
+  } catch (e) { /* sin conexión: se mantiene el catálogo incluido */ }
+}
+cargarCatalogo();
 
 /* Copiar número */
 const toast = document.getElementById("toast");
