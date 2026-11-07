@@ -44,6 +44,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.6; }
@@ -270,6 +271,44 @@ input[aria-invalid="true"] { border-color: #c0392b; }
 @media (max-width: 760px) { .ofertas-in { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .of-form { animation: none; } }
 
+/* Líneas de producto */
+.lineas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 30px; }
+.linea-card { text-align: left; display: flex; flex-direction: column; gap: 8px; padding: 22px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; cursor: pointer; transition: transform .25s ease, border-color .2s ease, box-shadow .25s ease; min-width: 0; }
+.linea-card:hover { transform: translateY(-4px); border-color: #d4ad62; box-shadow: 0 18px 30px -22px rgba(0,0,0,.45); }
+.linea-card.activa { border-color: #d4ad62; background: var(--accent-soft); }
+.linea-n { font-family: var(--font-display); font-weight: 300; font-size: 1.6rem; color: var(--accent); line-height: 1; }
+.linea-t { font-family: var(--font-display); font-weight: 500; font-size: 1.15rem; text-transform: uppercase; letter-spacing: .04em; }
+.linea-d { color: var(--muted); font-size: .93rem; line-height: 1.5; }
+.linea-c { margin-top: auto; padding-top: 6px; font-family: var(--font-display); font-size: .85rem; font-weight: 500; color: var(--accent); }
+.card-linea { display: block; text-align: center; font-family: var(--font-display); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: -6px; }
+@media (max-width: 760px) { .lineas { grid-template-columns: 1fr; } }
+
+/* Preguntas de fabricación */
+.pers { display: flex; flex-direction: column; gap: 20px; padding: 22px; border-radius: 16px; border: 1px dashed var(--line); }
+.pers-t { margin-bottom: -6px; }
+.grupo { display: flex; flex-direction: column; gap: 10px; border-radius: 12px; transition: background-color .3s ease, box-shadow .3s ease; }
+.grupo.aviso { box-shadow: 0 0 0 3px #d4ad62; background: var(--accent-soft); }
+.grupo-l { font-weight: 600; font-size: .95rem; }
+.grupo-l b { color: #b8913f; }
+.opt .extra { display: block; font-style: normal; font-size: .7rem; color: var(--accent); font-weight: 600; margin-top: 2px; }
+.nota-op { font-size: .86rem; color: var(--muted); text-align: left; margin-top: -2px; }
+
+/* Mostrador de telas */
+.telas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 22px; }
+.tela-card { display: flex; flex-direction: column; text-align: left; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; overflow: hidden; animation: flotar 6s ease-in-out infinite, flotar-sombra 6s ease-in-out infinite; transition: border-color .2s ease; min-width: 0; }
+.tela-card:hover { border-color: #d4ad62; animation-play-state: paused; }
+.tela-img { display: block; aspect-ratio: 4 / 1.25; max-width: 100%; overflow: hidden; background: var(--line); }
+.tela-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.tela-card:hover .tela-img img { transform: scale(1.06); }
+.tela-info { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 18px; }
+.tela-tipo { font-family: var(--font-display); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.tela-n { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; text-transform: uppercase; letter-spacing: .03em; }
+.tela-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
+.tela-tag { font-size: .74rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
+#tmodal .sheet-photo img { width: auto; aspect-ratio: auto; height: auto; object-fit: contain; }
+@media (max-width: 760px) { #tmodal .sheet-photo img { max-height: 55vh !important; } }
+@media (prefers-reduced-motion: reduce) { .tela-card { animation: none; } }
+
 /* Iconos de redes sociales */
 .redes { display: flex; gap: 12px; margin-top: 6px; }
 .redes a { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--line); color: var(--ink); text-decoration: none; transition: transform .25s cubic-bezier(.2,.8,.2,1), background-color .2s ease, color .2s ease, border-color .2s ease; }
@@ -423,6 +462,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
     <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menú</button>
     <nav class="nav" id="nav">
       <a href="#catalogo-completo">Catálogo</a>
+      <a href="#telas">Telas</a>
       <a href="#nosotros">Nosotros</a>
       <a href="#envios">Envíos</a>
       <a href="#ofertas">Ofertas</a>
@@ -464,16 +504,38 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       <div class="section-head">
         <span class="eyebrow">Catálogo · Los más vendidos primero</span>
         <h2>¿Qué estás buscando?</h2>
-        <p class="lead">Todos nuestros modelos se fabrican en el tamaño que necesites: individual, matrimonial, queen o king.</p>
+        <p class="lead">Todos nuestros modelos se fabrican en el tamaño que necesites: individual, matrimonial, queen o king. Elige la línea que va contigo.</p>
       </div>
+      <div class="lineas" id="lineas"></div>
       <div class="filters" role="group" aria-label="Filtrar por categoría">
         <button class="chip" data-f="todos" aria-pressed="true">Todos</button>
-        <button class="chip" data-f="camas" aria-pressed="false">Camas</button>
+        <button class="chip" data-f="esencial" aria-pressed="false">Esencial</button>
+        <button class="chip" data-f="signature" aria-pressed="false">Signature</button>
+        <button class="chip" data-f="prestige" aria-pressed="false">Prestige</button>
         <button class="chip" data-f="sofas" aria-pressed="false">Sofás</button>
         <span class="count" id="count"></span>
       </div>
       <div class="grid" id="grid-catalogo"></div>
       <div class="ver-mas"><button type="button" class="btn btn-primary" id="ver-mas" aria-expanded="false" aria-controls="grid-catalogo">VER MÁS</button></div>
+    </div>
+  </section>
+
+  <section class="band telas" id="telas">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Mostrador de telas</span>
+        <h2>Elige la tela y el color de tu mueble</h2>
+        <p class="lead">Trabajamos con colecciones de tapicería de alta calidad, muchas antifluido y amigables con las mascotas. Toca una colección para verla completa.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrar telas">
+        <button class="chip tchip" data-t="todas" aria-pressed="true">Todas</button>
+        <button class="chip tchip" data-t="Aterciopelada" aria-pressed="false">Aterciopeladas</button>
+        <button class="chip tchip" data-t="Tipo lino" aria-pressed="false">Tipo lino</button>
+        <button class="chip tchip" data-t="Bouclé" aria-pressed="false">Bouclé</button>
+        <span class="count" id="tcount"></span>
+      </div>
+      <div class="telas-grid" id="telas-grid"></div>
+      <div class="ver-mas" id="telas-mas-box"><button type="button" class="btn btn-primary" id="telas-mas" aria-expanded="false">VER TODAS LAS TELAS</button></div>
     </div>
   </section>
 
@@ -626,7 +688,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       <img src="logo-v.png" alt="Muebles Ideal" width="138" height="92">
       <p class="slogan">Soñado por otros, diseñado por nosotros.</p>
     </div>
-    <div><h4>Productos</h4><ul><li><a href="#catalogo" data-go="camas">Camas</a></li><li><a href="#catalogo" data-go="sofas">Sofás</a></li><li><a href="#catalogo-completo">Catálogo completo</a></li></ul></div>
+    <div><h4>Productos</h4><ul><li><a href="#catalogo" data-go="camas">Camas</a></li><li><a href="#catalogo" data-go="sofas">Sofás</a></li><li><a href="#catalogo-completo">Catálogo completo</a></li><li><a href="#telas">Mostrador de telas</a></li></ul></div>
     <div><h4>Ayuda</h4><ul><li><a href="#envios">Envíos y tarifas</a></li><li><a href="#proceso">Cómo trabajamos</a></li><li><a href="#contacto">Asesoría</a></li></ul></div>
     <div><h4>Envíos</h4><ul><li>Caracas</li><li>Maracay</li><li>Valencia</li><li>Todo el país*</li></ul></div>
     <div><h4>Contacto</h4><ul><li>Mariara, Carabobo</li></ul>
@@ -653,7 +715,9 @@ footer img { animation: flotar 6s ease-in-out infinite; }
     </div>
     <div class="filters" role="group" aria-label="Filtrar catálogo completo">
       <button class="chip" data-pf="todos" aria-pressed="true">Todos</button>
-      <button class="chip" data-pf="camas" aria-pressed="false">Camas</button>
+      <button class="chip" data-pf="esencial" aria-pressed="false">Esencial</button>
+      <button class="chip" data-pf="signature" aria-pressed="false">Signature</button>
+      <button class="chip" data-pf="prestige" aria-pressed="false">Prestige</button>
       <button class="chip" data-pf="sofas" aria-pressed="false">Sofás</button>
       <span class="count" id="panel-count"></span>
     </div>
@@ -672,6 +736,25 @@ footer img { animation: flotar 6s ease-in-out infinite; }
   <div class="panel-body"><div style="max-width: 1100px; margin: 0 auto" id="envios-body"></div></div>
 </div>
 
+<div class="modal" id="tmodal" role="dialog" aria-modal="true" aria-labelledby="t-nombre" hidden>
+  <div class="modal-bg" data-tclose></div>
+  <div class="sheet">
+    <button class="close" data-tclose aria-label="Cerrar">×</button>
+    <div class="sheet-photo"><img id="t-img" src="tela-marmol.jpg" alt="" style="aspect-ratio:auto;max-height:78vh;width:auto;max-width:100%"></div>
+    <div class="sheet-info">
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <span class="eyebrow" id="t-tipo">Tela</span>
+        <h2 id="t-nombre">Tela</h2>
+        <p class="lead" id="t-desc"></p>
+      </div>
+      <div class="tela-tags" id="t-tags"></div>
+      <table class="spec-table"><tbody id="t-specs"></tbody></table>
+      <button type="button" class="btn btn-wa" id="t-elegir">ELEGIR ESTA TELA</button>
+      <p class="note">Al elegirla, la marcamos en la ficha del modelo que quieras cotizar. Los colores pueden variar un poco según la pantalla. ¿Quieres ver la muestra en persona? <a id="t-wa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-nombre" hidden>
   <div class="modal-bg" data-close></div>
   <div class="sheet">
@@ -686,6 +769,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       <div style="display:flex; flex-direction:column; gap:10px"><span class="sub">Características</span><ul class="feat" id="m-feat"></ul></div>
       <div style="display:flex; flex-direction:column; gap:10px"><span class="sub" id="m-size-label">Tamaño</span><div class="opts" id="m-sizes"></div></div>
       <div style="display:flex; flex-direction:column; gap:10px"><span class="sub">Color de tela</span><div class="opts" id="m-colors"></div></div>
+      <div class="pers" id="m-pers"></div>
       <div style="display:flex; flex-direction:column; gap:6px"><span class="sub">Especificaciones técnicas</span><table class="spec-table"><tbody id="m-specs"></tbody></table></div>
       <div class="price-row"><span class="price ask" id="m-price">Precio a consultar</span></div>
       <form class="m-form" id="m-form" novalidate>
@@ -698,9 +782,10 @@ footer img { animation: flotar 6s ease-in-out infinite; }
           <div class="field"><label for="m-tel">Teléfono (opcional)</label><input id="m-tel" type="tel" autocomplete="tel" placeholder="0414-0000000"></div>
           <div class="field"><label for="m-ciudad">Ciudad</label><input id="m-ciudad" placeholder="Ej. Caracas"></div>
         </div>
+        <div class="field" id="m-dir-box" hidden><label for="m-dir">Dirección de entrega</label><input id="m-dir" autocomplete="street-address" placeholder="Urbanización, calle, edificio o casa, punto de referencia"></div>
         <button class="btn btn-wa" type="submit" id="m-enviar">SOLICITAR COTIZACIÓN</button>
         <p class="estado" id="m-estado" role="status" hidden></p>
-        <p class="note">El tamaño y color que elijas se incluyen en tu solicitud y te llega una confirmación por correo. ¿Prefieres el chat? <a id="m-wa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
+        <p class="note">Todo lo que elijas se incluye en tu solicitud y te llega una confirmación por correo. ¿Prefieres el chat? <a id="m-wa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
       </form>
     </div>
   </div>
@@ -716,19 +801,51 @@ footer img { animation: flotar 6s ease-in-out infinite; }
 document.documentElement.lang = "es";
 const WHATSAPP = "584149442672";
 const PRODUCTOS = [
-  { id:"chevron",  cat:"camas", nombre:"Cama Chevron",         img:"cama-chevron-marca.jpg",   desc:"Cabecero alto con costuras en V. Elegante y moderna.",          tela:"Tela a elegir", precio:"", destacado:true,  tag:"Más vendida" },
-  { id:"abanico",  cat:"camas", nombre:"Cama Abanico",         img:"cama-abanico.jpg",         desc:"Cabecero en abanico y base con canales verticales.",            tela:"Tela a elegir", precio:"", destacado:true },
-  { id:"linea",    cat:"camas", nombre:"Cama Línea",           img:"cama-linea.jpg",           desc:"Cabecero y base acanalados, patas doradas.",                   tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"chevron", linea:"signature",  cat:"camas", nombre:"Cama Chevron",         img:"cama-chevron-marca.jpg",   desc:"Cabecero alto con costuras en V. Elegante y moderna.",          tela:"Tela a elegir", precio:"", destacado:true,  tag:"Más vendida" },
+  { id:"abanico", linea:"signature",  cat:"camas", nombre:"Cama Abanico",         img:"cama-abanico.jpg",         desc:"Cabecero en abanico y base con canales verticales.",            tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"linea", linea:"signature",    cat:"camas", nombre:"Cama Línea",           img:"cama-linea.jpg",           desc:"Cabecero y base acanalados, patas doradas.",                   tela:"Tela a elegir", precio:"", destacado:true },
   { id:"perla",    cat:"sofas", nombre:"Sofá en L Perla",      img:"sofa-perla.jpg",           desc:"Sofá con chaise y patas metálicas. Amplio y cómodo.",          tela:"Tela a elegir", precio:"", destacado:true },
-  { id:"abanico-p",cat:"camas", nombre:"Cama Abanico Petróleo",img:"cama-abanico-petroleo.jpg",desc:"Nuestro modelo abanico tapizado en azul petróleo.",            tela:"Tela a elegir", precio:"" },
-  { id:"mosaico",  cat:"camas", nombre:"Cama Mosaico",         img:"cama-mosaico.jpg",         desc:"Cabecero geométrico en bloques, patas doradas.",               tela:"Tela a elegir", precio:"" },
-  { id:"luna",     cat:"camas", nombre:"Cama Luna",            img:"cama-luna.jpg",            desc:"Cabecero de media luna en bouclé. Diseño de tendencia.",        tela:"Bouclé",        precio:"", tag:"Nuevo" },
-  { id:"marco",    cat:"camas", nombre:"Cama Marco",           img:"cama-marco.jpg",           desc:"Cabecero con canales a los lados y base tapizada.",            tela:"Tela a elegir", precio:"" },
-  { id:"duo",      cat:"camas", nombre:"Cama Dúo",             img:"cama-duo.jpg",             desc:"Cabecero de dos paneles acolchados. Líneas simples.",          tela:"Tela a elegir", precio:"" },
-  { id:"arena",    cat:"camas", nombre:"Cama Línea Arena",     img:"cama-linea-arena.jpg",     desc:"Cabecero acanalado alto en tono arena.",                       tela:"Tela a elegir", precio:"" },
+  { id:"abanico-p", linea:"signature",cat:"camas", nombre:"Cama Abanico Petróleo",img:"cama-abanico-petroleo.jpg",desc:"Nuestro modelo abanico tapizado en azul petróleo.",            tela:"Tela a elegir", precio:"" },
+  { id:"mosaico", linea:"signature",  cat:"camas", nombre:"Cama Mosaico",         img:"cama-mosaico.jpg",         desc:"Cabecero geométrico en bloques, patas doradas.",               tela:"Tela a elegir", precio:"" },
+  { id:"luna", linea:"prestige",     cat:"camas", nombre:"Cama Luna",            img:"cama-luna.jpg",            desc:"Cabecero de media luna en bouclé. Diseño de tendencia.",        tela:"Bouclé",        precio:"", tag:"Nuevo" },
+  { id:"marco", linea:"esencial",    cat:"camas", nombre:"Cama Marco",           img:"cama-marco.jpg",           desc:"Cabecero con canales a los lados y base tapizada.",            tela:"Tela a elegir", precio:"" },
+  { id:"duo", linea:"esencial",      cat:"camas", nombre:"Cama Dúo",             img:"cama-duo.jpg",             desc:"Cabecero de dos paneles acolchados. Líneas simples.",          tela:"Tela a elegir", precio:"" },
+  { id:"arena", linea:"esencial",    cat:"camas", nombre:"Cama Línea Arena",     img:"cama-linea-arena.jpg",     desc:"Cabecero acanalado alto en tono arena.",                       tela:"Tela a elegir", precio:"" },
+  { id:"nube", linea:"prestige", cat:"camas", nombre:"Cama Nube", img:"hero-cama.jpg", desc:"Cabecero y bordes de cojines acolchados tipo nube. Máximo confort.", tela:"Tela a elegir", precio:"", tag:"Nuevo" },
   { id:"noir",     cat:"sofas", nombre:"Sofá en L Noir",       img:"sofa-noir.jpg",            desc:"Asiento capitoneado en negro y patas cromadas.",               tela:"Tela a elegir", precio:"" },
   { id:"grafito",  cat:"sofas", nombre:"Sofá en L Grafito",    img:"sofa-grafito.jpg",         desc:"Sofá modular amplio, ideal para salas grandes.",               tela:"Tela a elegir", precio:"" }
 ];
+
+/* Líneas de producto. Cambia los nombres o descripciones aquí. */
+const LINEAS = {
+  esencial:  { nombre: "Esencial",  desc: "Box sencillo de líneas limpias. Lo esencial, bien hecho y al mejor precio." },
+  signature: { nombre: "Signature", desc: "Cabeceros de diseño con costuras y canales que se vuelven el centro de tu habitación." },
+  prestige:  { nombre: "Prestige",  desc: "Camas tipo nube y piezas de autor, con acolchado envolvente y máximo confort." }
+};
+/* ===== MOSTRADOR DE TELAS =====
+   Para agregar una tela: sube tela-ID.jpg y tela-card-ID.jpg y añade una línea aquí. */
+const TELAS = [
+  { id: "marmol",     nombre: "Mármol",          tipo: "Aterciopelada", desc: "Terciopelo con veteado tipo mármol, en tonos intensos y neutros.", tags: [] },
+  { id: "armonica",   nombre: "Armónica Plus",   tipo: "Aterciopelada", desc: "Terciopelo liso de colores vivos y neutros. Una de las más versátiles.", tags: ["Pet friendly"] },
+  { id: "mariscal",   nombre: "Mariscal",        tipo: "Aterciopelada", desc: "Terciopelo con textura jaspeada, en tonos claros y profundos.", tags: ["Antifluido", "Pet friendly"] },
+  { id: "yorkie",     nombre: "Yorkie",          tipo: "Aterciopelada", desc: "Efecto envejecido tipo cuero, muy suave al tacto.", tags: ["Antifluido", "Pet friendly"] },
+  { id: "carrasco",   nombre: "Carrasco",        tipo: "Aterciopelada", desc: "Veteado tipo mármol con vetas claras que resaltan.", tags: ["Antifluido", "Pet friendly"] },
+  { id: "estacion",   nombre: "Estación",        tipo: "Aterciopelada", desc: "Textura arrugada con brillo suave, en tonos pastel.", tags: ["Antifluido", "Pet friendly"] },
+  { id: "mirandela",  nombre: "Mirandela",       tipo: "Aterciopelada", desc: "Pelo con movimiento y acabado marmolado.", tags: ["Antifluido", "Pet friendly"] },
+  { id: "acuarela",   nombre: "Acuarela",        tipo: "Aterciopelada", desc: "Textura marmolada en tonos pastel, azules y grises.", tags: ["Antifluido", "Pet friendly"] },
+  { id: "gamuza",     nombre: "Gamuza",          tipo: "Aterciopelada", desc: "Acabado tipo gamuza en tonos tierra y grises.", tags: [] },
+  { id: "terciopelo", nombre: "Terciopelo Liso", tipo: "Aterciopelada", desc: "Color sólido y uniforme, desde neutros hasta colores vivos.", tags: [] },
+  { id: "otawa",      nombre: "Otawa",           tipo: "Tipo lino",     desc: "Tejido tipo lino de trama gruesa, muy resistente al uso diario.", tags: [] },
+  { id: "cortijo",    nombre: "Cortijo",         tipo: "Tipo lino",     desc: "Tejido texturizado con efecto jaspeado.", tags: ["Antifluido"] },
+  { id: "zaga",       nombre: "Zaga",            tipo: "Tipo lino",     desc: "Trama tipo lino en tonos neutros y vivos.", tags: [] },
+  { id: "lino",       nombre: "Lino Natural",    tipo: "Tipo lino",     desc: "Tejido tipo lino clásico en tonos naturales y grises.", tags: [] },
+  { id: "damasco",    nombre: "Lino Damasco",    tipo: "Tipo lino",     desc: "Lino de color profundo: chocolate, negro, rojo, gris y plomo.", tags: [] },
+  { id: "oasis",      nombre: "Oasis",           tipo: "Bouclé",        desc: "Tela de pelo corto muy suave. Ideal para camas tipo nube.", tags: ["Antifluido"] }
+];
+let telaElegida = "";
+
+/* Pon true cuando haya promoción de despacho gratis. */
+const ENVIO_GRATIS = false;
 
 const fmt = n => "$" + Number(n).toLocaleString("es-VE");
 const waLink = txt => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`;
@@ -738,6 +855,7 @@ function card(p){
   return `<article class="card">
     <a class="ph" href="#p-${p.id}" aria-label="Ver detalles de ${p.nombre}">${(() => { const t = p.destacado ? (p.cat === "sofas" ? "Más vendido" : "Más vendida") : p.tag; return t ? `<span class="tag">${t}</span>` : ""; })()}<img src="${p.img}" alt="${p.nombre}" loading="lazy"></a>
     <div class="body">
+      ${p.linea ? `<span class="card-linea">Línea ${LINEAS[p.linea].nombre}</span>` : `<span class="card-linea">Sofás</span>`}
       <h3><a href="#p-${p.id}">${p.nombre}</a></h3>
     </div>
   </article>`;
@@ -749,13 +867,14 @@ const chips = [...document.querySelectorAll(".chip")];
 const VISIBLES = 3;
 const btnMas = document.getElementById("ver-mas");
 const ordenados = [...PRODUCTOS.filter(p => p.destacado), ...PRODUCTOS.filter(p => !p.destacado)];
-const porCat = f => f === "todos" ? ordenados : ordenados.filter(p => p.cat === f);
+const porCat = f => f === "todos" ? ordenados : ordenados.filter(p => LINEAS[f] ? p.linea === f : p.cat === f);
 let filtroActual = "todos";
 function filtrar(f){
   filtroActual = f;
   const lista = porCat(f), muestra = lista.slice(0, VISIBLES);
   gridCat.innerHTML = muestra.map(card).join("");
   chips.forEach(c => c.setAttribute("aria-pressed", c.dataset.f === f));
+  document.querySelectorAll(".linea-card").forEach(b => b.classList.toggle("activa", b.dataset.l === f));
   document.getElementById("count").textContent = `Mostrando ${muestra.length} de ${lista.length} modelos`;
 }
 /* Ventana del catálogo completo */
@@ -785,6 +904,15 @@ pchips.forEach(c => c.addEventListener("click", () => filtrarPanel(c.dataset.pf)
 document.getElementById("panel-close").addEventListener("click", cerrarPanel);
 btnMas.addEventListener("click", () => { location.hash = "catalogo-completo"; });
 chips.forEach(c => c.addEventListener("click", () => filtrar(c.dataset.f)));
+/* Tarjetas de las 3 líneas */
+document.getElementById("lineas").innerHTML = Object.entries(LINEAS).map(([k, l], i) => `
+  <button type="button" class="linea-card" data-l="${k}">
+    <span class="linea-n">0${i + 1}</span>
+    <span class="linea-t">Línea ${l.nombre}</span>
+    <span class="linea-d">${l.desc}</span>
+    <span class="linea-c">${PRODUCTOS.filter(p => p.linea === k).length} modelos →</span>
+  </button>`).join("");
+document.querySelectorAll(".linea-card").forEach(b => b.addEventListener("click", () => filtrar(b.dataset.l)));
 document.querySelectorAll("[data-go]").forEach(a => a.addEventListener("click", () => filtrar(a.dataset.go)));
 filtrar("todos");
 
@@ -803,33 +931,94 @@ const FICHA = {
   marco:     { cabecero:"Panel central con canales laterales", base:"Tapizada lisa", patas:"Ocultas", feat:["Cabecero sobrio con detalle acanalado a los lados","Base amplia y robusta","Ideal para habitaciones modernas"] },
   duo:       { cabecero:"Dos paneles acolchados", base:"Tapizada lisa", patas:"Ocultas", feat:["Diseño minimalista de líneas simples","Cabecero de dos cojines acolchados","Excelente relación precio y estilo"] },
   arena:     { cabecero:"Alto, canales verticales", base:"Tapizada lisa", patas:"Ocultas", feat:["Cabecero alto acanalado","Tono arena cálido y luminoso","Base lisa fácil de limpiar"] },
+  nube:      { cabecero:"Cojines acolchados tipo nube", base:"Bordes envolventes acolchados con base de listones", patas:"A ras de piso", feat:["Cabecero de cojines tipo nube, súper cómodo para recostarse","Bordes acolchados que envuelven el colchón","La pieza más lujosa de nuestra línea Prestige"] },
   perla:     { asiento:"3 puestos + chaise", patas:"Metálicas cromadas", feat:["Chaise amplia para descansar con las piernas estiradas","Respaldos con cojines sueltos","Patas metálicas cromadas"] },
   noir:      { asiento:"3 puestos + chaise", patas:"Metálicas cromadas", feat:["Asiento y chaise capitoneados","Brazos anchos y rectos","Mostrado en tela negra"] },
   grafito:   { asiento:"4 puestos + chaise", patas:"Ocultas", feat:["Gran formato para salas amplias","Asientos de doble capa muy cómodos","Mostrado en gris grafito"] }
 };
 function especificaciones(p, f){
   if (p.cat === "camas") return [
-    ["Tipo","Cama tapizada con base"],["Cabecero",f.cabecero],["Base",f.base],["Patas",f.patas],
+    ["Línea", p.linea ? LINEAS[p.linea].nombre : "—"],["Tipo","Cama tapizada con base"],["Cabecero",f.cabecero],["Base",f.base],["Base para subir","En una pieza (casa) o en dos piezas (apartamento)"],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],["Gavetas laterales","Opcionales, con costo adicional"],
     ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
     ["Tapizado",p.tela === "Bouclé" ? "Bouclé (otras telas disponibles)" : "Lino, pana o felpa a elegir"],
-    ["Colchón","No incluido (consúltanos)"],["Fabricación","Hecha a mano en Mariara, Carabobo"],["Entrega","Por encargo. Te confirmamos el tiempo al pedir"]
+    ["Colchón","No incluido (consúltanos)"],["Fabricación","Hecha a mano en Mariara, Carabobo"],["Entrega","Retiro en fábrica o delivery a todo el país"]
   ];
   return [
-    ["Tipo","Sofá en L con chaise"],["Capacidad",f.asiento],["Patas",f.patas],
+    ["Tipo","Sofá en L con chaise"],["Capacidad",f.asiento],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],
     ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
     ["Tapizado","Lino, pana o felpa a elegir"],["Medidas","A medida según tu espacio"],
-    ["Fabricación","Hecho a mano en Mariara, Carabobo"],["Entrega","Por encargo. Te confirmamos el tiempo al pedir"]
+    ["Fabricación","Hecho a mano en Mariara, Carabobo"],["Entrega","Retiro en fábrica o delivery a todo el país"]
   ];
 }
 
 const modal = document.getElementById("modal");
 const $ = id => document.getElementById(id);
 let actual = null, talla = "", color = "";
+
+/* ===== PREGUNTAS DE FABRICACIÓN =====
+   extra: true muestra la etiqueta "+ costo adicional". */
+const PREGUNTAS = [
+  { id: "vivienda", cat: "camas", label: "¿Dónde va la cama?", requerida: true, opciones: [
+    { v: "Casa (planta baja)", nota: "La base (box) se fabrica en una sola pieza." },
+    { v: "Apartamento o piso alto (por escaleras)", nota: "La base (box) se fabrica en dos piezas para subirla por las escaleras." } ] },
+  { id: "vivienda", cat: "sofas", label: "¿Dónde va el sofá?", requerida: true, opciones: [
+    { v: "Casa (planta baja)", nota: "" },
+    { v: "Apartamento o piso alto (por escaleras)", nota: "Lo fabricamos pensando en el acceso por escaleras." } ] },
+  { id: "gavetas", cat: "camas", label: "Gavetas laterales", requerida: false, defecto: "Sin gavetas", opciones: [
+    { v: "Sin gavetas" },
+    { v: "Gavetas en un lado", extra: true, nota: "Las gavetas tienen un costo adicional." },
+    { v: "Gavetas en ambos lados", extra: true, nota: "Las gavetas tienen un costo adicional." } ] },
+  { id: "soporte", label: "Tipo de soporte", requerida: true, opciones: [
+    { v: "Patas de metal", nota: "Sin costo adicional." },
+    { v: "Deslizadores", nota: "Sin costo adicional." } ] },
+  { id: "colorPatas", label: "Color de las patas", requerida: true, si: e => e.soporte === "Patas de metal", opciones: [
+    { v: "Plateada" }, { v: "Dorada" }, { v: "Negra" } ] },
+  { id: "tela", label: "Colección de tela", requerida: false, defecto: "Aún no sé", opciones: [{ v: "Aún no sé", nota: "Te ayudamos a elegir. Puedes ver todas en el mostrador de telas." }, ...TELAS.map(t => ({ v: t.nombre }))] },
+  { id: "entrega", label: "Entrega", requerida: true, opciones: [
+    { v: "Retiro en fábrica (Mariara)", nota: "Retiras tu pedido en nuestro taller en Mariara, Carabobo." },
+    { v: "Delivery", nota: ENVIO_GRATIS ? "¡Despacho gratis por promoción vigente!" : "El costo del delivery depende de tu ciudad. Te lo indicamos en la cotización." } ] }
+];
+let elec = {};
+const preguntasDe = p => PREGUNTAS.filter(q => !q.cat || q.cat === p.cat);
+function renderPreguntas(){
+  if (!actual) return;
+  const cont = $("m-pers");
+  cont.innerHTML = `<span class="sub pers-t">Personaliza tu pedido</span>` + preguntasDe(actual).map(q => {
+    if (q.si && !q.si(elec)) return "";
+    const sel = elec[q.id] || "";
+    const nota = (q.opciones.find(o => o.v === sel) || {}).nota || "";
+    return `<div class="grupo" data-q="${q.id}">
+      <span class="grupo-l">${q.label}${q.requerida ? ' <b aria-hidden="true">*</b>' : ""}</span>
+      <div class="opts">${q.opciones.map(o => `<button type="button" class="opt" data-q="${q.id}" data-v="${o.v}" aria-pressed="${o.v === sel}">${o.v}${o.extra ? '<em class="extra">+ costo adicional</em>' : ""}</button>`).join("")}</div>
+      ${nota ? `<p class="nota-op">${nota}</p>` : ""}
+    </div>`;
+  }).join("");
+  cont.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+    elec[b.dataset.q] = b.dataset.v;
+    if (b.dataset.q === "soporte" && b.dataset.v !== "Patas de metal") delete elec.colorPatas;
+    renderPreguntas();
+    const nuevo = cont.querySelector(`.opt[data-q="${b.dataset.q}"][data-v="${CSS.escape(b.dataset.v)}"]`);
+    if (nuevo) nuevo.focus({ preventScroll: true });
+    $("m-dir-box").hidden = elec.entrega !== "Delivery";
+    mensaje();
+  }));
+}
+function faltante(){
+  return preguntasDe(actual).find(q => q.requerida && (!q.si || q.si(elec)) && !elec[q.id]);
+}
+function piezas(){
+  if (actual.cat !== "camas" || !elec.vivienda) return "";
+  return elec.vivienda.startsWith("Apartamento") ? "Base en dos piezas" : "Base en una sola pieza";
+}
 function mensaje(){
   const art = actual.cat === "sofas" ? "el" : "la";
   let t = `Hola Muebles Ideal, me interesa ${art} ${actual.nombre}.`;
   if (talla) t += ` ${actual.cat === "sofas" ? "Configuración" : "Tamaño"}: ${talla}.`;
   if (color) t += ` Color: ${color}.`;
+  if (elec.vivienda) t += ` Va para: ${elec.vivienda}.`;
+  if (elec.gavetas) t += ` ${elec.gavetas}.`;
+  if (elec.soporte) t += ` ${elec.soporte}${elec.colorPatas ? " " + elec.colorPatas.toLowerCase() + "s" : ""}.`;
+  if (elec.entrega) t += ` Entrega: ${elec.entrega}.`;
   $("m-wa").href = waLink(t + " ¿Me pueden dar precio y tiempo de entrega?");
 }
 function opciones(cont, lista, esColor){
@@ -849,15 +1038,19 @@ function abrir(id){
   const p = PRODUCTOS.find(x => x.id === id); if (!p) return;
   const f = FICHA[id] || {};
   actual = p; talla = ""; color = "";
+  elec = {}; PREGUNTAS.forEach(q => { if (q.defecto && (!q.cat || q.cat === p.cat)) elec[q.id] = q.defecto; });
+  if (telaElegida) elec.tela = telaElegida;
+  $("m-dir-box").hidden = true;
   $("m-img").src = p.img; $("m-img").alt = p.nombre;
   modal.querySelector(".sheet-photo").style.setProperty("--m-img", `url("${p.img}")`);
-  $("m-cat").textContent = p.cat === "camas" ? "Camas · Hecha a medida" : "Sofás · Hecho a medida";
+  $("m-cat").textContent = p.linea ? `Línea ${LINEAS[p.linea].nombre} · Hecha a medida` : "Sofás · Hecho a medida";
   $("m-nombre").textContent = p.nombre;
   $("m-desc").textContent = p.desc;
   $("m-feat").innerHTML = (f.feat || []).map(t => `<li><svg><use href="#i-check"/></svg>${t}</li>`).join("");
   $("m-size-label").textContent = p.cat === "camas" ? "Tamaño (medida del colchón)" : "Configuración";
   opciones($("m-sizes"), p.cat === "camas" ? TAMANOS_CAMA : TAMANOS_SOFA, false);
   opciones($("m-colors"), COLORES, true);
+  renderPreguntas();
   $("m-specs").innerHTML = especificaciones(p, f).map(([k,v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
   const tiene = p.precio !== "" && p.precio != null;
   $("m-price").className = tiene ? "price" : "price ask";
@@ -942,6 +1135,56 @@ document.getElementById("copy-mail").addEventListener("click", () => {
     b.textContent = v.muted ? "Activar sonido" : "Silenciar";
     b.setAttribute("aria-pressed", !v.muted);
   });
+})();
+
+/* ===== Mostrador de telas ===== */
+(function(){
+  const grid = $("telas-grid"), mas = $("telas-mas"), tm = $("tmodal");
+  const tchips = [...document.querySelectorAll(".tchip")];
+  const VIS = 6; let filtroT = "todas", todasT = false, actualT = null, volverT = null;
+  const tagsHtml = t => t.tags.map(x => `<span class="tela-tag">${x}</span>`).join("");
+  function pintar(){
+    const lista = filtroT === "todas" ? TELAS : TELAS.filter(t => t.tipo === filtroT);
+    const muestra = todasT ? lista : lista.slice(0, VIS);
+    grid.innerHTML = muestra.map((t, i) => `<button type="button" class="tela-card" data-t="${t.id}" style="animation-delay:${-i * 1.1}s">
+      <span class="tela-img"><img src="tela-card-${t.id}.jpg" alt="Muestrario de la tela ${t.nombre}" loading="lazy"></span>
+      <span class="tela-info"><span class="tela-tipo">${t.tipo}</span><span class="tela-n">${t.nombre}</span><span class="tela-tags">${tagsHtml(t)}</span></span>
+    </button>`).join("");
+    grid.querySelectorAll(".tela-card").forEach(b => b.addEventListener("click", () => abrirT(b.dataset.t)));
+    tchips.forEach(c => c.setAttribute("aria-pressed", c.dataset.t === filtroT));
+    $("tcount").textContent = `${lista.length} colecciones`;
+    $("telas-mas-box").hidden = lista.length <= VIS;
+    mas.textContent = todasT ? "VER MENOS" : "VER TODAS LAS TELAS";
+    mas.setAttribute("aria-expanded", todasT);
+  }
+  tchips.forEach(c => c.addEventListener("click", () => { filtroT = c.dataset.t; todasT = false; pintar(); }));
+  mas.addEventListener("click", () => { const cerrarT = todasT; todasT = !todasT; pintar(); if (cerrarT) $("telas").scrollIntoView({ behavior: "smooth" }); });
+  function abrirT(id){
+    const t = TELAS.find(x => x.id === id); if (!t) return; actualT = t;
+    $("t-img").src = `tela-${t.id}.jpg`; $("t-img").alt = `Muestrario completo de la tela ${t.nombre}`;
+    tm.querySelector(".sheet-photo").style.setProperty("--m-img", `url("tela-${t.id}.jpg")`);
+    $("t-tipo").textContent = `Tela ${t.tipo.toLowerCase()}`;
+    $("t-nombre").textContent = t.nombre; $("t-desc").textContent = t.desc;
+    $("t-tags").innerHTML = tagsHtml(t);
+    $("t-specs").innerHTML = [["Tipo", t.tipo], ["Antifluido", t.tags.includes("Antifluido") ? "Sí, repele líquidos" : "No"], ["Pet friendly", t.tags.includes("Pet friendly") ? "Sí, resiste uñas de mascotas" : "No"], ["Disponible para", "Camas y sofás"]].map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
+    $("t-wa").href = waLink(`Hola Muebles Ideal, me interesa la tela ${t.nombre}. ¿Me pueden mostrar los colores disponibles?`);
+    volverT = document.activeElement;
+    tm.hidden = false; document.body.classList.add("lock");
+    tm.querySelector(".sheet").scrollTop = 0; tm.querySelector(".close").focus({ preventScroll: true });
+  }
+  function cerrarT(){
+    if (tm.hidden) return; tm.hidden = true;
+    if (modal.hidden && panel.hidden && pEnv.hidden) document.body.classList.remove("lock");
+    if (volverT && volverT.focus) volverT.focus({ preventScroll: true });
+  }
+  tm.querySelectorAll("[data-tclose]").forEach(el => el.addEventListener("click", cerrarT));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarT(); });
+  $("t-elegir").addEventListener("click", () => {
+    telaElegida = actualT.nombre; cerrarT();
+    aviso(`Tela ${actualT.nombre} elegida. Ahora escoge tu modelo.`);
+    $("catalogo").scrollIntoView({ behavior: "smooth" });
+  });
+  pintar();
 })();
 
 /* Menú móvil */
@@ -1083,13 +1326,36 @@ document.getElementById("m-form").addEventListener("submit", async e => {
   if (!actual) return;
   const v = id => document.getElementById(id).value.trim();
   const est = document.getElementById("m-estado");
+  const falta = faltante();
+  if (falta) {
+    estado(est, "error", `Elige una opción en "${falta.label}" para continuar.`);
+    const g = $("m-pers").querySelector(`.grupo[data-q="${falta.id}"]`);
+    if (g) { g.scrollIntoView({ behavior: "smooth", block: "center" }); g.classList.add("aviso"); setTimeout(() => g.classList.remove("aviso"), 1600); }
+    return;
+  }
+  if (elec.entrega === "Delivery" && !v("m-dir")) { estado(est, "error", "Escribe la dirección de entrega para calcular el delivery."); $("m-dir").focus(); return; }
   if (!validar(document.getElementById("m-nom"), document.getElementById("m-email"), est)) return;
-  await procesar(document.getElementById("m-enviar"), est, {
+  const esCama = actual.cat === "camas";
+  const campos = {
     name: v("m-nom"), email: v("m-email"), "Teléfono": v("m-tel") || "No indicado", Ciudad: v("m-ciudad") || "No indicada",
-    Modelo: actual.nombre, [actual.cat === "sofas" ? "Configuración" : "Tamaño"]: talla || "Por definir", Color: color || "Por definir"
-  }, `Nueva cotización: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN", { col: "cotizaciones", data: {
+    Modelo: actual.nombre
+  };
+  if (actual.linea) campos["Línea"] = LINEAS[actual.linea].nombre;
+  campos[esCama ? "Tamaño" : "Configuración"] = talla || "Por definir";
+  campos.Color = color || "Por definir";
+  campos.Tela = elec.tela || "Aún no sé";
+  campos["Va para"] = elec.vivienda;
+  if (esCama) { campos["Fabricación de la base"] = piezas(); campos.Gavetas = elec.gavetas || "Sin gavetas"; }
+  campos.Soporte = elec.soporte + (elec.colorPatas ? ` (${elec.colorPatas.toLowerCase()})` : "");
+  campos.Entrega = elec.entrega + (elec.entrega === "Delivery" && ENVIO_GRATIS ? " (gratis por promoción)" : "");
+  if (elec.entrega === "Delivery") campos["Dirección"] = v("m-dir");
+  await procesar(document.getElementById("m-enviar"), est, campos,
+    `Nueva cotización: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN", { col: "cotizaciones", data: {
     nombre: v("m-nom"), email: v("m-email"), telefono: v("m-tel"), ciudad: v("m-ciudad"),
-    modelo: actual.nombre, tamano: talla || "Por definir", color: color || "Por definir", origen: "ficha"
+    modelo: actual.nombre, tamano: talla || "Por definir", color: (color || "Por definir") + " · Tela: " + (elec.tela || "Aún no sé"), origen: "ficha",
+    linea: actual.linea ? LINEAS[actual.linea].nombre : "Sofás", vivienda: elec.vivienda, piezas: piezas(),
+    gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte, colorPatas: elec.colorPatas || "",
+    entrega: elec.entrega, direccion: elec.entrega === "Delivery" ? v("m-dir") : ""
   } });
 });
 armar();
