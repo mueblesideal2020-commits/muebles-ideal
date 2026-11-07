@@ -989,22 +989,38 @@ try { if (window.emailjs) emailjs.init({ publicKey: EMAILJS.publicKey }); } catc
 
 const emailOk = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 const conLimite = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("tiempo")), ms))]);
+const escHtml = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const filasHtml = pares => pares.map(([k, v]) =>
+  `<tr><td style="padding:11px 12px 11px 0;border-bottom:1px solid #e6e1d6;color:#7a7368;font-size:13px;width:40%;vertical-align:top">${escHtml(k)}</td>` +
+  `<td style="padding:11px 0;border-bottom:1px solid #e6e1d6;color:#141414;font-size:14px;font-weight:bold;vertical-align:top">${escHtml(v)}</td></tr>`).join("");
 async function enviarCotizacion(campos, asunto, respuesta, registro){
-  const mensajeCliente = respuesta || `Hola ${campos.name}, gracias por escribir a Muebles Ideal. Recibimos tu solicitud${campos.Modelo ? " de cotización de la " + campos.Modelo : ""} y te responderemos muy pronto con el precio y el tiempo de entrega. Si lo prefieres, escríbenos al WhatsApp +58 414-944-2672. Muebles Ideal: soñado por otros, diseñado por nosotros.`;
-  const asuntoCliente = respuesta ? "¡Bienvenido al Club Muebles Ideal!" : "Recibimos tu solicitud - Muebles Ideal";
+  const esClub = !!respuesta;
+  const mensajeCliente = esClub
+    ? "Desde ahora serás de los primeros en conocer nuestras ofertas, los lanzamientos de nuevos modelos y las promociones especiales para clientes registrados."
+    : `Gracias por escribir a Muebles Ideal. Recibimos tu solicitud${campos.Modelo ? " de cotización de la " + campos.Modelo : ""} y muy pronto te enviaremos el precio y el tiempo de entrega. Este es el resumen de lo que nos pediste:`;
+  const asuntoCliente = esClub ? "¡Bienvenido al Club Muebles Ideal!" : "Recibimos tu solicitud - Muebles Ideal";
+  const titulo = esClub ? "¡Bienvenido al Club!" : "¡Recibimos tu solicitud!";
   const etiquetas = { name: "Nombre", email: "Correo" };
-  const detalle = Object.entries(campos).map(([k, v]) => `${etiquetas[k] || k}: ${v}`).join("  |  ");
+  const pares = Object.entries(campos).map(([k, v]) => [etiquetas[k] || k, v]);
+  const detalle = pares.map(([k, v]) => `${k}: ${v}`).join("  |  ");
+  const SITIO = "https://mueblesideal2020-commits.github.io/muebles-ideal/";
+  const prod = PRODUCTOS.find(p => p.nombre === campos.Modelo || p.nombre === campos["Producto de interés"]);
+  const foto = SITIO + "email-" + (prod ? prod.img.replace(/^img\//, "") : "hero-cama.jpg");
+  const modeloFoto = prod ? prod.nombre : "Muebles Ideal";
+  const paraCliente = esClub
+    ? [["Membresía", "Club Muebles Ideal"], ["Correo registrado", campos.email]]
+    : pares.filter(([k]) => !["Nombre", "Correo", "Teléfono"].includes(k));
 
   const guardar = (baseDatos && registro)
     ? conLimite(baseDatos.collection(registro.col).add({ ...registro.data, fecha: firebase.firestore.FieldValue.serverTimestamp() }), 15000)
     : Promise.reject(new Error("sin base de datos"));
   const avisar = window.emailjs
-    ? conLimite(emailjs.send(EMAILJS.service, EMAILJS.plantillaNegocio, { asunto, email: campos.email, detalle }), 15000)
+    ? conLimite(emailjs.send(EMAILJS.service, EMAILJS.plantillaNegocio, { asunto, email: campos.email, name: campos.name, detalle, detalle_html: filasHtml(pares), foto, modelo: modeloFoto }), 15000)
     : Promise.reject(new Error("sin emailjs"));
   const [r1, r2] = await Promise.allSettled([guardar, avisar]);
   if (r1.status === "rejected" && r2.status === "rejected") throw new Error("envio");
   if (window.emailjs) {
-    try { await conLimite(emailjs.send(EMAILJS.service, EMAILJS.plantillaCliente, { email: campos.email, asunto_cliente: asuntoCliente, mensaje_cliente: mensajeCliente }), 15000); } catch (e) {}
+    try { await conLimite(emailjs.send(EMAILJS.service, EMAILJS.plantillaCliente, { email: campos.email, name: campos.name, asunto_cliente: asuntoCliente, titulo, mensaje_cliente: mensajeCliente, resumen_html: filasHtml(paraCliente), foto, modelo: modeloFoto }), 15000); } catch (e) {}
   }
 }
 function estado(el, tipo, texto){ el.hidden = false; el.className = "estado " + tipo; el.textContent = texto; }
