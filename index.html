@@ -574,9 +574,9 @@ footer img { animation: flotar 6s ease-in-out infinite; }
           </div>
           <div class="info-row">
             <small>Correo</small>
-            <span class="big" id="correo" style="font-size: clamp(1.05rem, 2.2vw, 1.35rem); overflow-wrap: anywhere">muebles_ideal2020@gmail.com</span>
+            <span class="big" id="correo" style="font-size: clamp(1.05rem, 2.2vw, 1.35rem); overflow-wrap: anywhere">mueblesideal2020@gmail.com</span>
             <div class="inline">
-              <a class="link-btn" href="mailto:muebles_ideal2020@gmail.com">Escribir correo</a>
+              <a class="link-btn" href="mailto:mueblesideal2020@gmail.com">Escribir correo</a>
               <button class="link-btn" id="copy-mail" type="button">Copiar correo</button>
             </div>
           </div>
@@ -706,6 +706,9 @@ footer img { animation: flotar 6s ease-in-out infinite; }
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"></script>
 <script>
 /* ===== PRODUCTOS =====
    Para poner un precio, escribe el número en "precio" (ej. precio: 450).
@@ -926,7 +929,7 @@ leerHash();
 /* Copiar correo */
 document.getElementById("copy-mail").addEventListener("click", () => {
   const sel = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("correo")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); aviso("Correo seleccionado, cópialo"); };
-  try { navigator.clipboard.writeText("muebles_ideal2020@gmail.com").then(() => aviso("Correo copiado"), sel); } catch (e) { sel(); }
+  try { navigator.clipboard.writeText("mueblesideal2020@gmail.com").then(() => aviso("Correo copiado"), sel); } catch (e) { sel(); }
 });
 
 /* Video de Nosotros: sonido */
@@ -961,26 +964,48 @@ function armar(){
   send.href = waLink(partes.join(" "));
 }
 document.getElementById("form").addEventListener("input", armar);
-/* ===== ENVÍO DE COTIZACIONES POR CORREO =====
-   Usa FormSubmit (gratis): te llega cada solicitud a tu correo y el cliente
-   recibe una confirmación automática. Funciona cuando la página está publicada
-   en tu dominio; la primera solicitud te pedirá activar el servicio por correo. */
-const CORREO_NEGOCIO = "muebles_ideal2020@gmail.com";
+/* ===== ENVÍO DE COTIZACIONES Y REGISTROS =====
+   Firebase (Firestore) guarda cada solicitud y cada registro del Club.
+   EmailJS envía dos correos: el aviso para el negocio y la confirmación al cliente. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBJXjU2TUQvCa7xxe1bEa8WchLrn8LDsyM",
+  authDomain: "muebles-ideal-38af6.firebaseapp.com",
+  projectId: "muebles-ideal-38af6",
+  storageBucket: "muebles-ideal-38af6.firebasestorage.app",
+  messagingSenderId: "971429499996",
+  appId: "1:971429499996:web:ba6aabf7e61514e0e8c299"
+};
+const EMAILJS = {
+  publicKey: "7P1UoHb7WD8Qjylhl",
+  service: "service_2d0itgq",
+  plantillaNegocio: "template_fwc92cp",
+  plantillaCliente: "template_vgcgv7f"
+};
+let baseDatos = null;
+try {
+  if (window.firebase) { firebase.initializeApp(FIREBASE_CONFIG); baseDatos = firebase.firestore(); }
+} catch (e) { baseDatos = null; }
+try { if (window.emailjs) emailjs.init({ publicKey: EMAILJS.publicKey }); } catch (e) {}
+
 const emailOk = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
-async function enviarCotizacion(campos, asunto, respuesta){
-  const cuerpo = {
-    ...campos,
-    _subject: asunto,
-    _template: "table",
-    _captcha: "false",
-    _autoresponse: respuesta || `Hola ${campos.name}, gracias por escribir a Muebles Ideal. Recibimos tu solicitud${campos.Modelo ? " de cotización de la " + campos.Modelo : ""} y te responderemos muy pronto con el precio y el tiempo de entrega. Si lo prefieres, escríbenos al WhatsApp +58 414-944-2672. Muebles Ideal: soñado por otros, diseñado por nosotros.`
-  };
-  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 15000);
-  try {
-    const r = await fetch(`https://formsubmit.co/ajax/${CORREO_NEGOCIO}`, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(cuerpo), signal: ctrl.signal });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok || String(j.success) !== "true") throw new Error("envio");
-  } finally { clearTimeout(t); }
+const conLimite = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("tiempo")), ms))]);
+async function enviarCotizacion(campos, asunto, respuesta, registro){
+  const mensajeCliente = respuesta || `Hola ${campos.name}, gracias por escribir a Muebles Ideal. Recibimos tu solicitud${campos.Modelo ? " de cotización de la " + campos.Modelo : ""} y te responderemos muy pronto con el precio y el tiempo de entrega. Si lo prefieres, escríbenos al WhatsApp +58 414-944-2672. Muebles Ideal: soñado por otros, diseñado por nosotros.`;
+  const asuntoCliente = respuesta ? "¡Bienvenido al Club Muebles Ideal!" : "Recibimos tu solicitud - Muebles Ideal";
+  const etiquetas = { name: "Nombre", email: "Correo" };
+  const detalle = Object.entries(campos).map(([k, v]) => `${etiquetas[k] || k}: ${v}`).join("  |  ");
+
+  const guardar = (baseDatos && registro)
+    ? conLimite(baseDatos.collection(registro.col).add({ ...registro.data, fecha: firebase.firestore.FieldValue.serverTimestamp() }), 15000)
+    : Promise.reject(new Error("sin base de datos"));
+  const avisar = window.emailjs
+    ? conLimite(emailjs.send(EMAILJS.service, EMAILJS.plantillaNegocio, { asunto, email: campos.email, detalle }), 15000)
+    : Promise.reject(new Error("sin emailjs"));
+  const [r1, r2] = await Promise.allSettled([guardar, avisar]);
+  if (r1.status === "rejected" && r2.status === "rejected") throw new Error("envio");
+  if (window.emailjs) {
+    try { await conLimite(emailjs.send(EMAILJS.service, EMAILJS.plantillaCliente, { email: campos.email, asunto_cliente: asuntoCliente, mensaje_cliente: mensajeCliente }), 15000); } catch (e) {}
+  }
 }
 function estado(el, tipo, texto){ el.hidden = false; el.className = "estado " + tipo; el.textContent = texto; }
 function validar(nomEl, mailEl, estEl){
@@ -990,10 +1015,10 @@ function validar(nomEl, mailEl, estEl){
   if (!emailOk(m)) { estado(estEl, "error", "Revisa tu correo electrónico: lo necesitamos para enviarte la confirmación."); mailEl.focus(); return false; }
   return true;
 }
-async function procesar(btn, estEl, campos, asunto, textoBtn){
+async function procesar(btn, estEl, campos, asunto, textoBtn, registro){
   btn.disabled = true; btn.textContent = "Enviando…";
   try {
-    await enviarCotizacion(campos, asunto);
+    await enviarCotizacion(campos, asunto, null, registro);
     estado(estEl, "ok", `¡Listo, ${campos.name}! Recibimos tu solicitud y te enviamos una confirmación a ${campos.email}. Te responderemos muy pronto.`);
     return true;
   } catch (e) {
@@ -1010,7 +1035,10 @@ document.getElementById("form").addEventListener("submit", async e => {
   const ok = await procesar(document.getElementById("f-enviar"), est, {
     name: v("f-nombre"), email: v("f-email"), "Teléfono": v("f-tel") || "No indicado", Ciudad: v("f-ciudad") || "No indicada",
     "Tipo de proyecto": v("f-tipo"), "Producto de interés": v("f-producto"), Mensaje: v("f-msg") || "Sin mensaje"
-  }, `Nueva solicitud de asesoría: ${v("f-nombre")}`, "Enviar solicitud");
+  }, `Nueva solicitud de asesoría: ${v("f-nombre")}`, "Enviar solicitud", { col: "cotizaciones", data: {
+    nombre: v("f-nombre"), email: v("f-email"), telefono: v("f-tel"), ciudad: v("f-ciudad"),
+    tipo: v("f-tipo"), modelo: v("f-producto"), mensaje: v("f-msg"), origen: "asesoria"
+  } });
   if (ok) ["f-msg"].forEach(id => document.getElementById(id).value = "");
 });
 
@@ -1024,7 +1052,8 @@ document.getElementById("of-form").addEventListener("submit", async e => {
   try {
     await enviarCotizacion({ name: v("of-nom"), email: v("of-email"), "Acepta ofertas": "Sí" },
       `Nuevo registro para ofertas: ${v("of-nom")}`,
-      `Hola ${v("of-nom")}, ¡bienvenido al Club Muebles Ideal! Desde ahora serás de los primeros en conocer nuestras ofertas, nuevos modelos y promociones especiales. Mientras tanto, puedes ver nuestros trabajos en Instagram @camas_ideal2020 o escribirnos al WhatsApp +58 414-944-2672. Muebles Ideal: soñado por otros, diseñado por nosotros.`);
+      `Hola ${v("of-nom")}, ¡bienvenido al Club Muebles Ideal! Desde ahora serás de los primeros en conocer nuestras ofertas, nuevos modelos y promociones especiales. Mientras tanto, puedes ver nuestros trabajos en Instagram @camas_ideal2020 o escribirnos al WhatsApp +58 414-944-2672. Muebles Ideal: soñado por otros, diseñado por nosotros.`,
+      { col: "club", data: { nombre: v("of-nom"), email: v("of-email"), acepta: true } });
     estado(est, "ok", `¡Bienvenido, ${v("of-nom")}! Ya estás registrado. Te enviamos un correo de bienvenida a ${v("of-email")}.`);
     ["of-nom", "of-email"].forEach(id => document.getElementById(id).value = "");
     document.getElementById("of-ok").checked = false;
@@ -1042,7 +1071,10 @@ document.getElementById("m-form").addEventListener("submit", async e => {
   await procesar(document.getElementById("m-enviar"), est, {
     name: v("m-nom"), email: v("m-email"), "Teléfono": v("m-tel") || "No indicado", Ciudad: v("m-ciudad") || "No indicada",
     Modelo: actual.nombre, [actual.cat === "sofas" ? "Configuración" : "Tamaño"]: talla || "Por definir", Color: color || "Por definir"
-  }, `Nueva cotización: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN");
+  }, `Nueva cotización: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN", { col: "cotizaciones", data: {
+    nombre: v("m-nom"), email: v("m-email"), telefono: v("m-tel"), ciudad: v("m-ciudad"),
+    modelo: actual.nombre, tamano: talla || "Por definir", color: color || "Por definir", origen: "ficha"
+  } });
 });
 armar();
 
