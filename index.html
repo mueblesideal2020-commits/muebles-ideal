@@ -311,7 +311,13 @@ input[aria-invalid="true"] { border-color: #c0392b; }
 .tela-hn { font-family: var(--font-display); font-weight: 500; text-transform: uppercase; letter-spacing: .04em; font-size: .95rem; }
 .tela-ht { display: flex; gap: 6px; flex-wrap: wrap; }
 .tela-tag { font-size: .74rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
-.swatches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; }
+.swatches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 12px 10px; }
+.sw-item { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; cursor: pointer; text-align: center; min-width: 0; }
+.sw-item .sw { width: 100%; pointer-events: none; }
+.sw-item:hover .sw { transform: scale(1.06); }
+.sw-item[aria-pressed="true"] .sw { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px #b8913f; }
+.sw-item[aria-pressed="true"] .sw-name { font-weight: 700; color: var(--accent); }
+.sw-name { font-size: .78rem; line-height: 1.2; overflow-wrap: anywhere; }
 .sw { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 10px; border: 0; padding: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); transition: transform .18s ease, box-shadow .18s ease; }
 .sw:hover { transform: scale(1.06); }
 .sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px #b8913f; }
@@ -320,6 +326,16 @@ input[aria-invalid="true"] { border-color: #c0392b; }
 
 .admin-link { color: inherit; opacity: .55; text-decoration: none; }
 .admin-link:hover { opacity: 1; text-decoration: underline; }
+
+/* Ubicación en el mapa */
+.mapa-box { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px dashed var(--line); }
+.mapa-t { font-size: .88rem; font-weight: 600; } .mapa-t small { font-weight: 400; color: var(--muted); }
+.mapa-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-mapa { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px; border: 1.5px solid #b8913f; background: var(--accent-soft); color: var(--ink); font: 500 .84rem var(--font-display); text-decoration: none; cursor: pointer; }
+.btn-mapa svg { width: 17px; height: 17px; color: #9a7230; flex: none; }
+.btn-mapa:hover { background: #d4ad62; color: #141414; }
+.mapa-ayuda { font-size: .8rem; color: var(--muted); line-height: 1.4; }
+.mapa-ayuda.ok { color: #2e7d32; font-weight: 600; }
 
 /* Iconos de redes sociales */
 .redes { display: flex; gap: 12px; margin-top: 6px; }
@@ -755,7 +771,17 @@ footer img { animation: flotar 6s ease-in-out infinite; }
           <div class="field"><label for="m-ciudad">Ciudad</label><input id="m-ciudad" placeholder="Ej. Caracas"></div>
         </div>
         <div class="field" id="m-medida-box" hidden><label for="m-medida">Medidas especiales que necesitas</label><input id="m-medida" placeholder="Ej. 300 × 180 cm, o el espacio disponible en tu sala"></div>
-        <div class="field" id="m-dir-box" hidden><label for="m-dir">Dirección de entrega</label><input id="m-dir" autocomplete="street-address" placeholder="Urbanización, calle, edificio o casa, punto de referencia"></div>
+        <div class="field" id="m-dir-box" hidden><label for="m-dir">Dirección de entrega</label><input id="m-dir" autocomplete="street-address" placeholder="Urbanización, calle, edificio o casa, punto de referencia">
+          <div class="mapa-box">
+            <span class="mapa-t">Ubicación en el mapa <small>(nos ayuda a llegar sin perdernos)</small></span>
+            <div class="mapa-btns">
+              <a class="btn-mapa" id="m-buscar-mapa" href="https://www.google.com/maps" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>Buscar en Google Maps</a>
+              <button type="button" class="btn-mapa" id="m-mi-ubic"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 3h-2.07A7 7 0 0 0 13 5.07V3h-2v2.07A7 7 0 0 0 5.07 11H3v2h2.07A7 7 0 0 0 11 18.93V21h2v-2.07A7 7 0 0 0 18.93 13H21v-2Zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>Usar mi ubicación actual</button>
+            </div>
+            <input id="m-mapa" inputmode="url" placeholder="Pega aquí el enlace de tu ubicación (opcional)">
+            <small class="mapa-ayuda" id="m-mapa-estado">Busca tu dirección en Google Maps, toca <b>Compartir → Copiar enlace</b> y pégalo aquí. O usa tu ubicación actual si estás en el lugar de entrega.</small>
+          </div>
+        </div>
         <button class="btn btn-wa" type="submit" id="m-enviar">SOLICITAR COTIZACIÓN</button>
         <p class="estado" id="m-estado" role="status" hidden></p>
         <p class="note">Todo lo que elijas se incluye en tu solicitud y te llega una confirmación por correo. ¿Prefieres el chat? <a id="m-wa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
@@ -799,22 +825,22 @@ const LINEAS = {
    Código de color: los 2 primeros dígitos son la colección y los 2 últimos el color.
    Cada colección usa la imagen colores-ID.jpg (una fila de muestras de 120×120). */
 const TELAS = [
-  { id: "marmol",     nombre: "Mármol",          tipo: "Aterciopelada", desc: "Terciopelo con veteado tipo mármol, en tonos intensos y neutros.", tags: [], colores: [["0101", "#447a84"], ["0102", "#033673"], ["0103", "#343e2e"], ["0104", "#c8bebf"], ["0105", "#948c8d"], ["0106", "#bcb4b5"], ["0107", "#e9eeec"], ["0108", "#afa18b"], ["0109", "#947764"], ["0110", "#a05b5e"], ["0111", "#706f68"]] },
-  { id: "armonica",   nombre: "Armónica Plus",   tipo: "Aterciopelada", desc: "Terciopelo liso de colores vivos y neutros. Una de las más versátiles.", tags: ["Pet friendly"], colores: [["0201", "#016877"], ["0202", "#013e5e"], ["0203", "#092c61"], ["0204", "#405f5d"], ["0205", "#606b64"], ["0206", "#8cb9c6"], ["0207", "#281f17"], ["0208", "#da3134"], ["0209", "#b53996"], ["0210", "#e7b1c1"], ["0211", "#d0bfd1"], ["0212", "#7f6750"], ["0213", "#dbe8d7"], ["0214", "#e1f2e9"]] },
-  { id: "mariscal",   nombre: "Mariscal",        tipo: "Aterciopelada", desc: "Terciopelo con textura jaspeada, en tonos claros y profundos.", tags: ["Antifluido", "Pet friendly"], colores: [["0301", "#fafdfd"], ["0302", "#f8eeeb"], ["0303", "#d7cccc"], ["0304", "#b8aeba"], ["0305", "#bc819e"], ["0306", "#0c5f84"], ["0307", "#1f3f40"], ["0308", "#1e4378"], ["0309", "#9598ab"], ["0310", "#6f6b70"], ["0311", "#0a0c0d"]] },
-  { id: "yorkie",     nombre: "Yorkie",          tipo: "Aterciopelada", desc: "Efecto envejecido tipo cuero, muy suave al tacto.", tags: ["Antifluido", "Pet friendly"], colores: [["0401", "#132419"], ["0402", "#081430"], ["0403", "#b2b9c9"], ["0404", "#5c595f"], ["0405", "#3a2e34"], ["0406", "#e5e2db"], ["0407", "#a98a71"], ["0408", "#8a8270"]] },
-  { id: "carrasco",   nombre: "Carrasco",        tipo: "Aterciopelada", desc: "Veteado tipo mármol con vetas claras que resaltan.", tags: ["Antifluido", "Pet friendly"], colores: [["0501", "#dce2e3"], ["0502", "#c1c2c2"], ["0503", "#bdb9b1"], ["0504", "#c5b7c2"], ["0505", "#193d43"], ["0506", "#092868"], ["0507", "#9d9fac"], ["0508", "#80818e"], ["0509", "#0e070f"], ["0510", "#790a26"]] },
-  { id: "estacion",   nombre: "Estación",        tipo: "Aterciopelada", desc: "Textura arrugada con brillo suave, en tonos pastel.", tags: ["Antifluido", "Pet friendly"], colores: [["0601", "#eeebe8"], ["0602", "#ae9e92"], ["0603", "#a8968f"], ["0604", "#91a9b6"], ["0605", "#244566"], ["0606", "#081940"], ["0607", "#9d7b94"], ["0608", "#8b7591"], ["0609", "#8f94a7"], ["0610", "#494252"]] },
-  { id: "mirandela",  nombre: "Mirandela",       tipo: "Aterciopelada", desc: "Pelo con movimiento y acabado marmolado.", tags: ["Antifluido", "Pet friendly"], colores: [["0701", "#e5e1db"], ["0702", "#d9c9c3"], ["0703", "#b8aba5"], ["0704", "#c4a1b3"], ["0705", "#a4c7d4"], ["0706", "#b5b6bc"], ["0707", "#8e9aa2"], ["0708", "#41444a"]] },
-  { id: "acuarela",   nombre: "Acuarela",        tipo: "Aterciopelada", desc: "Textura marmolada en tonos pastel, azules y grises.", tags: ["Antifluido", "Pet friendly"], colores: [["0801", "#efe6d0"], ["0802", "#e7dec5"], ["0803", "#c8b6a5"], ["0804", "#d0e7e3"], ["0805", "#7498b0"], ["0806", "#3a5b84"], ["0807", "#e7c2c4"], ["0808", "#c7acbb"], ["0809", "#d9e3ea"], ["0810", "#abbbcd"], ["0811", "#7b889b"]] },
-  { id: "gamuza",     nombre: "Gamuza",          tipo: "Aterciopelada", desc: "Acabado tipo gamuza en tonos tierra y grises.", tags: [], colores: [["0901", "#dadad5"], ["0902", "#ebe9de"], ["0903", "#666460"], ["0904", "#c3d2e3"], ["0905", "#8b9caa"], ["0906", "#334a56"]] },
-  { id: "terciopelo", nombre: "Terciopelo Liso", tipo: "Aterciopelada", desc: "Color sólido y uniforme, desde neutros hasta colores vivos.", tags: [], colores: [["1001", "#3e434b"], ["1002", "#f0f7f6"], ["1003", "#bbc1c0"], ["1004", "#426bb8"], ["1005", "#e93f49"], ["1006", "#fa4f7f"], ["1007", "#fcbbcb"], ["1008", "#dcc8b2"], ["1009", "#9a806c"]] },
-  { id: "otawa",      nombre: "Otawa",           tipo: "Tipo lino",     desc: "Tejido tipo lino de trama gruesa, muy resistente al uso diario.", tags: [], colores: [["1101", "#e8decf"], ["1102", "#b9aca3"], ["1103", "#b0a297"], ["1104", "#433630"], ["1105", "#918486"], ["1106", "#3e5a78"], ["1107", "#1e3f5d"], ["1108", "#0a385f"]] },
-  { id: "cortijo",    nombre: "Cortijo",         tipo: "Tipo lino",     desc: "Tejido texturizado con efecto jaspeado.", tags: ["Antifluido"], colores: [["1201", "#cecac9"], ["1202", "#bab5b3"], ["1203", "#bebab8"], ["1204", "#9d9b9a"], ["1205", "#99a5ac"], ["1206", "#527e98"], ["1207", "#7d9ca2"], ["1208", "#a59aae"], ["1209", "#afbfcf"], ["1210", "#7b8795"], ["1211", "#99a5b8"]] },
-  { id: "zaga",       nombre: "Zaga",            tipo: "Tipo lino",     desc: "Trama tipo lino en tonos neutros y vivos.", tags: [], colores: [["1301", "#f4f3f1"], ["1302", "#e8e6e1"], ["1303", "#e8dbcb"], ["1304", "#cac1be"], ["1305", "#816c6c"], ["1306", "#596d80"], ["1307", "#b6c4cb"], ["1308", "#788691"], ["1309", "#c2c3bd"], ["1310", "#234e70"], ["1311", "#233b6b"], ["1312", "#cabfd7"], ["1313", "#ddbcc8"], ["1314", "#cd4371"]] },
-  { id: "lino",       nombre: "Lino Natural",    tipo: "Tipo lino",     desc: "Tejido tipo lino clásico en tonos naturales y grises.", tags: [], colores: [["1401", "#d4cfbe"], ["1402", "#a29b92"], ["1403", "#988679"], ["1404", "#bdc1ca"], ["1405", "#a4a8ae"], ["1406", "#666d76"], ["1407", "#222526"]] },
-  { id: "damasco",    nombre: "Lino Damasco",    tipo: "Tipo lino",     desc: "Lino de color profundo: chocolate, negro, rojo, gris y plomo.", tags: [], colores: [["1501", "#4c3933"], ["1502", "#0e1317"], ["1503", "#b10a1a"], ["1504", "#717b8a"], ["1505", "#4b5359"]] },
-  { id: "oasis",      nombre: "Oasis",           tipo: "Bouclé",        desc: "Tela de pelo corto muy suave. Ideal para camas tipo nube.", tags: ["Antifluido"], colores: [["1601", "#f4f2f0"], ["1602", "#cdc9c9"], ["1603", "#d3ccc8"], ["1604", "#aba39f"], ["1605", "#657667"], ["1606", "#618094"], ["1607", "#26699e"], ["1608", "#a0829e"], ["1609", "#848897"], ["1610", "#555868"]] }
+  { id: "marmol",     nombre: "Mármol",          tipo: "Aterciopelada", desc: "Terciopelo con veteado tipo mármol, en tonos intensos y neutros.", tags: [], colores: [["0101", "#447a84", "Turquesa"], ["0102", "#033673", "Azul Rey"], ["0103", "#343e2e", "Verde Musgo"], ["0104", "#c8bebf", "Rosa Palo"], ["0105", "#948c8d", "Gris Topo"], ["0106", "#bcb4b5", "Gris Rosado"], ["0107", "#e9eeec", "Blanco Hielo"], ["0108", "#afa18b", "Beige Arena"], ["0109", "#947764", "Café Moca"], ["0110", "#a05b5e", "Rosa Viejo"], ["0111", "#706f68", "Gris Oliva"]] },
+  { id: "armonica",   nombre: "Armónica Plus",   tipo: "Aterciopelada", desc: "Terciopelo liso de colores vivos y neutros. Una de las más versátiles.", tags: ["Pet friendly"], colores: [["0201", "#016877", "Turquesa"], ["0202", "#013e5e", "Azul Petróleo"], ["0203", "#092c61", "Azul Marino"], ["0204", "#405f5d", "Verde Pino"], ["0205", "#606b64", "Gris Oliva"], ["0206", "#8cb9c6", "Azul Cielo"], ["0207", "#281f17", "Negro Café"], ["0208", "#da3134", "Rojo"], ["0209", "#b53996", "Fucsia"], ["0210", "#e7b1c1", "Rosa"], ["0211", "#d0bfd1", "Lila"], ["0212", "#7f6750", "Café"], ["0213", "#dbe8d7", "Crema"], ["0214", "#e1f2e9", "Marfil"]] },
+  { id: "mariscal",   nombre: "Mariscal",        tipo: "Aterciopelada", desc: "Terciopelo con textura jaspeada, en tonos claros y profundos.", tags: ["Antifluido", "Pet friendly"], colores: [["0301", "#fafdfd", "Blanco"], ["0302", "#f8eeeb", "Blanco Perla"], ["0303", "#d7cccc", "Gris Perla"], ["0304", "#b8aeba", "Lila Grisáceo"], ["0305", "#bc819e", "Rosa Malva"], ["0306", "#0c5f84", "Azul Turquesa"], ["0307", "#1f3f40", "Verde Botella"], ["0308", "#1e4378", "Azul Rey"], ["0309", "#9598ab", "Gris Azulado"], ["0310", "#6f6b70", "Gris Plomo"], ["0311", "#0a0c0d", "Negro"]] },
+  { id: "yorkie",     nombre: "Yorkie",          tipo: "Aterciopelada", desc: "Efecto envejecido tipo cuero, muy suave al tacto.", tags: ["Antifluido", "Pet friendly"], colores: [["0401", "#132419", "Verde Botella"], ["0402", "#081430", "Azul Noche"], ["0403", "#b2b9c9", "Gris Plata"], ["0404", "#5c595f", "Gris Grafito"], ["0405", "#3a2e34", "Carbón"], ["0406", "#e5e2db", "Hueso"], ["0407", "#a98a71", "Camel"], ["0408", "#8a8270", "Gris Oliva"]] },
+  { id: "carrasco",   nombre: "Carrasco",        tipo: "Aterciopelada", desc: "Veteado tipo mármol con vetas claras que resaltan.", tags: ["Antifluido", "Pet friendly"], colores: [["0501", "#dce2e3", "Blanco Mármol"], ["0502", "#c1c2c2", "Gris Perla"], ["0503", "#bdb9b1", "Arena"], ["0504", "#c5b7c2", "Rosa Palo"], ["0505", "#193d43", "Verde Esmeralda"], ["0506", "#092868", "Azul Rey"], ["0507", "#9d9fac", "Gris Claro"], ["0508", "#80818e", "Gris Medio"], ["0509", "#0e070f", "Negro"], ["0510", "#790a26", "Vino Tinto"]] },
+  { id: "estacion",   nombre: "Estación",        tipo: "Aterciopelada", desc: "Textura arrugada con brillo suave, en tonos pastel.", tags: ["Antifluido", "Pet friendly"], colores: [["0601", "#eeebe8", "Marfil"], ["0602", "#ae9e92", "Beige Tostado"], ["0603", "#a8968f", "Taupe"], ["0604", "#91a9b6", "Azul Cielo"], ["0605", "#244566", "Azul Acero"], ["0606", "#081940", "Azul Marino"], ["0607", "#9d7b94", "Malva"], ["0608", "#8b7591", "Lila"], ["0609", "#8f94a7", "Gris Perla"], ["0610", "#494252", "Gris Humo"]] },
+  { id: "mirandela",  nombre: "Mirandela",       tipo: "Aterciopelada", desc: "Pelo con movimiento y acabado marmolado.", tags: ["Antifluido", "Pet friendly"], colores: [["0701", "#e5e1db", "Marfil"], ["0702", "#d9c9c3", "Rosa Arena"], ["0703", "#b8aba5", "Topo"], ["0704", "#c4a1b3", "Rosa Malva"], ["0705", "#a4c7d4", "Celeste"], ["0706", "#b5b6bc", "Gris Perla"], ["0707", "#8e9aa2", "Gris Acero"], ["0708", "#41444a", "Gris Carbón"]] },
+  { id: "acuarela",   nombre: "Acuarela",        tipo: "Aterciopelada", desc: "Textura marmolada en tonos pastel, azules y grises.", tags: ["Antifluido", "Pet friendly"], colores: [["0801", "#efe6d0", "Crema"], ["0802", "#e7dec5", "Vainilla"], ["0803", "#c8b6a5", "Beige"], ["0804", "#d0e7e3", "Verde Agua"], ["0805", "#7498b0", "Azul Cielo"], ["0806", "#3a5b84", "Azul Mezclilla"], ["0807", "#e7c2c4", "Rosa Pastel"], ["0808", "#c7acbb", "Lila"], ["0809", "#d9e3ea", "Blanco Hielo"], ["0810", "#abbbcd", "Azul Grisáceo"], ["0811", "#7b889b", "Gris Acero"]] },
+  { id: "gamuza",     nombre: "Gamuza",          tipo: "Aterciopelada", desc: "Acabado tipo gamuza en tonos tierra y grises.", tags: [], colores: [["0901", "#dadad5", "Gris Perla"], ["0902", "#ebe9de", "Crema"], ["0903", "#666460", "Gris Grafito"], ["0904", "#c3d2e3", "Celeste"], ["0905", "#8b9caa", "Gris Azulado"], ["0906", "#334a56", "Azul Petróleo"]] },
+  { id: "terciopelo", nombre: "Terciopelo Liso", tipo: "Aterciopelada", desc: "Color sólido y uniforme, desde neutros hasta colores vivos.", tags: [], colores: [["1001", "#3e434b", "Gris Carbón"], ["1002", "#f0f7f6", "Blanco"], ["1003", "#bbc1c0", "Gris Perla"], ["1004", "#426bb8", "Azul Rey"], ["1005", "#e93f49", "Rojo"], ["1006", "#fa4f7f", "Fucsia"], ["1007", "#fcbbcb", "Rosa Bebé"], ["1008", "#dcc8b2", "Beige"], ["1009", "#9a806c", "Café Moca"]] },
+  { id: "otawa",      nombre: "Otawa",           tipo: "Tipo lino",     desc: "Tejido tipo lino de trama gruesa, muy resistente al uso diario.", tags: [], colores: [["1101", "#e8decf", "Crema"], ["1102", "#b9aca3", "Lino"], ["1103", "#b0a297", "Topo"], ["1104", "#433630", "Chocolate"], ["1105", "#918486", "Gris Ceniza"], ["1106", "#3e5a78", "Azul Mezclilla"], ["1107", "#1e3f5d", "Azul Petróleo"], ["1108", "#0a385f", "Azul Marino"]] },
+  { id: "cortijo",    nombre: "Cortijo",         tipo: "Tipo lino",     desc: "Tejido texturizado con efecto jaspeado.", tags: ["Antifluido"], colores: [["1201", "#cecac9", "Perla"], ["1202", "#bab5b3", "Arena"], ["1203", "#bebab8", "Lino"], ["1204", "#9d9b9a", "Gris Topo"], ["1205", "#99a5ac", "Gris Azulado"], ["1206", "#527e98", "Azul Petróleo"], ["1207", "#7d9ca2", "Verde Agua"], ["1208", "#a59aae", "Lila"], ["1209", "#afbfcf", "Celeste"], ["1210", "#7b8795", "Gris Acero"], ["1211", "#99a5b8", "Azul Grisáceo"]] },
+  { id: "zaga",       nombre: "Zaga",            tipo: "Tipo lino",     desc: "Trama tipo lino en tonos neutros y vivos.", tags: [], colores: [["1301", "#f4f3f1", "Blanco"], ["1302", "#e8e6e1", "Perla"], ["1303", "#e8dbcb", "Crema"], ["1304", "#cac1be", "Arena"], ["1305", "#816c6c", "Café Moca"], ["1306", "#596d80", "Azul Mezclilla"], ["1307", "#b6c4cb", "Gris Celeste"], ["1308", "#788691", "Gris Acero"], ["1309", "#c2c3bd", "Gris Claro"], ["1310", "#234e70", "Azul Petróleo"], ["1311", "#233b6b", "Azul Rey"], ["1312", "#cabfd7", "Lila"], ["1313", "#ddbcc8", "Rosa Palo"], ["1314", "#cd4371", "Fucsia"]] },
+  { id: "lino",       nombre: "Lino Natural",    tipo: "Tipo lino",     desc: "Tejido tipo lino clásico en tonos naturales y grises.", tags: [], colores: [["1401", "#d4cfbe", "Crema"], ["1402", "#a29b92", "Topo"], ["1403", "#988679", "Café"], ["1404", "#bdc1ca", "Gris Perla"], ["1405", "#a4a8ae", "Gris Medio"], ["1406", "#666d76", "Gris Grafito"], ["1407", "#222526", "Negro"]] },
+  { id: "damasco",    nombre: "Lino Damasco",    tipo: "Tipo lino",     desc: "Lino de color profundo: chocolate, negro, rojo, gris y plomo.", tags: [], colores: [["1501", "#4c3933", "Chocolate"], ["1502", "#0e1317", "Negro"], ["1503", "#b10a1a", "Rojo"], ["1504", "#717b8a", "Gris"], ["1505", "#4b5359", "Plomo"]] },
+  { id: "oasis",      nombre: "Oasis",           tipo: "Bouclé",        desc: "Tela de pelo corto muy suave. Ideal para camas tipo nube.", tags: ["Antifluido"], colores: [["1601", "#f4f2f0", "Blanco Nieve"], ["1602", "#cdc9c9", "Gris Perla"], ["1603", "#d3ccc8", "Arena"], ["1604", "#aba39f", "Topo"], ["1605", "#657667", "Verde Oliva"], ["1606", "#618094", "Azul Grisáceo"], ["1607", "#26699e", "Azul Francia"], ["1608", "#a0829e", "Malva"], ["1609", "#848897", "Gris Lavanda"], ["1610", "#555868", "Gris Carbón"]] }
 ];
 
 /* Pon true cuando haya promoción de despacho gratis. */
@@ -822,7 +848,7 @@ let ENVIO_GRATIS = false;
 /* Carpeta de imágenes (en GitHub queda vacía) y colores como objetos { codigo, hex, activo, sp | img } */
 const IMG_BASE = "";
 function normalizarTelas(){
-  TELAS.forEach(t => { const n = t.colores.length; t.colores = t.colores.map((c, i) => Array.isArray(c) ? { codigo: c[0], hex: c[1], activo: true, sp: { f: `colores-${t.id}.jpg`, i, n } } : c); });
+  TELAS.forEach(t => { const n = t.colores.length; t.colores = t.colores.map((c, i) => Array.isArray(c) ? { codigo: c[0], hex: c[1], nombre: c[2] || "", activo: true, sp: { f: `colores-${t.id}.jpg`, i, n } } : c); });
 }
 normalizarTelas();
 const coloresActivos = t => t.colores.filter(c => c.activo !== false);
@@ -1035,7 +1061,7 @@ function crearSelector(k, titulo, textoBoton, asesor){
   function pintarBtn(){
     const n = elec[k], c = elec[k + "Codigo"];
     if (n && c) { const t = TELAS.find(x => x.nombre === n), i = coloresActivos(t).findIndex(x => x.codigo === c);
-      btn.innerHTML = `<span class="sw-mini" style='${swStyle(t, i)}'></span><span class="tela-sel"><b>${t.nombre}</b><small>Color código ${c}</small></span><span class="tela-cambiar">Cambiar</span>`; }
+      btn.innerHTML = `<span class="sw-mini" style='${swStyle(t, i)}'></span><span class="tela-sel"><b>${t.nombre}</b><small>Color: ${escHtml(elec[k + "Nombre"] || c)}</small></span><span class="tela-cambiar">Cambiar</span>`; }
     else if (n) btn.innerHTML = `<span class="tela-sel"><b>${n}</b><small>Te ayudamos a elegir la tela y el color</small></span><span class="tela-cambiar">Cambiar</span>`;
     else btn.innerHTML = `<span class="tela-sel"><b>${textoBoton}</b><small>${TELAS.length} colecciones · ${TELAS.reduce((a, t) => a + coloresActivos(t).length, 0)} colores</small></span><span class="tela-cambiar">▾</span>`;
     btn.classList.toggle("lista", !!n);
@@ -1045,11 +1071,11 @@ function crearSelector(k, titulo, textoBoton, asesor){
     q(".tela-cols").innerHTML = TELAS.map(x => `<button type="button" role="tab" class="tela-col" data-id="${x.id}" aria-selected="${x.id === vista}"><span class="sw-strip" style='${tiraStyle(x)}'></span>${x.nombre}</button>`).join("");
     q(".tela-hn").textContent = `${t.nombre} · ${t.tipo}`;
     q(".tela-ht").innerHTML = t.tags.map(x => `<span class="tela-tag">${x}</span>`).join("");
-    q(".swatches-grid").innerHTML = coloresActivos(t).map((c, i) => `<button type="button" class="sw" aria-pressed="${elec[k] === t.nombre && elec[k + "Codigo"] === c.codigo}" aria-label="${t.nombre}, color código ${c.codigo}" data-i="${i}" style='${swStyle(t, i)}'><span class="sw-code">${c.codigo}</span></button>`).join("");
+    q(".swatches-grid").innerHTML = coloresActivos(t).map((c, i) => `<button type="button" class="sw-item" aria-pressed="${elec[k] === t.nombre && elec[k + "Codigo"] === c.codigo}" aria-label="${t.nombre}, color ${escHtml(c.nombre || c.codigo)}" data-i="${i}"><span class="sw" style='${swStyle(t, i)}'></span><span class="sw-name">${escHtml(c.nombre || "Color " + c.codigo)}</span></button>`).join("");
     box.querySelectorAll(".tela-col").forEach(b => b.addEventListener("click", () => { vista = b.dataset.id; pintarMenu(); }));
-    box.querySelectorAll(".sw").forEach(b => b.addEventListener("click", () => {
+    box.querySelectorAll(".sw-item").forEach(b => b.addEventListener("click", () => {
       const i = +b.dataset.i, c = coloresActivos(t)[i];
-      elec[k] = t.nombre; elec[k + "Codigo"] = c.codigo; elec[k + "Hex"] = c.hex; elec[k + "Id"] = t.id; elec[k + "Idx"] = i; elec[k + "Sp"] = c.sp || null;
+      elec[k] = t.nombre; elec[k + "Codigo"] = c.codigo; elec[k + "Hex"] = c.hex; elec[k + "Id"] = t.id; elec[k + "Idx"] = i; elec[k + "Sp"] = c.sp || null; elec[k + "Nombre"] = c.nombre || "Color " + c.codigo;
       abrirMenu(false); pintarBtn(); mensaje(); btn.focus({ preventScroll: true });
     }));
   }
@@ -1059,7 +1085,7 @@ function crearSelector(k, titulo, textoBoton, asesor){
   }
   btn.addEventListener("click", () => abrirMenu(menu.hidden));
   const as = q(".link-asesor");
-  if (as) as.addEventListener("click", () => { ["Codigo", "Hex", "Id", "Idx", "Sp"].forEach(x => delete elec[k + x]); elec[k] = "Por asesorar"; abrirMenu(false); pintarBtn(); mensaje(); });
+  if (as) as.addEventListener("click", () => { ["Codigo", "Hex", "Id", "Idx", "Sp", "Nombre"].forEach(x => delete elec[k + x]); elec[k] = "Por asesorar"; abrirMenu(false); pintarBtn(); mensaje(); });
   return { box, reset(){ vista = TELAS[0].id; abrirMenu(false); pintarBtn(); } };
 }
 const pickTela = crearSelector("tela", "Tela y color del mueble", "ELEGIR TELA Y COLOR", "Prefiero que me asesoren con la tela");
@@ -1084,8 +1110,8 @@ function mensaje(){
   if (elec.vivienda) t += ` Va para: ${elec.vivienda}.`;
   if (elec.gavetas) t += ` ${elec.gavetas}.`;
   if (elec.soporte) t += ` ${elec.soporte}${elec.colorPatas ? " " + elec.colorPatas.toLowerCase() + "s" : ""}.`;
-  if (elec.tela) t += ` Tela: ${elec.tela}${elec.telaCodigo ? ", color código " + elec.telaCodigo : ""}.`;
-  if (elec.cojin) t += ` Cojines: ${elec.cojin}${elec.cojinCodigo ? ", color código " + elec.cojinCodigo : ""}.`;
+  if (elec.tela) t += ` Tela: ${elec.tela}${elec.telaCodigo ? `, color ${elec.telaNombre} (ref. ${elec.telaCodigo})` : ""}.`;
+  if (elec.cojin) t += ` Cojines: ${elec.cojin}${elec.cojinCodigo ? `, color ${elec.cojinNombre} (ref. ${elec.cojinCodigo})` : ""}.`;
   if (elec.entrega) t += ` Entrega: ${elec.entrega}.`;
   $("m-wa").href = waLink(t + " ¿Me pueden dar precio y tiempo de entrega?");
 }
@@ -1251,12 +1277,13 @@ const emailOk = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 const conLimite = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("tiempo")), ms))]);
 const escHtml = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const valorHtml = (k, v) => {
-  const m = /^(\d{4})\|(#[0-9a-f]{6})$/i.exec(String(v));
+  const m = /^(.*)\|(\d{4})\|(#[0-9a-f]{6})$/i.exec(String(v));
+  if (/^MAPA\|/.test(String(v))) return `<a href="${escHtml(String(v).slice(5))}" target="_blank" style="color:#9a7230;font-weight:bold">Ver ubicación en Google Maps</a>`;
   if (/^ORDEN\|/.test(String(v))) return `<a href="${String(v).slice(6)}" target="_blank" style="display:inline-block;padding:13px 22px;background:#141414;color:#ffffff;border-radius:999px;font-weight:bold;font-size:13px;letter-spacing:1px;text-decoration:none">ABRIR ORDEN DE FABRICACIÓN</a><br><span style="font-size:11px;color:#7a7368;font-weight:normal">Ábrela e imprímela o guárdala en PDF.</span>`;
-  if (m) return `<span style="display:inline-block;width:22px;height:22px;border-radius:5px;background:${m[2]};border:1px solid #cfc8bb;vertical-align:middle;margin-right:10px"></span><span style="font-size:18px;letter-spacing:1px;vertical-align:middle">${m[1]}</span>`;
+  if (m) return `<span style="display:inline-block;width:22px;height:22px;border-radius:5px;background:${m[3]};border:1px solid #cfc8bb;vertical-align:middle;margin-right:10px"></span><span style="font-size:16px;vertical-align:middle">${escHtml(m[1])}</span> <span style="font-size:11px;color:#7a7368;font-weight:normal;vertical-align:middle">ref. ${m[2]}</span>`;
   return escHtml(v);
 };
-const valorTexto = v => String(v).replace(/^(\d{4})\|#[0-9a-f]{6}$/i, "$1").replace(/^ORDEN\|/, "");
+const valorTexto = v => String(v).replace(/^(.*)\|(\d{4})\|#[0-9a-f]{6}$/i, "$1 (ref. $2)").replace(/^(ORDEN|MAPA)\|/, "");
 const filasHtml = pares => pares.map(([k, v]) =>
   `<tr><td style="padding:11px 12px 11px 0;border-bottom:1px solid #e6e1d6;color:#7a7368;font-size:13px;width:40%;vertical-align:top">${escHtml(k)}</td>` +
   `<td style="padding:11px 0;border-bottom:1px solid #e6e1d6;color:#141414;font-size:14px;font-weight:bold;vertical-align:top">${valorHtml(k, v)}</td></tr>`).join("");
@@ -1345,6 +1372,25 @@ document.getElementById("of-form").addEventListener("submit", async e => {
   } finally { btn.disabled = false; btn.textContent = "REGISTRARME"; }
 });
 
+/* ===== Ubicación de entrega en Google Maps ===== */
+(function(){
+  const buscar = $("m-buscar-mapa"), mapa = $("m-mapa"), est = $("m-mapa-estado");
+  const actualizarBusqueda = () => {
+    const q = [$("m-dir").value.trim(), $("m-ciudad").value.trim(), "Venezuela"].filter(Boolean).join(", ");
+    buscar.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+  };
+  ["m-dir", "m-ciudad"].forEach(id => $(id).addEventListener("input", actualizarBusqueda)); actualizarBusqueda();
+  mapa.addEventListener("input", () => { const ok = /^https?:\/\/\S+/.test(mapa.value.trim()); est.className = "mapa-ayuda" + (ok ? " ok" : ""); est.textContent = ok ? "Ubicación agregada. Gracias." : "Pega el enlace completo, empieza por https://"; });
+  $("m-mi-ubic").addEventListener("click", () => {
+    if (!navigator.geolocation) { est.textContent = "Tu navegador no permite compartir la ubicación. Usa Buscar en Google Maps."; return; }
+    est.className = "mapa-ayuda"; est.textContent = "Buscando tu ubicación…";
+    navigator.geolocation.getCurrentPosition(p => {
+      mapa.value = `https://www.google.com/maps?q=${p.coords.latitude.toFixed(6)},${p.coords.longitude.toFixed(6)}`;
+      est.className = "mapa-ayuda ok"; est.textContent = "Ubicación actual agregada. Si no estás en el lugar de entrega, bórrala y usa Buscar en Google Maps.";
+    }, () => { est.className = "mapa-ayuda"; est.textContent = "No pudimos obtener tu ubicación. Revisa el permiso del navegador o usa Buscar en Google Maps."; }, { enableHighAccuracy: true, timeout: 12000 });
+  });
+})();
+
 /* ===== ORDEN DE FABRICACIÓN =====
    El correo del taller trae un enlace a orden.html con todos los datos del pedido. */
 function numeroOrden(){
@@ -1353,10 +1399,10 @@ function numeroOrden(){
 }
 function enlaceOrden(orden, v){
   const esCama = actual.cat === "camas";
-  const tel = k => elec[k + "Codigo"] ? { n: elec[k], c: elec[k + "Codigo"], h: elec[k + "Hex"], sp: elec[k + "Sp"] } : { n: elec[k] || "Por asesorar" };
+  const tel = k => elec[k + "Codigo"] ? { n: elec[k], c: elec[k + "Codigo"], h: elec[k + "Hex"], sp: elec[k + "Sp"], nm: elec[k + "Nombre"] } : { n: elec[k] || "Por asesorar" };
   const datos = {
     v: 1, n: orden, f: new Date().toISOString(),
-    c: { n: v("m-nom"), e: v("m-email"), t: v("m-tel"), ci: v("m-ciudad"), d: v("m-dir") },
+    c: { n: v("m-nom"), e: v("m-email"), t: v("m-tel"), ci: v("m-ciudad"), d: v("m-dir"), mapa: /^https?:\/\//.test(v("m-mapa")) ? v("m-mapa") : "" },
     p: { id: actual.id, n: actual.nombre, cat: actual.cat, l: actual.linea ? LINEAS[actual.linea].nombre : "", img: /^data:/.test(actual.img) ? "" : actual.img.replace(/^img\//, "") },
     o: { talla: talla || "", medida: v("m-medida"), viv: elec.vivienda, base: piezas(), gav: elec.gavetas || "", sop: elec.soporte, cp: elec.colorPatas || "",
          lado: elec.lado || "", acc: elec.accesorios || [], precios: PRECIOS_EXTRA, coj: elec.cojines || "", ent: elec.entrega, envGratis: ENVIO_GRATIS },
@@ -1393,31 +1439,31 @@ document.getElementById("m-form").addEventListener("submit", async e => {
   campos[esCama ? "Tamaño" : "Medidas"] = (talla || "Por definir") + (talla === "Medida especial" && v("m-medida") ? `: ${v("m-medida")}` : "");
   if (!esCama) { campos.Tipo = (FABRICACION[actual.id] || {}).tipo || "Sofá"; campos["Diván"] = elec.lado; }
   campos.Tela = elec.tela;
-  campos["Código de color"] = elec.telaCodigo ? `${elec.telaCodigo}|${elec.telaHex}` : "Por asesorar";
+  campos["Color"] = elec.telaCodigo ? `${elec.telaNombre}|${elec.telaCodigo}|${elec.telaHex}` : "Por asesorar";
   if (!esCama) {
     const acc = elec.accesorios || [];
     campos.Accesorios = acc.length ? acc.map(a => PRECIOS_EXTRA[a] ? `${a} (+$${PRECIOS_EXTRA[a]})` : `${a} (por cotizar)`).join(", ") : "Ninguno";
     if (acc.length) campos["Cargos adicionales"] = `$${acc.reduce((t, a) => t + (PRECIOS_EXTRA[a] || 0), 0)}${acc.some(a => !PRECIOS_EXTRA[a]) ? " + accesorios por cotizar" : ""}`;
     const quiere = elec.cojines && elec.cojines.startsWith("Sí");
     campos["Cojines (obsequio)"] = quiere ? `Sí · ${(FABRICACION[actual.id] || {}).cojines || 4} unidades · ${elec.cojin}` : "No";
-    if (quiere) campos["Código color cojines"] = elec.cojinCodigo ? `${elec.cojinCodigo}|${elec.cojinHex}` : "Por asesorar";
+    if (quiere) campos["Color de cojines"] = elec.cojinCodigo ? `${elec.cojinNombre}|${elec.cojinCodigo}|${elec.cojinHex}` : "Por asesorar";
   }
   campos["Va para"] = elec.vivienda;
   if (esCama) { campos["Fabricación de la base"] = piezas(); campos.Gavetas = elec.gavetas || "Sin gavetas"; }
   campos.Soporte = elec.soporte + (elec.colorPatas ? ` (${elec.colorPatas.toLowerCase()})` : "");
   campos.Entrega = elec.entrega + (elec.entrega === "Delivery" && ENVIO_GRATIS ? " (gratis por promoción)" : "");
-  if (elec.entrega === "Delivery") campos["Dirección"] = v("m-dir");
+  if (elec.entrega === "Delivery") { campos["Dirección"] = v("m-dir"); if (/^https?:\/\//.test(v("m-mapa"))) campos["Ubicación"] = "MAPA|" + v("m-mapa"); }
   campos["N° de orden"] = orden;
   campos["Orden de fabricación"] = "ORDEN|" + enlaceOrden(orden, v);
   await procesar(document.getElementById("m-enviar"), est, campos,
     `Nueva cotización ${orden}: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN", { col: "cotizaciones", data: {
     nombre: v("m-nom"), email: v("m-email"), telefono: v("m-tel"), ciudad: v("m-ciudad"),
-    modelo: actual.nombre, tamano: talla || "Por definir", color: elec.telaCodigo ? `${elec.tela} · código ${elec.telaCodigo}` : "Tela por asesorar", origen: "ficha", orden,
+    modelo: actual.nombre, tamano: talla || "Por definir", color: elec.telaCodigo ? `${elec.tela} · ${elec.telaNombre} (ref. ${elec.telaCodigo})` : "Tela por asesorar", origen: "ficha", orden,
     lado: elec.lado || "", accesorios: (elec.accesorios || []).join(", "), cojines: campos["Cojines (obsequio)"] || "",
-    colorCojines: elec.cojinCodigo ? `${elec.cojin} · código ${elec.cojinCodigo}` : (elec.cojin || ""), medida: v("m-medida"),
+    colorCojines: elec.cojinCodigo ? `${elec.cojin} · ${elec.cojinNombre} (ref. ${elec.cojinCodigo})` : (elec.cojin || ""), medida: v("m-medida"),
     linea: actual.linea ? LINEAS[actual.linea].nombre : "Sofás", vivienda: elec.vivienda, piezas: piezas(),
     gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte, colorPatas: elec.colorPatas || "",
-    entrega: elec.entrega, direccion: elec.entrega === "Delivery" ? v("m-dir") : ""
+    entrega: elec.entrega, direccion: elec.entrega === "Delivery" ? v("m-dir") : "", mapa: elec.entrega === "Delivery" ? v("m-mapa") : ""
   } });
 });
 armar();

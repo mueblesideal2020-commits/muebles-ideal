@@ -30,6 +30,10 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: v
 .compacta .chk { width: 12px; height: 12px; }
 .compacta .sec { margin-top: 11px; }
 .cargos td.r, .cargos th.r { text-align: right; }
+.ubic { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; margin-top: 10px; padding: 10px; border: 1.5px solid var(--ink); border-radius: 8px; }
+.con-mapa .plano svg { max-height: 82mm; }
+.con-mapa .sec { margin-top: 9px; }
+.qr { width: 96px; height: 96px; } .qr img, .qr svg { width: 96px; height: 96px; display: block; }
 .hoja:first-child table.t th, .hoja:first-child table.t td { padding: 3px 8px; font-size: .88rem; }
 h1, h2, h3 { font-family: var(--display); font-weight: 500; margin: 0; letter-spacing: .02em; }
 .cab { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; border-bottom: 3px solid var(--ink); padding-bottom: 12px; }
@@ -191,13 +195,13 @@ function materiales(D, patasTotal){
   const cama = D.p.cat === "camas";
   const grupos = [
     ["Estructura", [["Tablas / listones de madera", "unid.", "", "tablas"], ["Láminas de MDF o contraenchapado", "unid.", "", "mdf"], ["Tornillos", "unid.", "", "tornillos"], ["Grapas", "cajas", "", "grapas"], ["Pegamento de contacto", "L", "", "pegamento"]]],
-    ["Relleno y tapizado", [["Goma espuma (alta densidad)", "láminas", "", "goma"], ["Guata / fibra", "m", "", "guata"], [`Tela principal · ${D.tela.n}${D.tela.c ? " · código " + D.tela.c : ""}`, "m", "", "tela"], ["Cincha elástica", "m", "", "cincha"], ["Tafeta (tela de fondo)", "m", "", "tafeta"]]],
+    ["Relleno y tapizado", [["Goma espuma (alta densidad)", "láminas", "", "goma"], ["Guata / fibra", "m", "", "guata"], [`Tela principal · ${D.tela.n}${D.tela.c ? ` · ${D.tela.nm || ""} (ref. ${D.tela.c})` : ""}`, "m", "", "tela"], ["Cincha elástica", "m", "", "cincha"], ["Tafeta (tela de fondo)", "m", "", "tafeta"]]],
     ["Herrajes", [[D.o.sop === "Deslizadores" ? "Deslizadores" : `Patas de metal${D.o.cp ? " " + D.o.cp.toLowerCase() : ""}`, "unid.", "patas"],
       cama ? ["Herrajes de unión cabecero-base", "juego", "", "herrajes"] : ["Conectores entre módulos", "unid.", "", "conectores"],
       ...(cama && D.o.base && /dos/.test(D.o.base) ? [["Herrajes de unión pieza A-B", "juego", "", "herrajesAB"]] : []),
       ...(cama && /gaveta/i.test(D.o.gav) && !/sin/i.test(D.o.gav) ? [["Rieles para gavetas", "pares", "", "rieles"]] : [])]],
     ...(acc.length ? [["Accesorios", acc.map(a => [a, "unid.", "acc"])]] : []),
-    ...(D.cojin ? [["Cojines (obsequio)", [[`Tela de cojines · ${D.cojin.n}${D.cojin.c ? " · código " + D.cojin.c : ""}`, "m", "", "telaCojin"], ["Relleno de cojines", "kg", "", "rellenoCojin"], ["Cierres", "unid.", "cierres"]]]] : [])
+    ...(D.cojin ? [["Cojines (obsequio)", [[`Tela de cojines · ${D.cojin.n}${D.cojin.c ? ` · ${D.cojin.nm || ""} (ref. ${D.cojin.c})` : ""}`, "m", "", "telaCojin"], ["Relleno de cojines", "kg", "", "rellenoCojin"], ["Cierres", "unid.", "cierres"]]]] : [])
   ];
   let filas = "";
   grupos.forEach(([g, items]) => {
@@ -221,7 +225,8 @@ function swatch(t){
   return `<div class="sw" style="background-color:${t.h};background-image:url('${sp.f}');background-size:${sp.n * 100}% 100%;background-position:${pos}% 0"></div>`;
 }
 function bloqueTela(titulo, t, extra){
-  return `<div class="tela">${swatch(t)}<div><div class="lbl">${titulo}</div><div class="cod">${t && t.c ? esc(t.c) : "—"}</div><div class="nom">${esc(t ? t.n : "")}</div>${extra ? `<div style="font-size:.84rem;color:#615d56">${extra}</div>` : ""}</div></div>`;
+  const nombre = t && t.c ? (t.nm || "Color " + t.c) : "Por asesorar";
+  return `<div class="tela">${swatch(t)}<div><div class="lbl">${titulo}</div><div class="cod" style="font-size:1.25rem;letter-spacing:.02em">${esc(nombre)}</div><div class="nom">${esc(t ? t.n : "")}${t && t.c ? ` <span style="font-weight:500;color:#615d56">· ref. ${esc(t.c)}</span>` : ""}</div>${extra ? `<div style="font-size:.84rem;color:#615d56">${extra}</div>` : ""}</div></div>`;
 }
 
 function render(){
@@ -284,14 +289,15 @@ function render(){
     ${cargos}
   </div>${pie(1)}</article>
 
-  <article class="hoja"><div class="cuerpo">
+  <article class="hoja${D.c.mapa ? " con-mapa" : ""}"><div class="cuerpo">
     ${cab(2)}
     <section class="sec"><h2>Plano · vista superior (medidas en cm)</h2><div class="plano">${plano}</div>${notaPlano}</section>
     <section class="sec"><h2>Resumen para el taller</h2>
-      <div class="grid2">${kv([["Modelo", D.p.n], ...resumenProd.slice(0, 4)])}${kv([["Tela", `${D.tela.n}${D.tela.c ? " · " + D.tela.c : ""}`], ["Cojines", D.cojin ? `${D.cojin.n}${D.cojin.c ? " · " + D.cojin.c : ""} (${D.cojin.cant})` : (cama ? "" : "No")], ["Soporte", `${o.sop || ""}${o.cp ? " · " + o.cp : ""} · ${patasTotal} unid.`], ...(cama ? [] : [["Accesorios", acc.length ? `${acc.length} (ver hoja 1)` : "Ninguno"]])])}</div>
+      <div class="grid2">${kv([["Modelo", D.p.n], ...resumenProd.slice(0, 4)])}${kv([["Tela", `${D.tela.n}${D.tela.c ? ` · ${D.tela.nm || ""} (${D.tela.c})` : ""}`], ["Cojines", D.cojin ? `${D.cojin.n}${D.cojin.c ? ` · ${D.cojin.nm || ""} (${D.cojin.c})` : ""} ×${D.cojin.cant}` : (cama ? "" : "No")], ["Soporte", `${o.sop || ""}${o.cp ? " · " + o.cp : ""} · ${patasTotal} unid.`], ...(cama ? [] : [["Accesorios", acc.length ? `${acc.length} (ver hoja 1)` : "Ninguno"]])])}</div>
     </section>
     <section class="sec"><h2>Cliente y entrega</h2>
       <div class="grid2">${kv([["Cliente", D.c.n], ["Teléfono", D.c.t || "No indicado"], ["Correo", D.c.e]])}${kv([["Ciudad", D.c.ci || "No indicada"], ["Entrega", (o.ent || "") + (o.ent === "Delivery" && o.envGratis ? " (gratis por promoción)" : "")], ["Dirección", D.c.d]])}</div>
+      ${D.c.mapa ? `<div class="ubic"><div id="qr" class="qr"></div><div><b>Ubicación de entrega</b><br><span style="font-size:.85rem;color:#615d56">Escanea el código con el teléfono para abrir la ruta en Google Maps.</span><br><a href="${esc(D.c.mapa)}" target="_blank" rel="noopener">Abrir en Google Maps</a></div></div>` : (o.ent === "Delivery" ? `<p style="font-size:.85rem;color:#615d56;margin:6px 0 0">El cliente no compartió su ubicación en el mapa.</p>` : "")}
     </section>
   </div>${pie(2)}</article>
 
@@ -310,7 +316,13 @@ function render(){
 }
 document.getElementById("imprimir").addEventListener("click", () => window.print());
 window.addEventListener("hashchange", () => location.reload());
+function pintarQR(){
+  const el = document.getElementById("qr"); if (!el || !D || !D.c.mapa) return;
+  try { const q = qrcode(0, "M"); q.addData(D.c.mapa); q.make(); el.innerHTML = q.createSvgTag({ cellSize: 3, margin: 0, scalable: true }); }
+  catch (e) { el.innerHTML = '<div style="width:96px;height:96px;border:1px dashed #ccc;display:grid;place-items:center;font-size:.7rem;color:#888;text-align:center">QR no disponible</div>'; }
+}
 render();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" onload="pintarQR()" onerror="pintarQR()"></script>
 </body>
 </html>

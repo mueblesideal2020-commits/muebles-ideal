@@ -97,11 +97,13 @@ table.ed input[type=text], table.ed input[type=number] { padding: 7px 8px; }
 .col-h h3 { font-size: 1.05rem; text-transform: uppercase; margin-right: 6px; }
 .col-h .num { font-family: var(--display); font-size: .78rem; color: var(--muted); }
 .col-h .acc { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
-.sws { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px; }
+.sws { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px 10px; align-items: start; }
 .sw { position: relative; aspect-ratio: 1; border-radius: 10px; border: 0; padding: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
 .sw .cod { position: absolute; left: 4px; bottom: 4px; background: rgba(20,20,20,.8); color: #fff; font: 600 .68rem/1.4 var(--display); padding: 1px 5px; border-radius: 5px; }
 .sw.agotado { filter: grayscale(1) opacity(.45); }
 .sw.agotado::after { content: "AGOTADO"; position: absolute; inset: 0; display: grid; place-items: center; font: 700 .62rem var(--display); letter-spacing: .08em; color: var(--bad); background: rgba(255,255,255,.55); border-radius: 10px; }
+.sw-cel { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sw-nom { padding: 5px 6px !important; font-size: .78rem; border-radius: 7px !important; text-align: center; }
 .sw-add { aspect-ratio: 1; border-radius: 10px; border: 2px dashed var(--gold); background: var(--soft); color: var(--ink); font-family: var(--display); font-size: .78rem; cursor: pointer; display: grid; place-items: center; text-align: center; padding: 6px; }
 .ayuda { font-size: .86rem; color: var(--muted); }
 
@@ -402,7 +404,7 @@ function pintarTelas(){
   const total = TELAS.reduce((a, t) => a + (t.colores || []).length, 0), agot = TELAS.reduce((a, t) => a + (t.colores || []).filter(c => c.activo === false).length, 0);
   el.innerHTML = `<div class="barra"><h2>Telas y colores <small style="color:var(--muted);font-size:.9rem">(${TELAS.length} colecciones · ${total} colores${agot ? ` · ${agot} agotados` : ""})</small></h2>
       <button class="btn oro" id="t-nueva" type="button">+ NUEVA COLECCIÓN</button></div>
-    <p class="ayuda" style="margin:-8px 0 16px">Toca un color para marcarlo <b>agotado</b> (se oculta en la página) o volver a activarlo. Los códigos nunca se repiten.</p>
+    <p class="ayuda" style="margin:-8px 0 16px">Toca un color para marcarlo <b>agotado</b> (se oculta en la página) o volver a activarlo. Escribe debajo el <b>nombre</b> que verá el cliente; se guarda al salir del campo. El código es solo de referencia para el taller y nunca se repite.</p>
     ${nuevaTela ? `<div class="card coleccion"><h3 style="font-size:1rem">Nueva colección</h3>
       <div class="fila"><label class="f">Nombre<input type="text" id="nt-nombre" placeholder="Ej. Velvet Royal"></label>
         <label class="f">Tipo<select id="nt-tipo"><option>Aterciopelada</option><option>Tipo lino</option><option>Bouclé</option><option>Cuero sintético</option><option>Otra</option></select></label></div>
@@ -418,7 +420,7 @@ function pintarTelas(){
           <span class="acc"><button class="btn borde mini" type="button" data-vis="${esc(t.id)}">${t.activo === false ? "Mostrar colección" : "Ocultar colección"}</button>
           <button class="btn borde mini" type="button" data-borrar-t="${esc(t.id)}">Eliminar</button></span></div>
         ${borrarTela === t.id ? `<div class="confirma"><b>¿Eliminar la colección ${esc(t.nombre)} y sus ${(t.colores || []).length} colores?</b><button class="btn peligro mini" type="button" data-borrar-si="${esc(t.id)}">Sí, eliminar</button><button class="btn borde mini" type="button" data-borrar-no>No</button></div>` : ""}
-        <div class="sws">${(t.colores || []).map((c, i) => `<button type="button" class="sw ${c.activo === false ? "agotado" : ""}" style='${estiloColor(c)}' data-t="${esc(t.id)}" data-i="${i}" title="${c.activo === false ? "Agotado · toca para activar" : "Disponible · toca para marcar agotado"}"><span class="cod">${esc(c.codigo)}</span></button>`).join("")}
+        <div class="sws">${(t.colores || []).map((c, i) => `<div class="sw-cel"><button type="button" class="sw ${c.activo === false ? "agotado" : ""}" style='${estiloColor(c)}' data-t="${esc(t.id)}" data-i="${i}" title="${c.activo === false ? "Agotado · toca para activar" : "Disponible · toca para marcar agotado"}"><span class="cod">${esc(c.codigo)}</span></button><input type="text" class="sw-nom" value="${esc(c.nombre || "")}" placeholder="Nombre" data-nt="${esc(t.id)}" data-ni="${i}" aria-label="Nombre del color ${esc(c.codigo)}"></div>`).join("")}
           <label class="sw-add">+ Agregar colores<input type="file" accept="image/*" multiple hidden data-add="${esc(t.id)}"></label></div>
       </div>`; }).join("")}`;
   $("t-nueva").addEventListener("click", () => { nuevaTela = true; pintarTelas(); $("nt-nombre").focus(); });
@@ -438,6 +440,11 @@ function pintarTelas(){
     c.activo = c.activo === false; b.classList.toggle("agotado", c.activo === false);
     await db.collection("telas").doc(t.id).update({ colores: t.colores }); toast(`Color ${c.codigo} ${c.activo === false ? "marcado como agotado" : "disponible de nuevo"}.`);
   }));
+  el.querySelectorAll(".sw-nom").forEach(inp => inp.addEventListener("change", async () => {
+    const t = TELAS.find(x => x.id === inp.dataset.nt), c = t.colores[+inp.dataset.ni];
+    c.nombre = inp.value.trim();
+    await db.collection("telas").doc(t.id).update({ colores: t.colores }); toast(`Nombre guardado: ${c.nombre || "(sin nombre)"}`);
+  }));
   el.querySelectorAll("[data-vis]").forEach(b => b.addEventListener("click", async () => {
     const t = TELAS.find(x => x.id === b.dataset.vis); t.activo = t.activo === false;
     await db.collection("telas").doc(t.id).update({ activo: t.activo }); pintarTelas(); toast(t.activo ? "Colección visible." : "Colección oculta en la página.");
@@ -451,8 +458,8 @@ function pintarTelas(){
     const num = String(t.num || 0).padStart(2, "0");
     let sig = (t.colores || []).reduce((m, c) => Math.max(m, +String(c.codigo).slice(2) || 0), 0);
     t.colores = t.colores || [];
-    for (const f of files) { const m = await muestraColor(f); sig++; t.colores.push({ codigo: num + String(sig).padStart(2, "0"), hex: m.hex, img: m.img, activo: true }); }
-    await db.collection("telas").doc(t.id).update({ colores: t.colores }); toast(`Listo: ${files.length} ${files.length === 1 ? "color agregado" : "colores agregados"}.`); pintarTelas();
+    for (const f of files) { const m = await muestraColor(f); sig++; t.colores.push({ codigo: num + String(sig).padStart(2, "0"), nombre: "Color " + sig, hex: m.hex, img: m.img, activo: true }); }
+    await db.collection("telas").doc(t.id).update({ colores: t.colores }); toast(`Listo: ${files.length} ${files.length === 1 ? "color agregado" : "colores agregados"}. Ponles su nombre debajo de cada muestra.`); pintarTelas();
   }));
 }
 
