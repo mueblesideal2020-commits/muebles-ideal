@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="img/logo-mark.png">
+<style>:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font-family:system-ui,sans-serif;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Muebles Ideal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Muebles Ideal: camas tapizadas y sofás fabricados a medida en Mariara, Carabobo. Envíos a Caracas, Maracay, Valencia y toda Venezuela.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Karla:wght@400;500;600&display=swap">
+<style>
+/* Layout: taller de tapicería — foto grande del producto, texto sobrio, la tela y el color como protagonistas */
+:root {
+  --bg: #e8e8e6;
+  --surface: #ffffff;
+  --ink: #141414;
+  --muted: #66625b;
+  --line: #d6d4cf;
+  --accent: #9a7230;        /* dorado, como las patas de las camas */
+  --accent-ink: #ffffff;
+  --accent-soft: #f2eadb;
+  --wa: #b8913f;
+  --wa-ink: #141414;
+  --logo-filter: none;
+  --font-display: "Lexend", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Karla", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --radius: 14px;
+  --wrap: 1180px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0f0e; --surface: #1a1916; --ink: #eeebe4; --muted: #a8a397; --line: #2e2c27;
+    --accent: #d4ad62; --accent-ink: #141414; --accent-soft: #2a2418; --wa: #d4ad62; --wa-ink: #141414; --logo-filter: invert(1);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f0f0e; --surface: #1a1916; --ink: #eeebe4; --muted: #a8a397; --line: #2e2c27;
+  --accent: #d4ad62; --accent-ink: #141414; --accent-soft: #2a2418; --wa: #d4ad62; --wa-ink: #141414; --logo-filter: invert(1);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.6; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 500; line-height: 1.12; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+p { margin: 0; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+h1, h2, h3, h4 { text-transform: uppercase; letter-spacing: 0.02em; }
+a { color: inherit; }
+img { display: block; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+section { scroll-margin-top: 80px; }
+.band { padding-block: clamp(56px, 8vw, 104px); }
+.eyebrow { font-family: var(--font-display); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.lead { color: var(--muted); font-size: 1.08rem; max-width: 60ch; }
+.section-head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 36px; max-width: 720px; }
+.section-head h2 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); }
+
+/* Botones */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--font-display); font-weight: 500; font-size: 0.98rem; padding: 14px 22px; border-radius: 999px; text-decoration: none; border: 1.5px solid transparent; cursor: pointer; transition: transform .15s ease, background-color .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--ink); color: var(--bg); }
+.btn-ghost { border-color: var(--ink); color: var(--ink); background: transparent; }
+.btn-wa { background: var(--wa); color: var(--wa-ink); }
+.btn svg { width: 18px; height: 18px; flex: none; }
+
+/* Encabezado */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.top .wrap { max-width: none; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 14px; }
+.brand { display: flex; margin-right: auto; }
+.brand img { height: 42px; width: auto; filter: var(--logo-filter); transition: transform .3s ease; }
+.brand:hover img { transform: rotate(-6deg) scale(1.05); }
+.nav { display: flex; gap: 26px; align-items: center; }
+.nav a { text-decoration: none; font-family: var(--font-display); font-size: 0.93rem; color: var(--muted); }
+.nav a:hover { color: var(--ink); }
+@media (min-width: 861px) {
+  .nav a:not(.btn) { position: relative; padding-block: 6px; }
+  .nav a:not(.btn)::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+  .nav a:not(.btn):hover::after, .nav a:not(.btn):focus-visible::after { transform: scaleX(1); }
+}
+.nav .btn { padding: 10px 18px; font-size: 0.9rem; }
+.menu-btn { display: none; background: none; border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 12px; color: var(--ink); font: 500 0.9rem var(--font-display); cursor: pointer; }
+@media (max-width: 860px) {
+  .menu-btn { display: inline-block; }
+  .nav { display: none; position: absolute; left: 0; right: 0; top: 100%; flex-direction: column; align-items: stretch; gap: 0; background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px max(20px, env(safe-area-inset-right, 0px)) 18px max(20px, env(safe-area-inset-left, 0px)); }
+  .nav.open { display: flex; }
+  .nav a { padding: 12px 0; font-size: 1rem; border-bottom: 1px solid var(--line); }
+  .nav .btn { margin-top: 14px; border-bottom: 0; }
+}
+
+/* Portada */
+.hero { position: relative; overflow: hidden; background: #121110; color: #f3efe7; isolation: isolate; }
+.hero::before { content: ""; position: absolute; inset: -40px; z-index: -2; background: url("img/cama-mosaico.jpg") center / cover no-repeat; filter: blur(14px) saturate(0.85); transform: scale(1.05); }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(100deg, rgba(14,13,12,.94) 0%, rgba(14,13,12,.82) 45%, rgba(14,13,12,.55) 100%), radial-gradient(circle at 85% 20%, rgba(212,173,98,.22), transparent 55%); }
+.hero .eyebrow { color: #d4ad62; }
+.hero h1 em { color: #d4ad62 !important; }
+.hero .lead { color: rgba(243,239,231,.78); }
+.hero .seal { color: rgba(243,239,231,.82); }
+.hero .seal svg { color: #d4ad62; }
+.hero .btn-primary { background: #d4ad62; color: #141414; }
+.hero .btn-ghost { border-color: rgba(243,239,231,.7); color: #f3efe7; }
+.hero .wrap { padding-block: clamp(48px, 7vw, 96px) !important; }
+.hero .swatch-card { color: var(--ink); }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(28px, 5vw, 64px); align-items: center; padding-block: clamp(36px, 6vw, 80px); }
+.hero-copy { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.hero h1 { font-size: clamp(2.1rem, 4.8vw, 3.7rem); font-weight: 400; letter-spacing: 0.005em; }
+.hero h1 em { font-style: normal; font-weight: 600; color: var(--accent); }
+.hero .lead { font-size: 1.15rem; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.seals { display: flex; flex-wrap: wrap; gap: 10px 22px; padding-top: 8px; }
+.seal { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--muted); }
+.seal svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+.hero-photo { position: relative; min-width: 0; }
+.hero-photo img { width: 100%; aspect-ratio: 1 / 1; max-width: 100%; object-fit: cover; border-radius: 22px; }
+.swatch-card { position: absolute; left: -18px; bottom: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 14px 40px -18px rgba(0,0,0,.35); }
+.swatch-card span { font-size: 0.8rem; color: var(--muted); }
+.swatches { display: flex; gap: 6px; }
+.swatches i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); }
+@media (max-width: 860px) {
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-photo { order: -1; }
+  .hero-photo img { aspect-ratio: 1 / 1; }
+  .swatch-card { left: 12px; bottom: 12px; }
+}
+
+/* Productos */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.card .ph { position: relative; aspect-ratio: 4 / 4.2; background: var(--line); overflow: hidden; }
+.card .ph img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+.card:hover .ph img { transform: scale(1.04); }
+.tag { position: absolute; top: 12px; left: 12px; background: var(--surface); color: var(--ink); font: 500 0.72rem var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; }
+.card .body { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.card h3 { font-size: 1.1rem; text-align: center; }
+.card .body { padding: 18px 16px !important; }
+.card .body { gap: 14px !important; justify-content: space-between; }
+.card p { color: var(--muted); font-size: 0.95rem; }
+.specs { display: flex; flex-wrap: wrap; gap: 6px; }
+.specs span { font-size: 0.78rem; background: var(--accent-soft); color: var(--ink); padding: 4px 10px; border-radius: 999px; }
+.price-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 6px; }
+.price { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.price.ask { font-size: 0.95rem; font-weight: 500; color: var(--muted); }
+.card .btn { width: 100%; padding: 12px 16px; font-size: 0.92rem; }
+
+#grid-catalogo { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { #grid-catalogo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { #grid-catalogo { grid-template-columns: 1fr; } }
+.panel { position: fixed; inset: 0; z-index: 45; background: var(--bg); overflow-y: auto; animation: panel-entra .45s cubic-bezier(.2,.8,.2,1); }
+@keyframes panel-entra { from { opacity: 0; transform: translateY(40px); } }
+.panel-top { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); padding: calc(18px + env(safe-area-inset-top, 0px)) max(24px, 4vw, env(safe-area-inset-right, 0px)) 6px max(24px, 4vw, env(safe-area-inset-left, 0px)); }
+.panel-head { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.panel-head img { height: 40px; width: auto; filter: var(--logo-filter); }
+.panel-head h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
+.panel-close { position: static; margin-left: auto; flex: none; }
+.panel .filters { margin-bottom: 12px; }
+.panel-body { padding: 36px max(24px, 4vw, env(safe-area-inset-right, 0px)) calc(60px + env(safe-area-inset-bottom, 0px)) max(24px, 4vw, env(safe-area-inset-left, 0px)); }
+#grid-panel { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 28px; }
+@media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+.ver-mas { display: flex; justify-content: center; margin-top: 40px; }
+.ver-mas .btn { min-width: 220px; letter-spacing: 0.08em; }
+.grid .card.nueva { animation: aparece .5s cubic-bezier(.2,.8,.2,1) both, flotar 5.5s ease-in-out infinite, flotar-sombra 5.5s ease-in-out infinite; }
+@keyframes aparece { from { opacity: 0; translate: 0 24px; } }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+.chip { font: 500 0.92rem var(--font-display); padding: 9px 18px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.count { color: var(--muted); font-size: 0.9rem; margin-left: auto; align-self: center; }
+
+/* Nosotros */
+.about { --ink: #121110; --bg: #eeebe4; background: linear-gradient(180deg, #5b5a56 0%, #3a3936 35%, #1c1b19 75%, #121110 100%); color: var(--bg); }
+.about .wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(28px, 5vw, 70px); align-items: center; }
+.about img { width: 100%; max-width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 20px; }
+.about .eyebrow { color: color-mix(in srgb, var(--accent) 55%, var(--bg)); }
+.about h2 { font-size: clamp(1.9rem, 3.8vw, 2.8rem); }
+.about-copy { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.about-copy > p { color: color-mix(in srgb, var(--bg) 78%, var(--ink)); max-width: 56ch; }
+.values { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 26px; padding-top: 8px; }
+.values h4 { font-size: 1rem; margin-bottom: 4px; }
+.values p { font-size: 0.92rem; color: color-mix(in srgb, var(--bg) 68%, var(--ink)); }
+.video-box { position: relative; aspect-ratio: 4 / 5; max-width: 100%; max-height: 680px; width: 100%; border-radius: 20px; overflow: hidden; isolation: isolate; background: #1a1916; min-width: 0; animation: flotar 7s ease-in-out infinite, flotar-sombra 7s ease-in-out infinite; }
+.video-box::before { content: ""; position: absolute; inset: -40px; z-index: -1; background: url("img/video-poster.jpg") center / cover; filter: blur(24px) brightness(.7); }
+.video-box video { position: absolute; inset: 0; margin: auto; height: 100%; width: auto; max-width: 100%; object-fit: contain; }
+.sonido { position: absolute; top: 14px; right: 14px; z-index: 2; border: 0; border-radius: 999px; padding: 8px 14px; background: rgba(212,173,98,.95); color: #141414; font: 500 0.82rem var(--font-display); letter-spacing: .04em; cursor: pointer; transition: transform .2s ease; }
+.sonido:hover { transform: scale(1.06); }
+.video-box .video-cap { pointer-events: none; color: #fff; }
+.video-link { position: relative; display: block; border-radius: 20px; overflow: hidden; min-width: 0; color: #fff; text-decoration: none; }
+.video-link img { border-radius: 20px; }
+.play { position: absolute; left: 50%; top: 50%; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; background: rgba(212,173,98,.95); color: #141414; display: grid; place-items: center; box-shadow: 0 0 0 0 rgba(212,173,98,.6); animation: latido 2.4s ease-in-out infinite; transition: transform .25s ease; }
+.play svg { width: 34px; height: 34px; margin-left: 4px; }
+.video-link:hover .play { transform: scale(1.12); }
+.video-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 20px 18px; background: linear-gradient(transparent, rgba(0,0,0,.7)); font: 500 1rem var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+@media (max-width: 860px) { .about .wrap { grid-template-columns: 1fr; } .about img { aspect-ratio: 4 / 3; } }
+@media (max-width: 460px) { .values { grid-template-columns: 1fr; } }
+
+/* Proceso */
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; }
+.step { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.step-img { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 3; max-width: 100%; margin-bottom: 8px; box-shadow: 0 16px 30px -22px rgba(0,0,0,.5); }
+.step-img img, .step-img video { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.step:hover .step-img img, .step:hover .step-img video { transform: scale(1.07); }
+.step b { position: absolute; left: 12px; bottom: 12px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: #d4ad62; color: #141414; font-family: var(--font-display); font-weight: 500; font-size: 1.35rem; line-height: 1; box-shadow: 0 6px 16px -6px rgba(0,0,0,.5); }
+.step h3 { font-size: 1.1rem; }
+.step p { color: var(--muted); font-size: 0.95rem; }
+@media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 460px) { .steps { grid-template-columns: 1fr; } }
+
+/* Envíos */
+.ship { display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; }
+.ship-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.route { display: flex; flex-direction: column; }
+.route div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+.route div:last-child { border-bottom: 0; }
+.route span:last-child { color: var(--muted); font-size: 0.92rem; text-align: right; }
+.origin { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); }
+.origin i { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 6px var(--accent-soft); flex: none; }
+@media (max-width: 760px) { .ship { grid-template-columns: 1fr; } }
+
+/* Contacto */
+.contact { display: grid; grid-template-columns: 1fr 1.15fr; gap: 22px; }
+.contact-info { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.info-row { display: flex; flex-direction: column; gap: 4px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.info-row small { font-family: var(--font-display); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.info-row .big { font-family: var(--font-display); font-size: 1.45rem; font-variant-numeric: tabular-nums; user-select: all; }
+.inline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.link-btn { background: none; border: 1.5px solid var(--line); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: 500 0.85rem var(--font-display); cursor: pointer; text-decoration: none; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+form h3 { font-size: 1.3rem; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 0.88rem; font-weight: 600; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+input, select, textarea { font: inherit; font-size: 1rem; color: var(--ink); background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; width: 100%; }
+textarea { min-height: 96px; resize: vertical; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+.hint { font-size: 0.85rem; color: var(--muted); }
+@media (max-width: 760px) { .contact { grid-template-columns: 1fr; } }
+@media (max-width: 460px) { .two { grid-template-columns: 1fr; } }
+
+footer ul a.pie-wa { display: inline-flex; align-items: center; gap: 8px; }
+.pie-wa svg { width: 20px; height: 20px; color: #d4ad62; flex: none; }
+
+/* Formularios de cotización */
+.m-form { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 16px; background: var(--bg); border: 1px solid var(--line); }
+.m-form input { background: var(--surface); }
+.hint a, .note a { color: var(--accent); font-weight: 600; }
+.estado { font-size: 0.95rem; padding: 12px 14px; border-radius: 10px; text-align: left; }
+.estado.ok { background: #e6f2e9; color: #1d4d2c; }
+.estado.error { background: #f8e6e3; color: #7a2418; }
+.btn[disabled] { opacity: .65; cursor: progress; transform: none; }
+input[aria-invalid="true"] { border-color: #c0392b; }
+
+/* Registro de ofertas */
+.ofertas { background: linear-gradient(120deg, #c99d4c 0%, #e2c27f 55%, #d4ad62 100%); color: #141414; }
+.ofertas-in { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(28px, 5vw, 72px); align-items: center; padding-block: clamp(56px, 8vw, 100px); }
+.of-copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ofertas .eyebrow { color: #3a2c12; }
+.of-copy h2 { font-size: clamp(1.8rem, 3.6vw, 2.7rem); }
+.of-copy p { color: #2b2418; max-width: 52ch; }
+.of-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 10px; }
+.of-list li { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.of-list svg { width: 20px; height: 20px; flex: none; }
+.of-form { background: var(--surface); color: var(--ink); border-radius: 20px; padding: clamp(22px, 3vw, 32px); display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 60px -30px rgba(40,28,8,.55); min-width: 0; animation: flotar 7s ease-in-out infinite; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 0.9rem; color: var(--muted); cursor: pointer; }
+.check input { width: 18px; height: 18px; margin-top: 2px; flex: none; accent-color: #b8913f; padding: 0; }
+@media (max-width: 760px) { .ofertas-in { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .of-form { animation: none; } }
+
+/* Iconos de redes sociales */
+.redes { display: flex; gap: 12px; margin-top: 6px; }
+.redes a { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--line); color: var(--ink); text-decoration: none; transition: transform .25s cubic-bezier(.2,.8,.2,1), background-color .2s ease, color .2s ease, border-color .2s ease; }
+.redes a svg { width: 22px; height: 22px; }
+.redes a:hover, .redes a:focus-visible { transform: translateY(-4px) rotate(-6deg); background: #d4ad62; border-color: #d4ad62; color: #141414; }
+.redes a::after { display: none !important; }
+
+/* Desvanecido por distancia */
+.top { opacity: var(--top-o, 1); transition: opacity .25s ease; }
+.top:hover, .top:focus-within, .top.ver { opacity: 1; }
+footer .wrap { opacity: var(--foot-o, 1); transform: translateY(calc((1 - var(--foot-o, 1)) * 30px)); transition: opacity .2s linear, transform .2s linear; }
+
+/* Pie */
+footer { border-top: 1px solid var(--line); }
+footer { --ink: #eeebe4; --muted: #a8a397; --line: #34312b; --logo-filter: invert(1); background: linear-gradient(180deg, #5b5a56 0%, #3a3936 35%, #1c1b19 75%, #121110 100%); color: var(--ink); border-top: 0 !important; }
+footer h4 { color: #d4ad62 !important; }
+footer .wrap { max-width: none; padding-left: max(24px, 4vw, env(safe-area-inset-left, 0px)); padding-right: max(24px, 4vw, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1.1fr; gap: clamp(32px, 4vw, 64px); padding-block: clamp(64px, 8vw, 110px) 36px; }
+footer img { height: 130px; width: auto; filter: var(--logo-filter); }
+footer h4 { font-size: 0.85rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; font-weight: 500; }
+footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 1.02rem; }
+footer a { text-decoration: none; color: var(--ink); }
+footer ul a { position: relative; display: inline-block; padding-bottom: 3px; }
+footer ul a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+footer ul a:hover::after, footer ul a:focus-visible::after { transform: scaleX(1); }
+.slogan { font-family: var(--font-display); font-weight: 300; font-size: clamp(1.2rem, 1.8vw, 1.5rem); line-height: 1.35; margin-top: 22px; max-width: 22ch; text-align: left; }
+.legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 26px; margin-top: 20px; color: var(--muted); font-size: 0.9rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; text-align: left; }
+@media (max-width: 1000px) { footer .wrap { grid-template-columns: 1fr 1fr 1fr; } footer .wrap > div:first-child { grid-column: 1 / -1; } }
+@media (max-width: 560px) { footer .wrap { grid-template-columns: 1fr 1fr; } }
+
+/* Ventana de detalle de producto */
+.ph { cursor: pointer; }
+.card h3 a { text-decoration: none; }
+.card h3 a:hover { color: var(--accent); }
+.card .actions { display: flex; flex-direction: column; gap: 8px; }
+.btn-line { border-color: var(--line); color: var(--ink); background: transparent; }
+.modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.modal-bg { position: absolute; inset: 0; background: rgba(10,14,14,.62); backdrop-filter: blur(4px); animation: fade .25s ease; }
+.sheet { position: relative; width: min(1280px, 100%); max-height: 100%; overflow: auto; background: var(--surface); color: var(--ink); border-radius: 22px; display: grid; grid-template-columns: 1fr 1fr; animation: subir .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes fade { from { opacity: 0; } }
+@keyframes subir { from { opacity: 0; transform: translateY(24px) scale(.98); } }
+.sheet-photo { position: relative; overflow: hidden; background: #1a1916; min-height: 320px; display: grid; place-items: center; padding: clamp(28px, 5vw, 64px); isolation: isolate; }
+.sheet-photo::before { content: ""; position: absolute; inset: -40px; z-index: -2; background: var(--m-img) center / cover no-repeat; filter: blur(22px) saturate(1.1); transform: scale(1.1); }
+.sheet-photo::after { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(15,14,13,.28); }
+.sheet-photo img { width: 100%; max-width: 520px; aspect-ratio: 1; height: auto; object-fit: cover; border-radius: 22px; box-shadow: 0 30px 60px -24px rgba(0,0,0,.6); animation: flotar 6s ease-in-out infinite; }
+.sheet-info { padding: clamp(26px, 4.5vw, 60px) clamp(22px, 4.5vw, 60px); display: flex; flex-direction: column; gap: 30px; min-width: 0; }
+.sheet-info .lead { line-height: 1.7; }
+.feat { gap: 12px !important; }
+.opts { gap: 10px !important; }
+.spec-table th, .spec-table td { padding: 13px 0 !important; }
+.sheet-info h2 { font-size: clamp(1.7rem, 3vw, 2.3rem); }
+.sheet-info .lead { font-size: 1rem; }
+.close { position: absolute; top: 14px; right: 14px; z-index: 2; width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--surface); color: var(--ink); font-size: 1.4rem; line-height: 1; cursor: pointer; box-shadow: 0 6px 18px -6px rgba(0,0,0,.35); }
+.feat { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.feat li { display: flex; gap: 10px; font-size: 0.97rem; }
+.feat svg { width: 18px; height: 18px; color: var(--accent); flex: none; margin-top: 3px; }
+.sub { font-family: var(--font-display); font-size: 0.78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.spec-table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+.spec-table th, .spec-table td { text-align: left; padding: 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.spec-table th { width: 38%; font-weight: 600; padding-right: 14px; }
+.spec-table td { color: var(--muted); }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt { font: 500 0.86rem var(--font-display); padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.color-opt { display: inline-flex; align-items: center; gap: 8px; }
+.color-opt i { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); }
+.sheet .price-row { padding-top: 4px; border-top: 1px solid var(--line); }
+.note { font-size: 0.84rem; color: var(--muted); }
+body.lock { overflow: hidden; }
+@media (max-width: 760px) {
+  .modal { place-items: end center; padding-bottom: 0; }
+  .sheet { grid-template-columns: 1fr; border-radius: 22px 22px 0 0; max-height: 94%; }
+  .sheet-photo { min-height: 0; padding: 28px 20px 24px; }
+  .sheet-photo img { max-width: 300px; }
+  .sheet-info { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) { .sheet, .modal-bg, .sheet-photo img { animation: none; } }
+
+/* Imágenes flotantes */
+@keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes flotar-sombra { 0%,100% { box-shadow: 0 18px 30px -22px rgba(0,0,0,.35); } 50% { box-shadow: 0 30px 44px -24px rgba(0,0,0,.28); } }
+@keyframes flotar-suave { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(-1.2deg); } }
+.hero-photo img { animation: flotar 6s ease-in-out infinite, flotar-sombra 6s ease-in-out infinite; }
+.swatch-card { animation: flotar-suave 5s ease-in-out infinite; animation-delay: -1.5s; }
+.about img { animation: flotar 7s ease-in-out infinite, flotar-sombra 7s ease-in-out infinite; animation-delay: -2s; }
+.card { animation: flotar 5.5s ease-in-out infinite, flotar-sombra 5.5s ease-in-out infinite; will-change: transform; }
+.grid .card:nth-child(4n+2) { animation-delay: -1.4s; }
+.grid .card:nth-child(4n+3) { animation-delay: -2.8s; }
+.grid .card:nth-child(4n+4) { animation-delay: -4.2s; }
+.card:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .hero-photo img, .swatch-card, .about img, .card { animation: none; } }
+
+/* Animaciones: botones */
+.btn { position: relative; overflow: hidden; isolation: isolate; transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background-color .2s ease; }
+.btn::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; z-index: -1; background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent); transform: skewX(-20deg) translateX(0); transition: transform .6s ease; pointer-events: none; }
+.btn:hover { transform: translateY(-3px); box-shadow: 0 12px 24px -12px rgba(0,0,0,.45); }
+.btn:hover::after { transform: skewX(-20deg) translateX(420%); }
+.btn:active { transform: translateY(0) scale(.97); box-shadow: none; }
+.chip, .opt, .link-btn { transition: transform .18s ease, background-color .18s ease, border-color .18s ease; }
+.chip:hover, .opt:hover, .link-btn:hover { transform: translateY(-2px); border-color: var(--accent); }
+.chip:active, .opt:active, .link-btn:active { transform: scale(.95); }
+.opt[aria-pressed="true"] { animation: pop .3s ease; }
+@keyframes pop { 50% { transform: scale(1.08); } }
+.fab { animation: latido 2.6s ease-in-out infinite; transition: transform .2s ease; }
+.fab:hover { transform: scale(1.1) rotate(-8deg); animation-play-state: paused; }
+@keyframes latido { 0%,100% { box-shadow: 0 10px 28px -8px rgba(0,0,0,.45), 0 0 0 0 rgba(212,173,98,.55); } 60% { box-shadow: 0 10px 28px -8px rgba(0,0,0,.45), 0 0 0 16px rgba(212,173,98,0); } }
+
+/* Animaciones: imágenes */
+.hero::before { animation: kenburns 24s ease-in-out infinite alternate; }
+@keyframes kenburns { from { transform: scale(1.05) translate(0,0); } to { transform: scale(1.18) translate(-2%, 1%); } }
+.hero-photo img { transition: filter .4s ease; }
+.hero-photo:hover img { filter: brightness(1.06) saturate(1.08); }
+.about img { transition: filter .4s ease, border-radius .5s ease; }
+.about img:hover { border-radius: 40px; filter: brightness(1.06); }
+@supports (animation-timeline: view()) {
+  .card .ph img { animation: revelar linear both; animation-timeline: view(); animation-range: entry 0% entry 90%; }
+  .about img, .steps .step { animation-name: revelar-sube; animation-timing-function: linear; animation-fill-mode: both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+  @keyframes revelar { from { scale: 1.25; filter: grayscale(1) blur(3px); } to { scale: 1; filter: none; } }
+  @keyframes revelar-sube { from { translate: 0 40px; opacity: .2; } to { translate: 0 0; opacity: 1; } }
+}
+
+/* Animaciones: logo */
+.brand img { animation: logo-entra .9s cubic-bezier(.2,.9,.25,1.2) both, logo-vaiven 7s ease-in-out 1.5s infinite; transform-origin: 50% 80%; }
+@keyframes logo-entra { from { opacity: 0; transform: translateY(-14px) rotate(-25deg) scale(.7); } }
+@keyframes logo-vaiven { 0%, 86%, 100% { transform: rotate(0); } 90% { transform: rotate(-10deg) scale(1.06); } 94% { transform: rotate(6deg); } }
+.brand:hover img { animation-play-state: paused; }
+footer img { animation: flotar 6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .btn::after, .chip, .opt, .link-btn, .fab, .hero::before, .brand img, footer img, .card .ph img, .about img, .steps .step { animation: none !important; transition: none !important; }
+}
+
+/* WhatsApp flotante */
+.fab { position: fixed; right: calc(18px + env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 25; width: 58px; height: 58px; border-radius: 50%; background: var(--wa); color: var(--wa-ink); display: grid; place-items: center; box-shadow: 0 10px 28px -8px rgba(0,0,0,.45); }
+.fab svg { width: 28px; height: 28px; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 0.9rem; z-index: 40; }
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.03c-.24.68-1.42 1.3-1.95 1.35-.5.05-.97.24-3.26-.68-2.76-1.09-4.5-3.91-4.64-4.09-.13-.18-1.1-1.47-1.1-2.81 0-1.34.7-2 .95-2.27.25-.27.54-.34.72-.34h.52c.17 0 .39-.06.61.47.24.56.79 1.92.86 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.16-.29.36-.41.48-.14.14-.28.29-.12.56.16.27.71 1.17 1.52 1.9 1.05.93 1.93 1.22 2.2 1.36.27.14.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.61-.14.25.09 1.59.75 1.86.89.27.14.45.2.52.32.07.11.07.65-.17 1.33Z"/></symbol>
+  <symbol id="i-ig" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/></g><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-tt" viewBox="0 0 24 24"><path fill="currentColor" d="M16.6 2.5c.4 2.4 1.9 3.9 4.2 4.1v3.3c-1.5 0-2.9-.4-4.1-1.2v6.6a6 6 0 1 1-6-6c.3 0 .6 0 .9.1v3.4a2.7 2.7 0 1 0 1.8 2.5V2.5h3.2Z"/></symbol>
+  <symbol id="i-fb" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 22v-8.2h2.8l.4-3.3h-3.2V8.4c0-.9.3-1.6 1.6-1.6h1.7V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.3v3.3h2.8V22h3.4Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Muebles Ideal, inicio"><img src="img/logo-mark.png" alt="Muebles Ideal" width="48" height="44"></a>
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menú</button>
+    <nav class="nav" id="nav">
+      <a href="#catalogo-completo">Catálogo</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#envios">Envíos</a>
+      <a href="#ofertas">Ofertas</a>
+      <a href="#contacto">Contacto</a>
+      <a class="btn btn-wa" href="https://wa.me/584149442672?text=Hola%20Muebles%20Ideal%2C%20quisiera%20informaci%C3%B3n" target="_blank" rel="noopener">Contáctanos</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="inicio">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">Fabricantes en Mariara, Carabobo</span>
+        <h1>Soñado por otros, <em>diseñado por nosotros.</em></h1>
+        <p class="lead">Camas tapizadas y sofás hechos a tu medida. Tú eliges el modelo, la tela y el color; nosotros lo fabricamos y te lo llevamos a casa.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#catalogo">Ver catálogo</a>
+          <a class="btn btn-ghost" href="https://wa.me/584149442672?text=Hola%20Muebles%20Ideal%2C%20quisiera%20una%20cotizaci%C3%B3n" target="_blank" rel="noopener">Pedir cotización</a>
+        </div>
+        <div class="seals">
+          <span class="seal"><svg><use href="#i-check"/></svg>Hecho a medida</span>
+          <span class="seal"><svg><use href="#i-check"/></svg>Fabricación propia</span>
+          <span class="seal"><svg><use href="#i-check"/></svg>Envíos a todo el país</span>
+        </div>
+      </div>
+      <div class="hero-photo">
+        <img src="img/hero-cama.jpg" alt="Cama tapizada con cabecero y bordes de cojines acolchados y base de listones de madera" width="735" height="715">
+        <div class="swatch-card" aria-label="Colores de tela disponibles">
+          <span>Elige tu tela y color</span>
+          <div class="swatches"><i style="background:#d8cbbb"></i><i style="background:#8a7a6b"></i><i style="background:#b8913f"></i><i style="background:#a9a6a3"></i><i style="background:#1b1b1b"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="catalogo" style="background: var(--surface); border-block: 1px solid var(--line)">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Catálogo · Los más vendidos primero</span>
+        <h2>¿Qué estás buscando?</h2>
+        <p class="lead">Todos nuestros modelos se fabrican en el tamaño que necesites: individual, matrimonial, queen o king.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrar por categoría">
+        <button class="chip" data-f="todos" aria-pressed="true">Todos</button>
+        <button class="chip" data-f="camas" aria-pressed="false">Camas</button>
+        <button class="chip" data-f="sofas" aria-pressed="false">Sofás</button>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="grid" id="grid-catalogo"></div>
+      <div class="ver-mas"><button type="button" class="btn btn-primary" id="ver-mas" aria-expanded="false" aria-controls="grid-catalogo">VER MÁS</button></div>
+    </div>
+  </section>
+
+  <section class="band about" id="nosotros">
+    <div class="wrap">
+      <div class="video-box">
+        <video id="vid" src="img/video-nosotros.mp4" poster="img/video-poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Video de un sofá fabricado por Muebles Ideal"></video>
+        <button class="sonido" id="sonido" type="button" aria-pressed="false">Activar sonido</button>
+        <span class="video-cap">Mira cómo trabajamos</span>
+      </div>
+      <div class="about-copy">
+        <span class="eyebrow">Nosotros · Desde 2020</span>
+        <h2>Cada cama sale de nuestro taller en Mariara</h2>
+        <p>En Muebles Ideal diseñamos y fabricamos camas tapizadas y sofás para hogares de toda Venezuela. Trabajamos cada pieza a mano, con estructura reforzada y la tela que tú escojas, para que el mueble que soñaste quede exactamente como lo imaginaste.</p>
+        <div class="values">
+          <div><h4>Diseño a tu medida</h4><p>Ajustamos tamaño, altura del cabecero y acabados.</p></div>
+          <div><h4>Hecho a mano</h4><p>Tapicería artesanal, cuidada en cada costura.</p></div>
+          <div><h4>Telas a elegir</h4><p>Lino, pana, bouclé y más colores disponibles.</p></div>
+          <div><h4>Entrega segura</h4><p>Despachos frecuentes a Caracas, Maracay y Valencia.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="proceso">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Cómo trabajamos</span>
+        <h2>De la idea a tu habitación</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-img"><img src="img/paso-modelo.jpg" alt="Cama con cabecero en abanico del catálogo" loading="lazy" width="640" height="480"><b>1</b></div><h3>Elige el modelo</h3><p>Escoge del catálogo o envíanos una foto de lo que te gusta.</p></div>
+        <div class="step"><div class="step-img"><img src="img/paso-tela.jpg" alt="Muestrario de telas en distintos colores" loading="lazy" width="640" height="480"><b>2</b></div><h3>Medidas y tela</h3><p>Definimos contigo el tamaño, la tela y el color.</p></div>
+        <div class="step"><div class="step-img"><img src="img/paso-fabricamos.jpg" alt="Estructura de madera de una cama en nuestro taller" loading="lazy" width="640" height="480"><b>3</b></div><h3>Fabricamos</h3><p>Hacemos tu mueble en nuestro taller de Mariara.</p></div>
+        <div class="step"><div class="step-img"><video src="img/paso-entrega.mp4" poster="img/paso-entrega-poster.jpg" autoplay muted loop playsinline preload="metadata" width="640" height="480" aria-label="Muebles embalados cargados en la camioneta para entrega"></video><b>4</b></div><h3>Te lo llevamos</h3><p>Coordinamos el despacho hasta la puerta de tu casa.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <template id="tpl-envios">
+      <div class="ship">
+        <div class="ship-card">
+          <div class="origin"><i></i>Salida desde Mariara, Carabobo</div>
+          <div class="route">
+            <div><span>Caracas</span><span>Despachos frecuentes</span></div>
+            <div><span>Maracay</span><span>Despachos frecuentes</span></div>
+            <div><span>Valencia</span><span>Despachos frecuentes</span></div>
+            <div><span>Resto del país</span><span>Con cargo adicional según destino</span></div>
+          </div>
+        </div>
+        <div class="ship-card" style="justify-content: space-between">
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <h3 style="font-size:1.3rem">Consulta el costo de envío a tu ciudad</h3>
+            <p class="lead" style="font-size:1rem">Escríbenos tu ciudad y el modelo que te interesa y te respondemos con el precio total puesto en tu puerta.</p>
+          </div>
+          <a class="btn btn-wa" href="https://wa.me/584149442672?text=Hola%20Muebles%20Ideal%2C%20%C2%BFcu%C3%A1nto%20cuesta%20el%20env%C3%ADo%20a%20mi%20ciudad%3F" target="_blank" rel="noopener">Consultar envío</a>
+        </div>
+      </div>
+  </template>
+
+  <section class="ofertas" id="ofertas">
+    <div class="wrap ofertas-in">
+      <div class="of-copy">
+        <span class="eyebrow">Club Muebles Ideal</span>
+        <h2>Regístrate y recibe ofertas exclusivas</h2>
+        <p>Sé el primero en conocer nuestros nuevos modelos, descuentos de temporada y promociones especiales para clientes registrados. Te escribimos solo cuando haya algo que valga la pena.</p>
+        <ul class="of-list">
+          <li><svg><use href="#i-check"/></svg>Descuentos antes que nadie</li>
+          <li><svg><use href="#i-check"/></svg>Lanzamientos de nuevos modelos</li>
+          <li><svg><use href="#i-check"/></svg>Promociones en envíos</li>
+        </ul>
+      </div>
+      <form class="of-form" id="of-form" novalidate>
+        <div class="field"><label for="of-nom">Nombre</label><input id="of-nom" autocomplete="name" placeholder="Tu nombre"></div>
+        <div class="field"><label for="of-email">Correo electrónico</label><input id="of-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"></div>
+        <label class="check" for="of-ok"><input id="of-ok" type="checkbox"> Acepto recibir ofertas y promociones de Muebles Ideal.</label>
+        <button class="btn btn-primary" type="submit" id="of-enviar">REGISTRARME</button>
+        <p class="estado" id="of-estado" role="status" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="band" id="contacto" style="background: var(--surface); border-top: 1px solid var(--line)">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Contacto</span>
+        <h2>Hablemos de tu próximo mueble</h2>
+      </div>
+      <div class="contact">
+        <div class="contact-info">
+          <div class="info-row">
+            <small style="display:flex; align-items:center; gap:6px"><svg style="width:16px; height:16px; color:var(--accent)"><use href="#i-wa"/></svg>WhatsApp</small>
+            <span class="big" id="phone">+58 414-944-2672</span>
+            <div class="inline">
+              <a class="link-btn" href="https://wa.me/584149442672" target="_blank" rel="noopener">Abrir chat</a>
+              <button class="link-btn" id="copy-phone" type="button">Copiar número</button>
+            </div>
+          </div>
+          <div class="info-row">
+            <small>Correo</small>
+            <span class="big" id="correo" style="font-size: clamp(1.05rem, 2.2vw, 1.35rem); overflow-wrap: anywhere">muebles_ideal2020@gmail.com</span>
+            <div class="inline">
+              <a class="link-btn" href="mailto:muebles_ideal2020@gmail.com">Escribir correo</a>
+              <button class="link-btn" id="copy-mail" type="button">Copiar correo</button>
+            </div>
+          </div>
+          <div class="info-row">
+            <small>Síguenos</small>
+            <div class="redes">
+              <a href="https://www.instagram.com/camas_ideal2020/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a>
+              <a href="https://www.tiktok.com/@muebles.y.camas.i" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok"><svg><use href="#i-tt"/></svg></a>
+              <a href="https://www.facebook.com/share/1CLPTUJma5/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a>
+            </div>
+          </div>
+          <div class="info-row" style="border-bottom:0">
+            <small>Ubicación</small>
+            <span class="big">Mariara, Carabobo</span>
+            <div class="inline"><a class="link-btn" href="https://www.google.com/maps/search/?api=1&query=Mariara%2C%20Carabobo%2C%20Venezuela" target="_blank" rel="noopener">Ver en Google Maps</a></div>
+          </div>
+        </div>
+
+        <form id="form" novalidate>
+          <h3>Solicitar asesoría personalizada</h3>
+          <div class="two">
+            <div class="field"><label for="f-nombre">Nombre</label><input id="f-nombre" autocomplete="name" placeholder="Tu nombre"></div>
+            <div class="field"><label for="f-ciudad">Ciudad</label><input id="f-ciudad" placeholder="Ej. Maracay"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="f-email">Correo electrónico</label><input id="f-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"></div>
+            <div class="field"><label for="f-tel">Teléfono (opcional)</label><input id="f-tel" type="tel" autocomplete="tel" placeholder="0414-0000000"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="f-tipo">Tipo de proyecto</label>
+              <select id="f-tipo"><option>Para mi hogar</option><option>Hotel o empresa</option><option>Quiero revender</option></select></div>
+            <div class="field"><label for="f-producto">Producto de interés</label><select id="f-producto"><option>Aún no sé</option></select></div>
+          </div>
+          <div class="field"><label for="f-msg">Mensaje</label><textarea id="f-msg" placeholder="Cuéntanos medidas, tela o color que te gustaría"></textarea></div>
+          <button class="btn btn-wa" type="submit" id="f-enviar">Enviar solicitud</button>
+          <p class="estado" id="f-estado" role="status" hidden></p>
+          <p class="hint">Te enviaremos una confirmación a tu correo. ¿Prefieres el chat? <a id="f-send" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <img src="img/logo-v.png" alt="Muebles Ideal" width="138" height="92">
+      <p class="slogan">Soñado por otros, diseñado por nosotros.</p>
+    </div>
+    <div><h4>Productos</h4><ul><li><a href="#catalogo" data-go="camas">Camas</a></li><li><a href="#catalogo" data-go="sofas">Sofás</a></li><li><a href="#catalogo-completo">Catálogo completo</a></li></ul></div>
+    <div><h4>Ayuda</h4><ul><li><a href="#envios">Envíos y tarifas</a></li><li><a href="#proceso">Cómo trabajamos</a></li><li><a href="#contacto">Asesoría</a></li></ul></div>
+    <div><h4>Envíos</h4><ul><li>Caracas</li><li>Maracay</li><li>Valencia</li><li>Todo el país*</li></ul></div>
+    <div><h4>Contacto</h4><ul><li>Mariara, Carabobo</li></ul>
+      <div class="redes" style="margin-top: 20px">
+        <a href="https://wa.me/584149442672" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp"><svg><use href="#i-wa"/></svg></a>
+        <a href="https://www.instagram.com/camas_ideal2020/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a>
+        <a href="https://www.tiktok.com/@muebles.y.camas.i" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok"><svg><use href="#i-tt"/></svg></a>
+        <a href="https://www.facebook.com/share/1CLPTUJma5/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a>
+      </div>
+    </div>
+    <p class="legal"><span>© 2026 Muebles Ideal. Todos los derechos reservados.</span><span>*Envíos al resto del país con cargo adicional.</span></p>
+  </div>
+</footer>
+
+<a class="fab" href="https://wa.me/584149442672?text=Hola%20Muebles%20Ideal%2C%20quisiera%20informaci%C3%B3n" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg><use href="#i-wa"/></svg></a>
+<div class="toast" id="toast" hidden></div>
+
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-t" hidden>
+  <div class="panel-top">
+    <div class="panel-head">
+      <img src="img/logo-mark.png" alt="" width="40" height="37">
+      <div><span class="eyebrow">Muebles Ideal</span><h2 id="panel-t">Catálogo completo</h2></div>
+      <button class="close panel-close" id="panel-close" aria-label="Cerrar catálogo">×</button>
+    </div>
+    <div class="filters" role="group" aria-label="Filtrar catálogo completo">
+      <button class="chip" data-pf="todos" aria-pressed="true">Todos</button>
+      <button class="chip" data-pf="camas" aria-pressed="false">Camas</button>
+      <button class="chip" data-pf="sofas" aria-pressed="false">Sofás</button>
+      <span class="count" id="panel-count"></span>
+    </div>
+  </div>
+  <div class="panel-body"><div class="grid" id="grid-panel"></div></div>
+</div>
+
+<div class="panel" id="panel-envios" role="dialog" aria-modal="true" aria-labelledby="envios-t" hidden>
+  <div class="panel-top">
+    <div class="panel-head">
+      <img src="img/logo-mark.png" alt="" width="40" height="37">
+      <div><span class="eyebrow">Envíos</span><h2 id="envios-t">Llevamos tu mueble a toda Venezuela</h2></div>
+      <button class="close panel-close" id="envios-close" aria-label="Cerrar envíos">×</button>
+    </div>
+  </div>
+  <div class="panel-body"><div style="max-width: 1100px; margin: 0 auto" id="envios-body"></div></div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-nombre" hidden>
+  <div class="modal-bg" data-close></div>
+  <div class="sheet">
+    <button class="close" data-close aria-label="Cerrar">×</button>
+    <div class="sheet-photo"><img id="m-img" src="img/cama-chevron.jpg" alt=""></div>
+    <div class="sheet-info">
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <span class="eyebrow" id="m-cat">Camas</span>
+        <h2 id="m-nombre">Producto</h2>
+        <p class="lead" id="m-desc"></p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px"><span class="sub">Características</span><ul class="feat" id="m-feat"></ul></div>
+      <div style="display:flex; flex-direction:column; gap:10px"><span class="sub" id="m-size-label">Tamaño</span><div class="opts" id="m-sizes"></div></div>
+      <div style="display:flex; flex-direction:column; gap:10px"><span class="sub">Color de tela</span><div class="opts" id="m-colors"></div></div>
+      <div style="display:flex; flex-direction:column; gap:6px"><span class="sub">Especificaciones técnicas</span><table class="spec-table"><tbody id="m-specs"></tbody></table></div>
+      <div class="price-row"><span class="price ask" id="m-price">Precio a consultar</span></div>
+      <form class="m-form" id="m-form" novalidate>
+        <span class="sub">Tus datos para la cotización</span>
+        <div class="two">
+          <div class="field"><label for="m-nom">Nombre</label><input id="m-nom" autocomplete="name" placeholder="Tu nombre"></div>
+          <div class="field"><label for="m-email">Correo electrónico</label><input id="m-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="m-tel">Teléfono (opcional)</label><input id="m-tel" type="tel" autocomplete="tel" placeholder="0414-0000000"></div>
+          <div class="field"><label for="m-ciudad">Ciudad</label><input id="m-ciudad" placeholder="Ej. Caracas"></div>
+        </div>
+        <button class="btn btn-wa" type="submit" id="m-enviar">SOLICITAR COTIZACIÓN</button>
+        <p class="estado" id="m-estado" role="status" hidden></p>
+        <p class="note">El tamaño y color que elijas se incluyen en tu solicitud y te llega una confirmación por correo. ¿Prefieres el chat? <a id="m-wa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== PRODUCTOS =====
+   Para poner un precio, escribe el número en "precio" (ej. precio: 450).
+   Si "precio" está vacío, la tarjeta muestra "Precio a consultar". */
+document.documentElement.lang = "es";
+const WHATSAPP = "584149442672";
+const PRODUCTOS = [
+  { id:"chevron",  cat:"camas", nombre:"Cama Chevron",         img:"img/cama-chevron-marca.jpg",   desc:"Cabecero alto con costuras en V. Elegante y moderna.",          tela:"Tela a elegir", precio:"", destacado:true,  tag:"Más vendida" },
+  { id:"abanico",  cat:"camas", nombre:"Cama Abanico",         img:"img/cama-abanico.jpg",         desc:"Cabecero en abanico y base con canales verticales.",            tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"linea",    cat:"camas", nombre:"Cama Línea",           img:"img/cama-linea.jpg",           desc:"Cabecero y base acanalados, patas doradas.",                   tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"perla",    cat:"sofas", nombre:"Sofá en L Perla",      img:"img/sofa-perla.jpg",           desc:"Sofá con chaise y patas metálicas. Amplio y cómodo.",          tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"abanico-p",cat:"camas", nombre:"Cama Abanico Petróleo",img:"img/cama-abanico-petroleo.jpg",desc:"Nuestro modelo abanico tapizado en azul petróleo.",            tela:"Tela a elegir", precio:"" },
+  { id:"mosaico",  cat:"camas", nombre:"Cama Mosaico",         img:"img/cama-mosaico.jpg",         desc:"Cabecero geométrico en bloques, patas doradas.",               tela:"Tela a elegir", precio:"" },
+  { id:"luna",     cat:"camas", nombre:"Cama Luna",            img:"img/cama-luna.jpg",            desc:"Cabecero de media luna en bouclé. Diseño de tendencia.",        tela:"Bouclé",        precio:"", tag:"Nuevo" },
+  { id:"marco",    cat:"camas", nombre:"Cama Marco",           img:"img/cama-marco.jpg",           desc:"Cabecero con canales a los lados y base tapizada.",            tela:"Tela a elegir", precio:"" },
+  { id:"duo",      cat:"camas", nombre:"Cama Dúo",             img:"img/cama-duo.jpg",             desc:"Cabecero de dos paneles acolchados. Líneas simples.",          tela:"Tela a elegir", precio:"" },
+  { id:"arena",    cat:"camas", nombre:"Cama Línea Arena",     img:"img/cama-linea-arena.jpg",     desc:"Cabecero acanalado alto en tono arena.",                       tela:"Tela a elegir", precio:"" },
+  { id:"noir",     cat:"sofas", nombre:"Sofá en L Noir",       img:"img/sofa-noir.jpg",            desc:"Asiento capitoneado en negro y patas cromadas.",               tela:"Tela a elegir", precio:"" },
+  { id:"grafito",  cat:"sofas", nombre:"Sofá en L Grafito",    img:"img/sofa-grafito.jpg",         desc:"Sofá modular amplio, ideal para salas grandes.",               tela:"Tela a elegir", precio:"" }
+];
+
+const fmt = n => "$" + Number(n).toLocaleString("es-VE");
+const waLink = txt => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`;
+
+function card(p){
+  const tiene = p.precio !== "" && p.precio != null;
+  return `<article class="card">
+    <a class="ph" href="#p-${p.id}" aria-label="Ver detalles de ${p.nombre}">${(() => { const t = p.destacado ? (p.cat === "sofas" ? "Más vendido" : "Más vendida") : p.tag; return t ? `<span class="tag">${t}</span>` : ""; })()}<img src="${p.img}" alt="${p.nombre}" loading="lazy"></a>
+    <div class="body">
+      <h3><a href="#p-${p.id}">${p.nombre}</a></h3>
+    </div>
+  </article>`;
+}
+
+
+const gridCat = document.getElementById("grid-catalogo");
+const chips = [...document.querySelectorAll(".chip")];
+const VISIBLES = 3;
+const btnMas = document.getElementById("ver-mas");
+const ordenados = [...PRODUCTOS.filter(p => p.destacado), ...PRODUCTOS.filter(p => !p.destacado)];
+const porCat = f => f === "todos" ? ordenados : ordenados.filter(p => p.cat === f);
+let filtroActual = "todos";
+function filtrar(f){
+  filtroActual = f;
+  const lista = porCat(f), muestra = lista.slice(0, VISIBLES);
+  gridCat.innerHTML = muestra.map(card).join("");
+  chips.forEach(c => c.setAttribute("aria-pressed", c.dataset.f === f));
+  document.getElementById("count").textContent = `Mostrando ${muestra.length} de ${lista.length} modelos`;
+}
+/* Ventana del catálogo completo */
+const panel = document.getElementById("panel"), gridPanel = document.getElementById("grid-panel");
+const pchips = [...document.querySelectorAll("[data-pf]")];
+function filtrarPanel(f){
+  const lista = porCat(f);
+  gridPanel.innerHTML = lista.map(card).join("");
+  [...gridPanel.children].forEach((el, i) => { el.classList.add("nueva"); el.style.animationDelay = `${i * 50}ms, ${-i * 1.4}s, ${-i * 1.4}s`; });
+  pchips.forEach(c => c.setAttribute("aria-pressed", c.dataset.pf === f));
+  document.getElementById("panel-count").textContent = `${lista.length} modelos`;
+}
+function abrirPanel(){
+  if (!panel.hidden) return;
+  filtrarPanel(filtroActual);
+  panel.hidden = false; panel.scrollTop = 0; document.body.classList.add("lock");
+  document.getElementById("panel-close").focus({ preventScroll: true });
+}
+function cerrarPanel(){
+  if (panel.hidden) return;
+  panel.hidden = true;
+  if (modal.hidden) document.body.classList.remove("lock");
+  if (location.hash === "#catalogo-completo") history.replaceState(null, "", location.pathname + location.search);
+  btnMas.focus({ preventScroll: true });
+}
+pchips.forEach(c => c.addEventListener("click", () => filtrarPanel(c.dataset.pf)));
+document.getElementById("panel-close").addEventListener("click", cerrarPanel);
+btnMas.addEventListener("click", () => { location.hash = "catalogo-completo"; });
+chips.forEach(c => c.addEventListener("click", () => filtrar(c.dataset.f)));
+document.querySelectorAll("[data-go]").forEach(a => a.addEventListener("click", () => filtrar(a.dataset.go)));
+filtrar("todos");
+
+/* ===== FICHA TÉCNICA =====
+   Revisa y corrige estos datos según tu fabricación real. */
+const TAMANOS_CAMA = ["Individual 100×190 cm","Matrimonial 135×190 cm","Queen 160×190 cm","King 190×200 cm","Medida especial"];
+const TAMANOS_SOFA = ["Chaise a la izquierda","Chaise a la derecha","Medida especial"];
+const COLORES = [["Beige","#d8cbbb"],["Arena","#b9a48e"],["Gris perla","#bdbab6"],["Gris grafito","#4a4d50"],["Marrón","#7a6656"],["Petróleo","#1d5a60"],["Negro","#1b1b1b"],["Blanco hueso","#ece7de"]];
+const FICHA = {
+  chevron:   { cabecero:"Alto, con costuras en V (chevron)", base:"Tapizada, líneas rectas", patas:"Ocultas", feat:["Cabecero acolchado de diseño exclusivo","Costuras en V que alargan visualmente la pared","Ideal para habitaciones principales"] },
+  abanico:   { cabecero:"En abanico (rayos) acolchado", base:"Acanalada vertical", patas:"Ocultas", feat:["Cabecero en abanico, nuestra pieza más llamativa","Base con canales que hace juego con el cabecero","Disponible en cualquier color de tela"] },
+  linea:     { cabecero:"Canales verticales", base:"Acanalada vertical", patas:"Doradas metálicas", feat:["Diseño acanalado completo, cabecero y base","Patas doradas que dan un toque de lujo","Combina con estilos modernos y clásicos"] },
+  "abanico-p":{ cabecero:"En abanico (rayos) acolchado", base:"Tapizada lisa", patas:"Ocultas", feat:["Versión del modelo Abanico con base lisa","Mostrada en tela azul petróleo","Cabecero alto y acolchado"] },
+  mosaico:   { cabecero:"Geométrico en bloques acolchados", base:"Tapizada lisa", patas:"Doradas metálicas", feat:["Cabecero en bloques de distintos tamaños","Estilo contemporáneo y elegante","Patas doradas"] },
+  luna:      { cabecero:"Media luna de gran formato", base:"Bordes redondeados acolchados", patas:"Ocultas, cama a ras de piso", feat:["Diseño envolvente de bordes redondos","Tapizado en bouclé de textura suave","Pieza protagonista para cualquier habitación"] },
+  marco:     { cabecero:"Panel central con canales laterales", base:"Tapizada lisa", patas:"Ocultas", feat:["Cabecero sobrio con detalle acanalado a los lados","Base amplia y robusta","Ideal para habitaciones modernas"] },
+  duo:       { cabecero:"Dos paneles acolchados", base:"Tapizada lisa", patas:"Ocultas", feat:["Diseño minimalista de líneas simples","Cabecero de dos cojines acolchados","Excelente relación precio y estilo"] },
+  arena:     { cabecero:"Alto, canales verticales", base:"Tapizada lisa", patas:"Ocultas", feat:["Cabecero alto acanalado","Tono arena cálido y luminoso","Base lisa fácil de limpiar"] },
+  perla:     { asiento:"3 puestos + chaise", patas:"Metálicas cromadas", feat:["Chaise amplia para descansar con las piernas estiradas","Respaldos con cojines sueltos","Patas metálicas cromadas"] },
+  noir:      { asiento:"3 puestos + chaise", patas:"Metálicas cromadas", feat:["Asiento y chaise capitoneados","Brazos anchos y rectos","Mostrado en tela negra"] },
+  grafito:   { asiento:"4 puestos + chaise", patas:"Ocultas", feat:["Gran formato para salas amplias","Asientos de doble capa muy cómodos","Mostrado en gris grafito"] }
+};
+function especificaciones(p, f){
+  if (p.cat === "camas") return [
+    ["Tipo","Cama tapizada con base"],["Cabecero",f.cabecero],["Base",f.base],["Patas",f.patas],
+    ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
+    ["Tapizado",p.tela === "Bouclé" ? "Bouclé (otras telas disponibles)" : "Lino, pana o felpa a elegir"],
+    ["Colchón","No incluido (consúltanos)"],["Fabricación","Hecha a mano en Mariara, Carabobo"],["Entrega","Por encargo. Te confirmamos el tiempo al pedir"]
+  ];
+  return [
+    ["Tipo","Sofá en L con chaise"],["Capacidad",f.asiento],["Patas",f.patas],
+    ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
+    ["Tapizado","Lino, pana o felpa a elegir"],["Medidas","A medida según tu espacio"],
+    ["Fabricación","Hecho a mano en Mariara, Carabobo"],["Entrega","Por encargo. Te confirmamos el tiempo al pedir"]
+  ];
+}
+
+const modal = document.getElementById("modal");
+const $ = id => document.getElementById(id);
+let actual = null, talla = "", color = "";
+function mensaje(){
+  const art = actual.cat === "sofas" ? "el" : "la";
+  let t = `Hola Muebles Ideal, me interesa ${art} ${actual.nombre}.`;
+  if (talla) t += ` ${actual.cat === "sofas" ? "Configuración" : "Tamaño"}: ${talla}.`;
+  if (color) t += ` Color: ${color}.`;
+  $("m-wa").href = waLink(t + " ¿Me pueden dar precio y tiempo de entrega?");
+}
+function opciones(cont, lista, esColor){
+  cont.innerHTML = lista.map(x => esColor
+    ? `<button type="button" class="opt color-opt" aria-pressed="false" data-v="${x[0]}"><i style="background:${x[1]}"></i>${x[0]}</button>`
+    : `<button type="button" class="opt" aria-pressed="false" data-v="${x}">${x}</button>`).join("");
+  cont.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") !== "true";
+    cont.querySelectorAll(".opt").forEach(o => o.setAttribute("aria-pressed", "false"));
+    b.setAttribute("aria-pressed", on);
+    if (esColor) color = on ? b.dataset.v : ""; else talla = on ? b.dataset.v : "";
+    mensaje();
+  }));
+}
+let volverA = null;
+function abrir(id){
+  const p = PRODUCTOS.find(x => x.id === id); if (!p) return;
+  const f = FICHA[id] || {};
+  actual = p; talla = ""; color = "";
+  $("m-img").src = p.img; $("m-img").alt = p.nombre;
+  modal.querySelector(".sheet-photo").style.setProperty("--m-img", `url("${p.img}")`);
+  $("m-cat").textContent = p.cat === "camas" ? "Camas · Hecha a medida" : "Sofás · Hecho a medida";
+  $("m-nombre").textContent = p.nombre;
+  $("m-desc").textContent = p.desc;
+  $("m-feat").innerHTML = (f.feat || []).map(t => `<li><svg><use href="#i-check"/></svg>${t}</li>`).join("");
+  $("m-size-label").textContent = p.cat === "camas" ? "Tamaño (medida del colchón)" : "Configuración";
+  opciones($("m-sizes"), p.cat === "camas" ? TAMANOS_CAMA : TAMANOS_SOFA, false);
+  opciones($("m-colors"), COLORES, true);
+  $("m-specs").innerHTML = especificaciones(p, f).map(([k,v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
+  const tiene = p.precio !== "" && p.precio != null;
+  $("m-price").className = tiene ? "price" : "price ask";
+  $("m-price").textContent = tiene ? fmt(p.precio) : "Precio a consultar";
+  mensaje();
+  document.getElementById("m-estado").hidden = true;
+  if (modal.hidden) volverA = document.activeElement;
+  modal.hidden = false; document.body.classList.add("lock");
+  modal.querySelector(".sheet").scrollTop = 0;
+  modal.querySelector(".close").focus({ preventScroll: true });
+}
+function cerrar(){
+  if (modal.hidden) return;
+  modal.hidden = true;
+  if (panel.hidden) document.body.classList.remove("lock");
+  if (location.hash.startsWith("#p-")) history.replaceState(null, "", panel.hidden ? location.pathname + location.search : "#catalogo-completo");
+  if (volverA && volverA.focus) volverA.focus({ preventScroll: true });
+}
+/* Ventana de envíos */
+const pEnv = document.getElementById("panel-envios");
+document.getElementById("envios-body").appendChild(document.getElementById("tpl-envios").content.cloneNode(true));
+let volverEnv = null;
+function abrirEnvios(){
+  if (!pEnv.hidden) return;
+  volverEnv = document.activeElement;
+  pEnv.hidden = false; pEnv.scrollTop = 0; document.body.classList.add("lock");
+  document.getElementById("envios-close").focus({ preventScroll: true });
+}
+function cerrarEnvios(){
+  if (pEnv.hidden) return;
+  pEnv.hidden = true;
+  if (modal.hidden && panel.hidden) document.body.classList.remove("lock");
+  if (location.hash === "#envios") history.replaceState(null, "", location.pathname + location.search);
+  if (volverEnv && volverEnv.focus) volverEnv.focus({ preventScroll: true });
+}
+document.getElementById("envios-close").addEventListener("click", cerrarEnvios);
+
+function leerHash(){
+  const h = location.hash;
+  if (h.startsWith("#p-")) abrir(h.slice(3));
+  else if (h === "#catalogo-completo") { cerrar(); cerrarEnvios(); abrirPanel(); }
+  else if (h === "#envios") { cerrar(); cerrarPanel(); abrirEnvios(); }
+  else { cerrar(); cerrarPanel(); cerrarEnvios(); }
+}
+window.addEventListener("hashchange", leerHash);
+modal.querySelectorAll("[data-close]").forEach(el => el.addEventListener("click", cerrar));
+document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!modal.hidden) cerrar(); else if (!pEnv.hidden) cerrarEnvios(); else cerrarPanel(); });
+leerHash();
+
+/* Menú y pie se desvanecen según la distancia */
+(function(){
+  const top = document.querySelector(".top"), pie = document.querySelector("footer"), raiz = document.documentElement;
+  let ultimo = scrollY, pend = false;
+  function calc(){
+    pend = false;
+    const y = scrollY;
+    raiz.style.setProperty("--top-o", Math.max(0.12, 1 - y / 500).toFixed(3));
+    top.classList.toggle("ver", y < ultimo - 4);
+    ultimo = y;
+    const r = pie.getBoundingClientRect();
+    const visto = Math.min(1, Math.max(0, (innerHeight - r.top) / Math.max(r.height, 1)));
+    raiz.style.setProperty("--foot-o", (0.1 + 0.9 * visto).toFixed(3));
+  }
+  addEventListener("scroll", () => { if (!pend) { pend = true; requestAnimationFrame(calc); } }, { passive: true });
+  addEventListener("resize", calc);
+  calc();
+})();
+
+/* Copiar correo */
+document.getElementById("copy-mail").addEventListener("click", () => {
+  const sel = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("correo")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); aviso("Correo seleccionado, cópialo"); };
+  try { navigator.clipboard.writeText("muebles_ideal2020@gmail.com").then(() => aviso("Correo copiado"), sel); } catch (e) { sel(); }
+});
+
+/* Video de Nosotros: sonido */
+(function(){
+  const v = document.getElementById("vid"), b = document.getElementById("sonido");
+  if (!v || !b) return;
+  b.addEventListener("click", () => {
+    v.muted = !v.muted;
+    if (!v.muted) { v.currentTime = 0; v.play().catch(() => {}); }
+    b.textContent = v.muted ? "Activar sonido" : "Silenciar";
+    b.setAttribute("aria-pressed", !v.muted);
+  });
+})();
+
+/* Menú móvil */
+const nav = document.getElementById("nav"), mb = document.getElementById("menu-btn");
+mb.addEventListener("click", () => { const o = nav.classList.toggle("open"); mb.setAttribute("aria-expanded", o); });
+nav.querySelectorAll("a").forEach(a => a.addEventListener("click", () => { nav.classList.remove("open"); mb.setAttribute("aria-expanded", false); }));
+
+/* Formulario → mensaje de WhatsApp */
+const sel = document.getElementById("f-producto");
+PRODUCTOS.forEach(p => { const o = document.createElement("option"); o.textContent = p.nombre; sel.appendChild(o); });
+const send = document.getElementById("f-send");
+function armar(){
+  const v = id => document.getElementById(id).value.trim();
+  const partes = ["Hola Muebles Ideal, quisiera una asesoría."];
+  if (v("f-nombre")) partes.push(`Mi nombre es ${v("f-nombre")}.`);
+  if (v("f-ciudad")) partes.push(`Estoy en ${v("f-ciudad")}.`);
+  partes.push(`Tipo de proyecto: ${v("f-tipo")}.`);
+  if (v("f-producto") !== "Aún no sé") partes.push(`Me interesa: ${v("f-producto")}.`);
+  if (v("f-msg")) partes.push(v("f-msg"));
+  send.href = waLink(partes.join(" "));
+}
+document.getElementById("form").addEventListener("input", armar);
+/* ===== ENVÍO DE COTIZACIONES POR CORREO =====
+   Usa FormSubmit (gratis): te llega cada solicitud a tu correo y el cliente
+   recibe una confirmación automática. Funciona cuando la página está publicada
+   en tu dominio; la primera solicitud te pedirá activar el servicio por correo. */
+const CORREO_NEGOCIO = "muebles_ideal2020@gmail.com";
+const emailOk = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+async function enviarCotizacion(campos, asunto, respuesta){
+  const cuerpo = {
+    ...campos,
+    _subject: asunto,
+    _template: "table",
+    _captcha: "false",
+    _autoresponse: respuesta || `Hola ${campos.name}, gracias por escribir a Muebles Ideal. Recibimos tu solicitud${campos.Modelo ? " de cotización de la " + campos.Modelo : ""} y te responderemos muy pronto con el precio y el tiempo de entrega. Si lo prefieres, escríbenos al WhatsApp +58 414-944-2672. Muebles Ideal: soñado por otros, diseñado por nosotros.`
+  };
+  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const r = await fetch(`https://formsubmit.co/ajax/${CORREO_NEGOCIO}`, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(cuerpo), signal: ctrl.signal });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || String(j.success) !== "true") throw new Error("envio");
+  } finally { clearTimeout(t); }
+}
+function estado(el, tipo, texto){ el.hidden = false; el.className = "estado " + tipo; el.textContent = texto; }
+function validar(nomEl, mailEl, estEl){
+  const n = nomEl.value.trim(), m = mailEl.value.trim();
+  nomEl.setAttribute("aria-invalid", !n); mailEl.setAttribute("aria-invalid", !emailOk(m));
+  if (!n) { estado(estEl, "error", "Escribe tu nombre para enviar la solicitud."); nomEl.focus(); return false; }
+  if (!emailOk(m)) { estado(estEl, "error", "Revisa tu correo electrónico: lo necesitamos para enviarte la confirmación."); mailEl.focus(); return false; }
+  return true;
+}
+async function procesar(btn, estEl, campos, asunto, textoBtn){
+  btn.disabled = true; btn.textContent = "Enviando…";
+  try {
+    await enviarCotizacion(campos, asunto);
+    estado(estEl, "ok", `¡Listo, ${campos.name}! Recibimos tu solicitud y te enviamos una confirmación a ${campos.email}. Te responderemos muy pronto.`);
+    return true;
+  } catch (e) {
+    estado(estEl, "error", "No pudimos enviar tu solicitud por correo en este momento. Intenta de nuevo o escríbenos por WhatsApp con el enlace de abajo.");
+    return false;
+  } finally { btn.disabled = false; btn.textContent = textoBtn; }
+}
+
+document.getElementById("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  const est = document.getElementById("f-estado");
+  if (!validar(document.getElementById("f-nombre"), document.getElementById("f-email"), est)) return;
+  const ok = await procesar(document.getElementById("f-enviar"), est, {
+    name: v("f-nombre"), email: v("f-email"), "Teléfono": v("f-tel") || "No indicado", Ciudad: v("f-ciudad") || "No indicada",
+    "Tipo de proyecto": v("f-tipo"), "Producto de interés": v("f-producto"), Mensaje: v("f-msg") || "Sin mensaje"
+  }, `Nueva solicitud de asesoría: ${v("f-nombre")}`, "Enviar solicitud");
+  if (ok) ["f-msg"].forEach(id => document.getElementById(id).value = "");
+});
+
+document.getElementById("of-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  const est = document.getElementById("of-estado"), btn = document.getElementById("of-enviar");
+  if (!validar(document.getElementById("of-nom"), document.getElementById("of-email"), est)) return;
+  if (!document.getElementById("of-ok").checked) { estado(est, "error", "Marca la casilla para aceptar recibir nuestras ofertas."); return; }
+  btn.disabled = true; btn.textContent = "Registrando…";
+  try {
+    await enviarCotizacion({ name: v("of-nom"), email: v("of-email"), "Acepta ofertas": "Sí" },
+      `Nuevo registro para ofertas: ${v("of-nom")}`,
+      `Hola ${v("of-nom")}, ¡bienvenido al Club Muebles Ideal! Desde ahora serás de los primeros en conocer nuestras ofertas, nuevos modelos y promociones especiales. Mientras tanto, puedes ver nuestros trabajos en Instagram @camas_ideal2020 o escribirnos al WhatsApp +58 414-944-2672. Muebles Ideal: soñado por otros, diseñado por nosotros.`);
+    estado(est, "ok", `¡Bienvenido, ${v("of-nom")}! Ya estás registrado. Te enviamos un correo de bienvenida a ${v("of-email")}.`);
+    ["of-nom", "of-email"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("of-ok").checked = false;
+  } catch (err) {
+    estado(est, "error", "No pudimos completar tu registro en este momento. Intenta de nuevo en unos minutos.");
+  } finally { btn.disabled = false; btn.textContent = "REGISTRARME"; }
+});
+
+document.getElementById("m-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!actual) return;
+  const v = id => document.getElementById(id).value.trim();
+  const est = document.getElementById("m-estado");
+  if (!validar(document.getElementById("m-nom"), document.getElementById("m-email"), est)) return;
+  await procesar(document.getElementById("m-enviar"), est, {
+    name: v("m-nom"), email: v("m-email"), "Teléfono": v("m-tel") || "No indicado", Ciudad: v("m-ciudad") || "No indicada",
+    Modelo: actual.nombre, [actual.cat === "sofas" ? "Configuración" : "Tamaño"]: talla || "Por definir", Color: color || "Por definir"
+  }, `Nueva cotización: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN");
+});
+armar();
+
+/* Copiar número */
+const toast = document.getElementById("toast");
+function aviso(t){ toast.textContent = t; toast.hidden = false; clearTimeout(aviso.t); aviso.t = setTimeout(() => toast.hidden = true, 1800); }
+document.getElementById("copy-phone").addEventListener("click", () => {
+  const num = "+584149442672";
+  try {
+    navigator.clipboard.writeText(num).then(() => aviso("Número copiado"), () => seleccionar());
+  } catch (e) { seleccionar(); }
+  function seleccionar(){ const r = document.createRange(); r.selectNodeContents(document.getElementById("phone")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); aviso("Número seleccionado, cópialo"); }
+});
+</script>
+
+</body>
+</html>
