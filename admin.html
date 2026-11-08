@@ -138,6 +138,7 @@ table.ed input[type=text], table.ed input[type=number] { padding: 7px 8px; }
   </div>
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-t="productos" aria-selected="true">Productos</button>
+    <button class="tab" role="tab" data-t="categorias" aria-selected="false">Categorías</button>
     <button class="tab" role="tab" data-t="telas" aria-selected="false">Telas y colores</button>
     <button class="tab" role="tab" data-t="precios" aria-selected="false">Precios y opciones</button>
     <button class="tab" role="tab" data-t="pagos" aria-selected="false">Datos de pago</button>
@@ -149,6 +150,7 @@ table.ed input[type=text], table.ed input[type=number] { padding: 7px 8px; }
     </div>
     <section id="t-productos"></section>
     <section id="t-telas" hidden></section>
+    <section id="t-categorias" hidden></section>
     <section id="t-precios" hidden></section>
     <section id="t-pagos" hidden></section>
   </main>
@@ -263,12 +265,75 @@ const guardarConfig = async () => { await db.collection("config").doc("general")
 document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
   tabActual = t.dataset.t;
   document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === t));
-  ["productos", "telas", "precios", "pagos"].forEach(k => $("t-" + k).hidden = k !== tabActual);
+  ["productos", "categorias", "telas", "precios", "pagos"].forEach(k => $("t-" + k).hidden = k !== tabActual);
   pintar();
 }));
-function pintar(){ ({ productos: pintarProductos, telas: pintarTelas, precios: pintarPrecios, pagos: pintarPagos })[tabActual](); }
+function pintar(){ ({ productos: pintarProductos, categorias: pintarCategorias, telas: pintarTelas, precios: pintarPrecios, pagos: pintarPagos })[tabActual](); }
+
+/* ===== CATEGORÍAS ===== */
+const TIPOS_CAT = { camas: "Cama (tamaños, gavetas, base en 1 o 2 piezas)", sofas: "Sofá modular (diván, cojines, plano por piezas)", tapizado: "Mueble tapizado (tela, patas, accesorios)", otro: "Sin tela (comedores, madera, accesorios)" };
+const CATEGORIAS_BASE = [
+  { id: "sofas", nombre: "Sofás", tipo: "sofas" }, { id: "camas", nombre: "Camas", tipo: "camas" }, { id: "camas-duplex", nombre: "Camas dúplex", tipo: "camas" },
+  { id: "sofa-cama", nombre: "Sofá cama", tipo: "tapizado" }, { id: "poltronas", nombre: "Poltronas", tipo: "tapizado" }, { id: "comedores", nombre: "Comedores", tipo: "otro" },
+  { id: "muebles", nombre: "Muebles", tipo: "tapizado" }, { id: "centros-entretenimiento", nombre: "Centros de entretenimiento", tipo: "otro" }, { id: "accesorios", nombre: "Accesorios", tipo: "otro" }
+].map((c, i) => Object.assign(c, { visible: true, orden: i + 1 }));
+const categorias = () => { if (CONFIG && !(CONFIG.categorias && CONFIG.categorias.length)) CONFIG.categorias = JSON.parse(JSON.stringify(CATEGORIAS_BASE));
+  return ((CONFIG && CONFIG.categorias) || CATEGORIAS_BASE).slice().sort((a, b) => (a.orden || 0) - (b.orden || 0)); };
+const catNombre = id => (categorias().find(c => c.id === id) || { nombre: id }).nombre;
+const tipoCat = id => (categorias().find(c => c.id === id) || { tipo: id === "sofas" ? "sofas" : id === "camas" ? "camas" : "otro" }).tipo;
+function pintarCategorias(){
+  const el = $("t-categorias");
+  if (!CONFIG) { el.innerHTML = `<div class="card vacio">Primero carga el catálogo inicial.</div>`; return; }
+  const cats = categorias(), cuenta = id => PRODUCTOS.filter(p => p.cat === id).length;
+  el.innerHTML = `<div class="barra"><h2>Categorías</h2><button class="btn oro" type="button" id="k-guardar">GUARDAR CAMBIOS</button></div>
+    <p class="ayuda" style="margin:0 0 14px">Oculta una categoría cuando no la tengas disponible: sus productos desaparecen de la página hasta que la vuelvas a mostrar. Una categoría visible sin productos no aparece en los filtros.</p>
+    <div class="card wrap-t"><table class="ed"><thead><tr><th>Categoría</th><th>Formulario de cotización</th><th style="width:90px">Productos</th><th style="width:120px">En la página</th><th style="width:150px"></th></tr></thead><tbody>
+    ${cats.map((c, i) => `<tr>
+      <td><input type="text" data-kn="${esc(c.id)}" value="${esc(c.nombre)}"></td>
+      <td><select data-kt="${esc(c.id)}">${Object.entries(TIPOS_CAT).map(([k, n]) => `<option value="${k}" ${c.tipo === k ? "selected" : ""}>${n}</option>`).join("")}</select></td>
+      <td style="text-align:center">${cuenta(c.id)}</td>
+      <td><label class="chk"><input type="checkbox" data-kv="${esc(c.id)}" ${c.visible !== false ? "checked" : ""}> ${c.visible !== false ? "Visible" : "Oculta"}</label></td>
+      <td style="white-space:nowrap"><button class="btn borde mini" type="button" data-ku="${i}" ${i ? "" : "disabled"} aria-label="Subir">↑</button> <button class="btn borde mini" type="button" data-kd="${i}" ${i < cats.length - 1 ? "" : "disabled"} aria-label="Bajar">↓</button>
+        ${cuenta(c.id) ? "" : ` <button class="btn borde mini" type="button" data-kx="${esc(c.id)}">Quitar</button>`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="bloque" style="margin-top:14px"><h3>Nueva categoría</h3><div class="fila">
+      <label class="f">Nombre<input type="text" id="k-nuevo" placeholder="Ej. Cabeceros"></label>
+      <label class="f">Formulario<select id="k-tipo">${Object.entries(TIPOS_CAT).map(([k, n]) => `<option value="${k}">${n}</option>`).join("")}</select></label></div>
+      <button class="btn borde mini" type="button" id="k-add" style="width:fit-content">+ Agregar categoría</button></div>`;
+  const c = id => CONFIG.categorias.find(x => x.id === id);
+  el.querySelectorAll("[data-kn]").forEach(i => i.addEventListener("input", () => c(i.dataset.kn).nombre = i.value));
+  el.querySelectorAll("[data-kt]").forEach(i => i.addEventListener("change", () => c(i.dataset.kt).tipo = i.value));
+  el.querySelectorAll("[data-kv]").forEach(i => i.addEventListener("change", () => { c(i.dataset.kv).visible = i.checked; pintarCategorias(); }));
+  const mover = (i, d) => { const l = categorias(); [l[i], l[i + d]] = [l[i + d], l[i]]; l.forEach((x, k) => x.orden = k + 1); CONFIG.categorias = l; pintarCategorias(); };
+  el.querySelectorAll("[data-ku]").forEach(b => b.addEventListener("click", () => mover(+b.dataset.ku, -1)));
+  el.querySelectorAll("[data-kd]").forEach(b => b.addEventListener("click", () => mover(+b.dataset.kd, 1)));
+  el.querySelectorAll("[data-kx]").forEach(b => b.addEventListener("click", () => { CONFIG.categorias = CONFIG.categorias.filter(x => x.id !== b.dataset.kx); pintarCategorias(); }));
+  $("k-add").addEventListener("click", () => {
+    const n = $("k-nuevo").value.trim(); if (!n) return toast("Escribe el nombre de la categoría.");
+    let id = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "categoria";
+    while (CONFIG.categorias.some(x => x.id === id)) id += "-2";
+    CONFIG.categorias.push({ id, nombre: n, tipo: $("k-tipo").value, visible: true, orden: CONFIG.categorias.length + 1 }); pintarCategorias();
+  });
+  $("k-guardar").addEventListener("click", async () => { try { await guardarConfig(); toast("Categorías guardadas. Ya se ven en la página."); } catch (err) { toast("No se pudo guardar: " + (err.message || err)); } });
+}
 
 /* ===== PRODUCTOS ===== */
+/* Cambio de nombres a ciudades (se aplica una sola vez con el botón; no toca los que ya renombraste a mano) */
+const NOMBRES_CIUDADES = {"chevron": {"antes": ["Cama Chevron", "Cama Caracas"], "ahora": "Cama Milán"}, "abanico": {"antes": ["Cama Abanico", "Cama Mérida"], "ahora": "Cama Florencia"}, "abanico-p": {"antes": ["Cama Abanico Petróleo", "Cama Mérida Petróleo"], "ahora": "Cama Florencia Petróleo"}, "linea": {"antes": ["Cama Línea", "Cama Valencia"], "ahora": "Cama Oslo"}, "arena": {"antes": ["Cama Línea Arena", "Cama Valencia Arena"], "ahora": "Cama Oslo Arena"}, "mosaico": {"antes": ["Cama Mosaico", "Cama Maracaibo"], "ahora": "Cama Lisboa"}, "luna": {"antes": ["Cama Luna", "Cama Coro"], "ahora": "Cama Mónaco"}, "marco": {"antes": ["Cama Marco", "Cama Barquisimeto"], "ahora": "Cama Viena"}, "duo": {"antes": ["Cama Dúo", "Cama Cumaná"], "ahora": "Cama Berlín"}, "nube": {"antes": ["Cama Nube", "Cama Mariara"], "ahora": "Cama París"}, "perla": {"antes": ["Sofá en L Perla", "Sofá en L Maracay", "Sofá en L Roma"], "ahora": "Sofá Modular Roma"}, "noir": {"antes": ["Sofá en L Noir", "Sofá en L San Cristóbal", "Sofá en L Londres"], "ahora": "Sofá Modular Londres"}, "grafito": {"antes": ["Sofá en L Grafito", "Sofá en L Barcelona", "Sofá en L Estocolmo"], "ahora": "Sofá Modular Estocolmo"}};
+const pendientesCiudad = () => PRODUCTOS.filter(p => NOMBRES_CIUDADES[p.id] && NOMBRES_CIUDADES[p.id].antes.includes(p.nombre));
+async function aplicarCiudades(){
+  const ls = pendientesCiudad(), b = $("p-ciudades"); b.disabled = true; b.textContent = "Cambiando…";
+  try {
+    for (const p of ls) {
+      const nuevo = NOMBRES_CIUDADES[p.id].ahora, cambios = { nombre: nuevo };
+      if (p.fab && /en L$/.test(p.fab.tipo || "")) cambios.fab = Object.assign({}, p.fab, { tipo: p.fab.tipo.replace(/ en L$/, "") });
+      if (p.ficha && Array.isArray(p.ficha.feat)) cambios.ficha = Object.assign({}, p.ficha, { feat: p.ficha.feat.map(f => f.replace(/modelo (Abanico|Mérida)/, "modelo Florencia")) });
+      await db.collection("productos").doc(p.id).update(cambios); Object.assign(p, cambios);
+    }
+    toast(`Listo: ${ls.length} productos ahora tienen nombre de ciudad.`);
+  } catch (e) { console.error(e); toast("No se pudieron cambiar los nombres: " + (e.message || e)); }
+  pintarProductos();
+}
 let filtroP = { q: "", cat: "" };
 function pintarProductos(){
   const el = $("t-productos");
@@ -276,17 +341,19 @@ function pintarProductos(){
   const lineas = (CONFIG && CONFIG.lineas) || {};
   el.innerHTML = `<div class="barra"><h2>Productos <small style="color:var(--muted);font-size:.9rem">(${PRODUCTOS.length})</small></h2>
       <input type="text" id="p-q" placeholder="Buscar por nombre" value="${esc(filtroP.q)}">
-      <select id="p-cat"><option value="">Todas las categorías</option><option value="camas" ${filtroP.cat === "camas" ? "selected" : ""}>Camas</option><option value="sofas" ${filtroP.cat === "sofas" ? "selected" : ""}>Sofás</option></select>
+      <select id="p-cat"><option value="">Todas las categorías</option>${categorias().map(c => `<option value="${esc(c.id)}" ${filtroP.cat === c.id ? "selected" : ""}>${esc(c.nombre)}${c.visible === false ? " (oculta)" : ""}</option>`).join("")}</select>
       <button class="btn oro" id="p-nuevo" type="button">+ NUEVO PRODUCTO</button></div>
+    ${pendientesCiudad().length ? `<div class="card" style="padding:16px 18px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:220px"><b>Nombres de ciudades</b><br><span class="ayuda">${pendientesCiudad().map(p => `${esc(p.nombre)} → <b>${esc(NOMBRES_CIUDADES[p.id].ahora)}</b>`).join(" · ")}</span></div><button class="btn oro" type="button" id="p-ciudades">CAMBIAR ${pendientesCiudad().length} NOMBRES</button></div>` : ""}
     ${lista.length ? `<div class="grid-p">${lista.map(p => `<button type="button" class="prod" data-id="${esc(p.id)}">
       <img src="${esc(resolverImg(p.img))}" alt="" loading="lazy">
-      <span class="i"><b>${esc(p.nombre)}</b><small>${p.cat === "camas" ? "Cama" : "Sofá"}${p.linea && lineas[p.linea] ? " · Línea " + esc(lineas[p.linea].nombre) : ""}</small>
+      <span class="i"><b>${esc(p.nombre)}</b><small>${esc(catNombre(p.cat))}${tipoCat(p.cat) === "camas" && p.linea && lineas[p.linea] ? " · Línea " + esc(lineas[p.linea].nombre) : ""}</small>
       <small>${p.precio !== "" && p.precio != null ? "$" + esc(p.precio) : "Precio a consultar"}</small>
       <span class="chips">${p.activo === false ? '<span class="chip off">Oculto</span>' : '<span class="chip">Visible</span>'}${p.destacado ? '<span class="chip oro">Más vendido</span>' : ""}${p.tag ? `<span class="chip">${esc(p.tag)}</span>` : ""}</span></span></button>`).join("")}</div>`
       : `<div class="card vacio">No hay productos${filtroP.q || filtroP.cat ? " con ese filtro" : ""}.</div>`}`;
   $("p-q").addEventListener("input", e => { filtroP.q = e.target.value; const pos = e.target.selectionStart; pintarProductos(); const n = $("p-q"); n.focus(); n.setSelectionRange(pos, pos); });
   $("p-cat").addEventListener("change", e => { filtroP.cat = e.target.value; pintarProductos(); });
   $("p-nuevo").addEventListener("click", () => editarProducto(null));
+  if ($("p-ciudades")) $("p-ciudades").addEventListener("click", aplicarCiudades);
   el.querySelectorAll(".prod").forEach(b => b.addEventListener("click", () => editarProducto(PRODUCTOS.find(p => p.id === b.dataset.id))));
 }
 
@@ -295,10 +362,10 @@ function editarProducto(p){
   const x = JSON.parse(JSON.stringify(p || { nombre: "", cat: "camas", linea: "esencial", desc: "", tag: "", destacado: false, activo: true, precio: "", orden: PRODUCTOS.length + 1, img: "", ficha: { feat: [] }, fab: null, materiales: {} }));
   x.ficha = x.ficha || { feat: [] }; x.materiales = x.materiales || {};
   const lineas = (CONFIG && CONFIG.lineas) || { esencial: { nombre: "Esencial" }, signature: { nombre: "Signature" }, prestige: { nombre: "Prestige" } };
-  const fabBase = () => ({ tipo: "Sofá modular en L", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: [{ n: "Poltrona", w: 60, d: 95, patas: 4, brazo: true }, { n: "2 puestos", w: 130, d: 95, patas: 4 }, { n: "Diván", w: 90, d: 170, patas: 4 }] });
+  const fabBase = () => ({ tipo: "Sofá modular", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: [{ n: "Poltrona", w: 60, d: 95, patas: 4, brazo: true }, { n: "2 puestos", w: 130, d: 95, patas: 4 }, { n: "Diván", w: 90, d: 170, patas: 4 }] });
   const ed = $("editor-in");
   function render(){
-    const esSofa = x.cat === "sofas";
+    const tipo = tipoCat(x.cat), esSofa = tipo === "sofas", esCama = tipo === "camas";
     if (esSofa && !x.fab) x.fab = fabBase();
     ed.innerHTML = `<header><h2>${nuevo ? "Nuevo producto" : "Editar · " + esc(x.nombre)}</h2>
         <button class="btn borde mini" type="button" data-cerrar>Cancelar</button><button class="btn oro" type="button" id="e-guardar">GUARDAR</button></header>
@@ -306,8 +373,8 @@ function editarProducto(p){
         <div class="bloque"><h3>General</h3>
           <div class="fila">
             <label class="f">Nombre<input type="text" data-k="nombre" value="${esc(x.nombre)}" placeholder="Ej. Cama Aurora"></label>
-            <label class="f">Categoría<select data-k="cat"><option value="camas" ${x.cat === "camas" ? "selected" : ""}>Cama</option><option value="sofas" ${esSofa ? "selected" : ""}>Sofá</option></select></label>
-            ${esSofa ? "" : `<label class="f">Línea<select data-k="linea">${Object.entries(lineas).map(([k, l]) => `<option value="${k}" ${x.linea === k ? "selected" : ""}>${esc(l.nombre)}</option>`).join("")}</select></label>`}
+            <label class="f">Categoría<select data-k="cat">${categorias().map(c => `<option value="${esc(c.id)}" ${x.cat === c.id ? "selected" : ""}>${esc(c.nombre)}${c.visible === false ? " (oculta)" : ""}</option>`).join("")}</select></label>
+            ${!esCama ? "" : `<label class="f">Línea<select data-k="linea">${Object.entries(lineas).map(([k, l]) => `<option value="${k}" ${x.linea === k ? "selected" : ""}>${esc(l.nombre)}</option>`).join("")}</select></label>`}
           </div>
           <label class="f">Descripción corta<textarea data-k="desc" placeholder="Ej. Cabecero alto con costuras en V. Elegante y moderna.">${esc(x.desc)}</textarea></label>
           <div class="fila">
@@ -331,6 +398,9 @@ function editarProducto(p){
 
         <div class="bloque"><h3>Ficha técnica</h3>
           ${esSofa ? `<div class="fila"><label class="f">Capacidad<input type="text" data-fk="asiento" value="${esc(x.ficha.asiento || "")}" placeholder="3 puestos + chaise"></label></div>`
+          : !esCama ? `<div class="fila"><label class="f">Medidas<input type="text" data-fk="medidas" value="${esc(x.ficha.medidas || "")}" placeholder="Ej. 180 × 90 cm"></label>
+              <label class="f">Material<input type="text" data-fk="material" value="${esc(x.ficha.material || "")}" placeholder="Ej. Madera de pino y MDF"></label>
+              <label class="f">Acabado<input type="text" data-fk="acabado" value="${esc(x.ficha.acabado || "")}" placeholder="Ej. Laca mate"></label></div>`
           : `<div class="fila"><label class="f">Cabecero<input type="text" data-fk="cabecero" value="${esc(x.ficha.cabecero || "")}"></label>
               <label class="f">Base<input type="text" data-fk="base" value="${esc(x.ficha.base || "")}"></label>
               <label class="f">Patas<input type="text" data-fk="patas" value="${esc(x.ficha.patas || "")}"></label></div>`}
@@ -366,7 +436,7 @@ function editarProducto(p){
       const k = i.dataset.k;
       if (k === "feat") x.ficha.feat = i.value.split("\n").map(s => s.trim()).filter(Boolean);
       else x[k] = i.type === "checkbox" ? i.checked : i.type === "number" ? (i.value === "" ? "" : +i.value) : i.value;
-      if (k === "cat") { if (x.cat === "sofas") { x.linea = ""; } else if (!x.linea) x.linea = Object.keys(lineas)[0]; render(); }
+      if (k === "cat") { if (tipoCat(x.cat) !== "camas") { x.linea = ""; } else if (!x.linea) x.linea = Object.keys(lineas)[0]; render(); }
     }));
     ed.querySelectorAll("[data-fk]").forEach(i => i.addEventListener("input", () => x.ficha[i.dataset.fk] = i.value));
     ed.querySelectorAll("[data-fab]").forEach(i => i.addEventListener(i.type === "checkbox" ? "change" : "input", () => x.fab[i.dataset.fab] = i.type === "checkbox" ? i.checked : i.type === "number" ? +i.value : i.value));
@@ -381,7 +451,7 @@ function editarProducto(p){
       const b = $("e-guardar"); b.disabled = true; b.textContent = "Guardando…";
       try {
         const id = x.id || (slug(x.nombre) + (PRODUCTOS.some(p => p.id === slug(x.nombre)) ? "-" + Date.now().toString(36).slice(-4) : ""));
-        const { id: _, ...datos } = x; if (datos.cat !== "sofas") datos.fab = null;
+        const { id: _, ...datos } = x; if (tipoCat(datos.cat) !== "sofas") datos.fab = null;
         await db.collection("productos").doc(id).set(datos);
         toast("Producto guardado. Ya se ve en la página."); cerrarEditor(); await cargarTodo();
       } catch (err) { toast("No se pudo guardar: " + (err.message || err)); b.disabled = false; b.textContent = "GUARDAR"; }

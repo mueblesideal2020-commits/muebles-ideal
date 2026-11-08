@@ -471,9 +471,36 @@ footer img { animation: flotar 6s ease-in-out infinite; }
 /* WhatsApp flotante */
 .fab { position: fixed; right: calc(18px + env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 25; width: 58px; height: 58px; border-radius: 50%; background: var(--wa); color: var(--wa-ink); display: grid; place-items: center; box-shadow: 0 10px 28px -8px rgba(0,0,0,.45); }
 .fab svg { width: 28px; height: 28px; }
-.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 0.9rem; z-index: 40; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 0.9rem; z-index: 70; max-width: calc(100% - 32px); text-align: center; }
+/* ===== Mi pedido (varios productos en una sola solicitud) ===== */
+.cant-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stepper { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); }
+.stepper button { width: 40px; height: 40px; border: 0; background: none; font-size: 1.25rem; cursor: pointer; color: var(--ink); border-radius: 50%; }
+.stepper button:hover { background: var(--bg); }
+.stepper output { min-width: 34px; text-align: center; font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; }
+.m-acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.m-acciones .btn { padding: 14px 12px; font-size: .9rem; }
+@media (max-width: 520px) { .m-acciones { grid-template-columns: 1fr; } }
+.pedido-fab { position: fixed; left: calc(18px + env(safe-area-inset-left, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 46; display: inline-flex; align-items: center; gap: 10px; padding: 0 20px 0 16px; height: 54px; border-radius: 999px; border: 0; background: var(--ink); color: var(--bg); font-family: var(--font-display); font-size: .95rem; cursor: pointer; box-shadow: 0 10px 28px -8px rgba(0,0,0,.45); }
+.pedido-fab svg { width: 22px; height: 22px; }
+.pedido-fab b { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 999px; background: var(--wa); color: var(--wa-ink); font-size: .8rem; }
+.cajon { position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end; }
+.cajon-bg { position: absolute; inset: 0; background: rgba(10,14,14,.62); backdrop-filter: blur(4px); }
+.cajon-in { position: relative; width: min(560px, 100%); height: 100%; overflow-y: auto; background: var(--surface); color: var(--ink); display: flex; flex-direction: column; animation: cajon-entra .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes cajon-entra { from { transform: translateX(40px); opacity: 0; } }
+.cajon-top { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: calc(18px + env(safe-area-inset-top, 0px)) 22px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.cajon-top h2 { font-size: 1.35rem; margin-right: auto; }
+.cajon-body { padding: 18px 22px calc(28px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 18px; }
+.ped-item { display: grid; grid-template-columns: 76px 1fr; gap: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); }
+.ped-item img { width: 76px; height: 76px; object-fit: cover; border-radius: 12px; }
+.ped-item h3 { font-size: 1rem; margin: 0 0 4px; }
+.ped-item p { margin: 0; font-size: .85rem; color: var(--muted); line-height: 1.45; }
+.ped-item .fila-ped { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.ped-item .stepper button { width: 34px; height: 34px; }
+.ped-quitar { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: .85rem; padding: 6px 0; }
+.ped-vacio { text-align: center; color: var(--muted); padding: 30px 10px; }
+.ped-total { font-family: var(--font-display); font-size: .95rem; color: var(--muted); }
 </style>
-
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -535,11 +562,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       </div>
       <div class="lineas" id="lineas"></div>
       <div class="filters" role="group" aria-label="Filtrar por categoría">
-        <button class="chip" data-f="todos" aria-pressed="true">Todos</button>
-        <button class="chip" data-f="esencial" aria-pressed="false">Esencial</button>
-        <button class="chip" data-f="signature" aria-pressed="false">Signature</button>
-        <button class="chip" data-f="prestige" aria-pressed="false">Prestige</button>
-        <button class="chip" data-f="sofas" aria-pressed="false">Sofás</button>
+        <div id="chips-main" style="display:contents"></div>
         <span class="count" id="count"></span>
       </div>
       <div class="grid" id="grid-catalogo"></div>
@@ -713,6 +736,38 @@ footer img { animation: flotar 6s ease-in-out infinite; }
 
 <a class="fab" href="https://wa.me/584149442672?text=Hola%20Muebles%20Ideal%2C%20quisiera%20informaci%C3%B3n" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg><use href="#i-wa"/></svg></a>
 <div class="toast" id="toast" hidden></div>
+<button type="button" class="pedido-fab" id="pedido-fab" hidden aria-label="Ver mi pedido"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM5.2 4l.4 2H20l-2 8H7.4l-2.6-12H2V0h4.4l.8 4Z" transform="translate(0 0)"/></svg>Mi pedido <b id="pedido-n">0</b></button>
+<div class="cajon" id="pedido" role="dialog" aria-modal="true" aria-labelledby="pedido-t" hidden>
+  <div class="cajon-bg" data-cerrar-pedido></div>
+  <div class="cajon-in">
+    <div class="cajon-top"><h2 id="pedido-t">Mi pedido</h2><button class="close" style="position:static" data-cerrar-pedido aria-label="Cerrar">×</button></div>
+    <div class="cajon-body">
+      <div id="ped-lista"></div>
+      <button type="button" class="btn btn-line" id="ped-mas">+ AGREGAR OTRO MUEBLE</button>
+      <form class="m-form" id="ped-form" novalidate>
+        <span class="sub">Tus datos para la cotización</span>
+        <div class="two">
+          <div class="field"><label for="p-nom">Nombre</label><input id="p-nom" autocomplete="name" placeholder="Tu nombre"></div>
+          <div class="field"><label for="p-email">Correo electrónico</label><input id="p-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="p-tel">Teléfono (opcional)</label><input id="p-tel" type="tel" autocomplete="tel" placeholder="0414-0000000"></div>
+          <div class="field"><label for="p-ciudad">Ciudad</label><input id="p-ciudad" placeholder="Ej. Caracas"></div>
+        </div>
+        <div class="field" id="p-dir-box" hidden><label for="p-dir">Dirección de entrega</label><input id="p-dir" autocomplete="street-address" placeholder="Urbanización, calle, edificio o casa, punto de referencia">
+          <div class="mapa-box">
+            <span class="mapa-t">Ubicación en el mapa <small>(opcional)</small></span>
+            <div class="mapa-btns"><a class="btn-mapa" id="p-buscar-mapa" href="https://www.google.com/maps" target="_blank" rel="noopener">Buscar en Google Maps</a></div>
+            <input id="p-mapa" inputmode="url" placeholder="Pega aquí el enlace de tu ubicación">
+          </div>
+        </div>
+        <button class="btn btn-wa" type="submit" id="p-enviar">ENVIAR SOLICITUD</button>
+        <p class="estado" id="p-estado" role="status" hidden></p>
+        <p class="note">Recibirás una sola cotización con todos los muebles de tu pedido.</p>
+      </form>
+    </div>
+  </div>
+</div>
 
 <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-t" hidden>
   <div class="panel-top">
@@ -722,11 +777,7 @@ footer img { animation: flotar 6s ease-in-out infinite; }
       <button class="close panel-close" id="panel-close" aria-label="Cerrar catálogo">×</button>
     </div>
     <div class="filters" role="group" aria-label="Filtrar catálogo completo">
-      <button class="chip" data-pf="todos" aria-pressed="true">Todos</button>
-      <button class="chip" data-pf="esencial" aria-pressed="false">Esencial</button>
-      <button class="chip" data-pf="signature" aria-pressed="false">Signature</button>
-      <button class="chip" data-pf="prestige" aria-pressed="false">Prestige</button>
-      <button class="chip" data-pf="sofas" aria-pressed="false">Sofás</button>
+      <div id="chips-panel" style="display:contents"></div>
       <span class="count" id="panel-count"></span>
     </div>
   </div>
@@ -782,7 +833,13 @@ footer img { animation: flotar 6s ease-in-out infinite; }
             <small class="mapa-ayuda" id="m-mapa-estado">Busca tu dirección en Google Maps, toca <b>Compartir → Copiar enlace</b> y pégalo aquí. O usa tu ubicación actual si estás en el lugar de entrega.</small>
           </div>
         </div>
-        <button class="btn btn-wa" type="submit" id="m-enviar">SOLICITAR COTIZACIÓN</button>
+        <div class="cant-row"><span class="sub">Cantidad</span>
+          <div class="stepper"><button type="button" id="m-menos" aria-label="Uno menos">−</button><output id="m-cant" aria-live="polite">1</output><button type="button" id="m-mas" aria-label="Uno más">+</button></div></div>
+        <div class="m-acciones">
+          <button class="btn btn-wa" type="submit" id="m-enviar">SOLICITAR COTIZACIÓN</button>
+          <button class="btn btn-ghost" type="button" id="m-agregar">AGREGAR A MI PEDIDO</button>
+        </div>
+        <p class="note" id="m-nota-pedido" style="margin:0">¿Necesitas varios muebles? Agrégalos a tu pedido y envía una sola solicitud.</p>
         <p class="estado" id="m-estado" role="status" hidden></p>
         <p class="note">Todo lo que elijas se incluye en tu solicitud y te llega una confirmación por correo. ¿Prefieres el chat? <a id="m-wa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.</p>
       </form>
@@ -799,20 +856,35 @@ footer img { animation: flotar 6s ease-in-out infinite; }
    Si "precio" está vacío, la tarjeta muestra "Precio a consultar". */
 document.documentElement.lang = "es";
 const WHATSAPP = "584149442672";
+/* Categorías del catálogo. "tipo" decide qué preguntas trae el formulario:
+   camas = cama tapizada · sofas = sofá modular (diván, cojines) · tapizado = mueble tapizado (tela y patas) · otro = sin tela.
+   Desde el panel admin se pueden ocultar o mostrar. */
+const CATEGORIAS_BASE = [
+  { id: "sofas", nombre: "Sofás", tipo: "sofas", visible: true }, { id: "camas", nombre: "Camas", tipo: "camas", visible: true },
+  { id: "camas-duplex", nombre: "Camas dúplex", tipo: "camas", visible: true }, { id: "sofa-cama", nombre: "Sofá cama", tipo: "tapizado", visible: true },
+  { id: "poltronas", nombre: "Poltronas", tipo: "tapizado", visible: true }, { id: "comedores", nombre: "Comedores", tipo: "otro", visible: true },
+  { id: "muebles", nombre: "Muebles", tipo: "tapizado", visible: true }, { id: "centros-entretenimiento", nombre: "Centros de entretenimiento", tipo: "otro", visible: true },
+  { id: "accesorios", nombre: "Accesorios", tipo: "otro", visible: true }
+];
+const CATEGORIAS = CATEGORIAS_BASE.map(c => Object.assign({}, c));
+const catDe = p => CATEGORIAS.find(c => c.id === (p && p.cat));
+const fam = p => (catDe(p) || {}).tipo || (p && p.cat === "sofas" ? "sofas" : p && p.cat === "camas" ? "camas" : "otro");
+const catVisible = id => { const c = CATEGORIAS.find(c => c.id === id); return !c || c.visible !== false; };
+const conTela = p => fam(p) !== "otro";
 const PRODUCTOS = [
-  { id:"chevron", linea:"signature",  cat:"camas", nombre:"Cama Chevron",         img:"cama-chevron-marca.jpg",   desc:"Cabecero alto con costuras en V. Elegante y moderna.",          tela:"Tela a elegir", precio:"", destacado:true,  tag:"Más vendida" },
-  { id:"abanico", linea:"signature",  cat:"camas", nombre:"Cama Abanico",         img:"cama-abanico.jpg",         desc:"Cabecero en abanico y base con canales verticales.",            tela:"Tela a elegir", precio:"", destacado:true },
-  { id:"linea", linea:"signature",    cat:"camas", nombre:"Cama Línea",           img:"cama-linea.jpg",           desc:"Cabecero y base acanalados, patas doradas.",                   tela:"Tela a elegir", precio:"", destacado:true },
-  { id:"perla",    cat:"sofas", nombre:"Sofá en L Perla",      img:"sofa-perla.jpg",           desc:"Sofá con chaise y patas metálicas. Amplio y cómodo.",          tela:"Tela a elegir", precio:"", destacado:true },
-  { id:"abanico-p", linea:"signature",cat:"camas", nombre:"Cama Abanico Petróleo",img:"cama-abanico-petroleo.jpg",desc:"Nuestro modelo abanico tapizado en azul petróleo.",            tela:"Tela a elegir", precio:"" },
-  { id:"mosaico", linea:"signature",  cat:"camas", nombre:"Cama Mosaico",         img:"cama-mosaico.jpg",         desc:"Cabecero geométrico en bloques, patas doradas.",               tela:"Tela a elegir", precio:"" },
-  { id:"luna", linea:"prestige",     cat:"camas", nombre:"Cama Luna",            img:"cama-luna.jpg",            desc:"Cabecero de media luna en bouclé. Diseño de tendencia.",        tela:"Bouclé",        precio:"", tag:"Nuevo" },
-  { id:"marco", linea:"esencial",    cat:"camas", nombre:"Cama Marco",           img:"cama-marco.jpg",           desc:"Cabecero con canales a los lados y base tapizada.",            tela:"Tela a elegir", precio:"" },
-  { id:"duo", linea:"esencial",      cat:"camas", nombre:"Cama Dúo",             img:"cama-duo.jpg",             desc:"Cabecero de dos paneles acolchados. Líneas simples.",          tela:"Tela a elegir", precio:"" },
-  { id:"arena", linea:"esencial",    cat:"camas", nombre:"Cama Línea Arena",     img:"cama-linea-arena.jpg",     desc:"Cabecero acanalado alto en tono arena.",                       tela:"Tela a elegir", precio:"" },
-  { id:"nube", linea:"prestige", cat:"camas", nombre:"Cama Nube", img:"hero-cama.jpg", desc:"Cabecero y bordes de cojines acolchados tipo nube. Máximo confort.", tela:"Tela a elegir", precio:"", tag:"Nuevo" },
-  { id:"noir",     cat:"sofas", nombre:"Sofá en L Noir",       img:"sofa-noir.jpg",            desc:"Asiento capitoneado en negro y patas cromadas.",               tela:"Tela a elegir", precio:"" },
-  { id:"grafito",  cat:"sofas", nombre:"Sofá en L Grafito",    img:"sofa-grafito.jpg",         desc:"Sofá modular amplio, ideal para salas grandes.",               tela:"Tela a elegir", precio:"" }
+  { id:"chevron", linea:"signature",  cat:"camas", nombre:"Cama Milán",         img:"cama-chevron-marca.jpg",   desc:"Cabecero alto con costuras en V. Elegante y moderna.",          tela:"Tela a elegir", precio:"", destacado:true,  tag:"Más vendida" },
+  { id:"abanico", linea:"signature",  cat:"camas", nombre:"Cama Florencia",         img:"cama-abanico.jpg",         desc:"Cabecero en abanico y base con canales verticales.",            tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"linea", linea:"signature",    cat:"camas", nombre:"Cama Oslo",           img:"cama-linea.jpg",           desc:"Cabecero y base acanalados, patas doradas.",                   tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"perla",    cat:"sofas", nombre:"Sofá Modular Roma",      img:"sofa-perla.jpg",           desc:"Sofá con chaise y patas metálicas. Amplio y cómodo.",          tela:"Tela a elegir", precio:"", destacado:true },
+  { id:"abanico-p", linea:"signature",cat:"camas", nombre:"Cama Florencia Petróleo",img:"cama-abanico-petroleo.jpg",desc:"Nuestro modelo abanico tapizado en azul petróleo.",            tela:"Tela a elegir", precio:"" },
+  { id:"mosaico", linea:"signature",  cat:"camas", nombre:"Cama Lisboa",         img:"cama-mosaico.jpg",         desc:"Cabecero geométrico en bloques, patas doradas.",               tela:"Tela a elegir", precio:"" },
+  { id:"luna", linea:"prestige",     cat:"camas", nombre:"Cama Mónaco",            img:"cama-luna.jpg",            desc:"Cabecero de media luna en bouclé. Diseño de tendencia.",        tela:"Bouclé",        precio:"", tag:"Nuevo" },
+  { id:"marco", linea:"esencial",    cat:"camas", nombre:"Cama Viena",           img:"cama-marco.jpg",           desc:"Cabecero con canales a los lados y base tapizada.",            tela:"Tela a elegir", precio:"" },
+  { id:"duo", linea:"esencial",      cat:"camas", nombre:"Cama Berlín",             img:"cama-duo.jpg",             desc:"Cabecero de dos paneles acolchados. Líneas simples.",          tela:"Tela a elegir", precio:"" },
+  { id:"arena", linea:"esencial",    cat:"camas", nombre:"Cama Oslo Arena",     img:"cama-linea-arena.jpg",     desc:"Cabecero acanalado alto en tono arena.",                       tela:"Tela a elegir", precio:"" },
+  { id:"nube", linea:"prestige", cat:"camas", nombre:"Cama París", img:"hero-cama.jpg", desc:"Cabecero y bordes de cojines acolchados tipo nube. Máximo confort.", tela:"Tela a elegir", precio:"", tag:"Nuevo" },
+  { id:"noir",     cat:"sofas", nombre:"Sofá Modular Londres",       img:"sofa-noir.jpg",            desc:"Asiento capitoneado en negro y patas cromadas.",               tela:"Tela a elegir", precio:"" },
+  { id:"grafito",  cat:"sofas", nombre:"Sofá Modular Estocolmo",    img:"sofa-grafito.jpg",         desc:"Sofá modular amplio, ideal para salas grandes.",               tela:"Tela a elegir", precio:"" }
 ];
 
 /* Líneas de producto. Cambia los nombres o descripciones aquí. */
@@ -862,7 +934,7 @@ const waLink = txt => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}
 function card(p){
   const tiene = p.precio !== "" && p.precio != null;
   return `<article class="card">
-    <a class="ph" href="#p-${p.id}" aria-label="Ver detalles de ${p.nombre}">${(() => { const t = p.destacado ? (p.cat === "sofas" ? "Más vendido" : "Más vendida") : p.tag; return t ? `<span class="tag">${t}</span>` : ""; })()}<img src="${p.img}" alt="${p.nombre}" loading="lazy"></a>
+    <a class="ph" href="#p-${p.id}" aria-label="Ver detalles de ${p.nombre}">${(() => { const t = p.destacado ? (fam(p) === "camas" ? "Más vendida" : "Más vendido") : p.tag; return t ? `<span class="tag">${t}</span>` : ""; })()}<img src="${p.img}" alt="${p.nombre}" loading="lazy"></a>
     <div class="body">
       ${p.linea ? `<span class="card-linea">Línea ${LINEAS[p.linea].nombre}</span>` : `<span class="card-linea">Sofás</span>`}
       <h3><a href="#p-${p.id}">${p.nombre}</a></h3>
@@ -872,10 +944,11 @@ function card(p){
 
 
 const gridCat = document.getElementById("grid-catalogo");
-const chips = [...document.querySelectorAll(".chip")];
+let chips = [];
 const VISIBLES = 3;
 const btnMas = document.getElementById("ver-mas");
-const ordenadosLista = () => [...PRODUCTOS.filter(p => p.destacado), ...PRODUCTOS.filter(p => !p.destacado)];
+const enVitrina = () => PRODUCTOS.filter(p => catVisible(p.cat));
+const ordenadosLista = () => [...enVitrina().filter(p => p.destacado), ...enVitrina().filter(p => !p.destacado)];
 const porCat = f => f === "todos" ? ordenadosLista() : ordenadosLista().filter(p => LINEAS[f] ? p.linea === f : p.cat === f);
 let filtroActual = "todos";
 function filtrar(f){
@@ -888,7 +961,19 @@ function filtrar(f){
 }
 /* Ventana del catálogo completo */
 const panel = document.getElementById("panel"), gridPanel = document.getElementById("grid-panel");
-const pchips = [...document.querySelectorAll("[data-pf]")];
+let pchips = [];
+/* Filtros: Todos + categorías visibles que tienen productos + líneas de camas */
+function pintarChips(){
+  const hay = new Set(enVitrina().map(p => p.cat)), lineasUsadas = new Set(enVitrina().map(p => p.linea).filter(Boolean));
+  const ops = [["todos", "Todos"], ...CATEGORIAS.filter(c => c.visible !== false && hay.has(c.id)).map(c => [c.id, c.nombre]),
+    ...Object.entries(LINEAS).filter(([k]) => lineasUsadas.has(k)).map(([k, l]) => [k, l.nombre])];
+  if (!ops.some(([k]) => k === filtroActual)) filtroActual = "todos";
+  const html = attr => ops.map(([k, n]) => `<button class="chip" ${attr}="${k}" aria-pressed="${k === filtroActual}">${n}</button>`).join("");
+  $("chips-main").innerHTML = html("data-f"); $("chips-panel").innerHTML = html("data-pf");
+  chips = [...$("chips-main").querySelectorAll(".chip")]; pchips = [...$("chips-panel").querySelectorAll(".chip")];
+  chips.forEach(c => c.addEventListener("click", () => filtrar(c.dataset.f)));
+  pchips.forEach(c => c.addEventListener("click", () => filtrarPanel(c.dataset.pf)));
+}
 function filtrarPanel(f){
   const lista = porCat(f);
   gridPanel.innerHTML = lista.map(card).join("");
@@ -909,10 +994,8 @@ function cerrarPanel(){
   if (location.hash === "#catalogo-completo") history.replaceState(null, "", location.pathname + location.search);
   btnMas.focus({ preventScroll: true });
 }
-pchips.forEach(c => c.addEventListener("click", () => filtrarPanel(c.dataset.pf)));
 document.getElementById("panel-close").addEventListener("click", cerrarPanel);
 btnMas.addEventListener("click", () => { location.hash = "catalogo-completo"; });
-chips.forEach(c => c.addEventListener("click", () => filtrar(c.dataset.f)));
 /* Tarjetas de las 3 líneas */
 function renderLineas(){
 document.getElementById("lineas").innerHTML = Object.entries(LINEAS).map(([k, l], i) => `
@@ -920,9 +1003,10 @@ document.getElementById("lineas").innerHTML = Object.entries(LINEAS).map(([k, l]
     <span class="linea-n">0${i + 1}</span>
     <span class="linea-t">Línea ${l.nombre}</span>
     <span class="linea-d">${l.desc}</span>
-    <span class="linea-c">${PRODUCTOS.filter(p => p.linea === k).length} modelos →</span>
+    <span class="linea-c">${enVitrina().filter(p => p.linea === k).length} modelos →</span>
   </button>`).join("");
 document.querySelectorAll(".linea-card").forEach(b => b.addEventListener("click", () => filtrar(b.dataset.l)));
+  document.getElementById("lineas").hidden = !enVitrina().some(p => p.linea && fam(p) === "camas");
 }
 renderLineas();
 document.querySelectorAll("[data-go]").forEach(a => a.addEventListener("click", () => filtrar(a.dataset.go)));
@@ -936,9 +1020,9 @@ const TAMANOS_CAMA = ["Individual 100×190 cm","Matrimonial 135×190 cm","Queen 
    medidasConfirmadas / piezasConfirmadas en false muestran el plano como REFERENCIAL. */
 const PIEZAS_L = [ { n: "Poltrona", w: 60, d: 95, patas: 4, brazo: true }, { n: "2 puestos", w: 130, d: 95, patas: 4 }, { n: "Diván", w: 90, d: 170, patas: 4 } ];
 const FABRICACION = {
-  grafito: { tipo: "Sofá modular en L", ancho: 280, fondo: 170, medidasConfirmadas: true,  piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} },
-  perla:   { tipo: "Sofá modular en L", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} },
-  noir:    { tipo: "Sofá modular en L", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} }
+  grafito: { tipo: "Sofá modular", ancho: 280, fondo: 170, medidasConfirmadas: true,  piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} },
+  perla:   { tipo: "Sofá modular", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} },
+  noir:    { tipo: "Sofá modular", ancho: 280, fondo: 170, medidasConfirmadas: false, piezasConfirmadas: false, cojines: 4, piezas: PIEZAS_L, materiales: {} }
 };
 /* Cargos adicionales de accesorios (USD). Los que no estén aquí se cotizan aparte. */
 const PRECIOS_EXTRA = { "Puerto USB": 50, "Portavasos": 25 };
@@ -950,7 +1034,7 @@ const FICHA = {
   chevron:   { cabecero:"Alto, con costuras en V (chevron)", base:"Tapizada, líneas rectas", patas:"Ocultas", feat:["Cabecero acolchado de diseño exclusivo","Costuras en V que alargan visualmente la pared","Ideal para habitaciones principales"] },
   abanico:   { cabecero:"En abanico (rayos) acolchado", base:"Acanalada vertical", patas:"Ocultas", feat:["Cabecero en abanico, nuestra pieza más llamativa","Base con canales que hace juego con el cabecero","Disponible en cualquier color de tela"] },
   linea:     { cabecero:"Canales verticales", base:"Acanalada vertical", patas:"Doradas metálicas", feat:["Diseño acanalado completo, cabecero y base","Patas doradas que dan un toque de lujo","Combina con estilos modernos y clásicos"] },
-  "abanico-p":{ cabecero:"En abanico (rayos) acolchado", base:"Tapizada lisa", patas:"Ocultas", feat:["Versión del modelo Abanico con base lisa","Mostrada en tela azul petróleo","Cabecero alto y acolchado"] },
+  "abanico-p":{ cabecero:"En abanico (rayos) acolchado", base:"Tapizada lisa", patas:"Ocultas", feat:["Versión del modelo Florencia con base lisa","Mostrada en tela azul petróleo","Cabecero alto y acolchado"] },
   mosaico:   { cabecero:"Geométrico en bloques acolchados", base:"Tapizada lisa", patas:"Doradas metálicas", feat:["Cabecero en bloques de distintos tamaños","Estilo contemporáneo y elegante","Patas doradas"] },
   luna:      { cabecero:"Media luna de gran formato", base:"Bordes redondeados acolchados", patas:"Ocultas, cama a ras de piso", feat:["Diseño envolvente de bordes redondos","Tapizado en bouclé de textura suave","Pieza protagonista para cualquier habitación"] },
   marco:     { cabecero:"Panel central con canales laterales", base:"Tapizada lisa", patas:"Ocultas", feat:["Cabecero sobrio con detalle acanalado a los lados","Base amplia y robusta","Ideal para habitaciones modernas"] },
@@ -962,14 +1046,18 @@ const FICHA = {
   grafito:   { asiento:"4 puestos + chaise", patas:"Ocultas", feat:["Gran formato para salas amplias","Asientos de doble capa muy cómodos","Mostrado en gris grafito"] }
 };
 function especificaciones(p, f){
-  if (p.cat === "camas") return [
+  if (fam(p) === "tapizado" || fam(p) === "otro") return [
+    ["Categoría", (catDe(p) || {}).nombre || "Mueble"], ...Object.entries(f).filter(([k, v]) => k !== "feat" && typeof v === "string" && v).map(([k, v]) => [k[0].toUpperCase() + k.slice(1), v]),
+    ...(f.medidas ? [] : [["Medidas", "Estándar o a la medida que necesites"]]), ...(conTela(p) ? [["Tapizado", "Tela y color a elegir"]] : []),
+    ["Fabricación", "Hecho a mano en Mariara, Carabobo"], ["Entrega", "Retiro en fábrica o delivery a todo el país"]];
+  if (fam(p) === "camas") return [
     ["Línea", p.linea ? LINEAS[p.linea].nombre : "—"],["Tipo","Cama tapizada con base"],["Cabecero",f.cabecero],["Base",f.base],["Base para subir","En una pieza (casa) o en dos piezas (apartamento)"],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],["Gavetas laterales","Opcionales, con costo adicional"],
     ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
     ["Tapizado",p.tela === "Bouclé" ? "Bouclé (otras telas disponibles)" : "Lino, pana o felpa a elegir"],
     ["Colchón","No incluido (consúltanos)"],["Fabricación","Hecha a mano en Mariara, Carabobo"],["Entrega","Retiro en fábrica o delivery a todo el país"]
   ];
   return [
-    ["Tipo",(FABRICACION[p.id] || {}).tipo || "Sofá en L"],["Piezas",(FABRICACION[p.id] ? FABRICACION[p.id].piezas.map(x => x.n).join(" + ") : "—")],
+    ["Tipo",(FABRICACION[p.id] || {}).tipo || "Sofá modular"],["Piezas",(FABRICACION[p.id] ? FABRICACION[p.id].piezas.map(x => x.n).join(" + ") : "—")],
     ["Medidas", FABRICACION[p.id] && FABRICACION[p.id].medidasConfirmadas ? medidasSofa(p.id) + " (ancho × fondo)" : "Por confirmar · también a medida"],
     ["Diván","A la izquierda o a la derecha, tú eliges"],["Cojines decorativos","De obsequio, en la tela y color que elijas"],
     ["Accesorios","Puerto USB (+$50), portavasos (+$25) y más"],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],
@@ -988,7 +1076,7 @@ const PREGUNTAS = [
   { id: "vivienda", cat: "camas", label: "¿Dónde va la cama?", requerida: true, opciones: [
     { v: "Casa (planta baja)", nota: "La base (box) se fabrica en una sola pieza." },
     { v: "Apartamento o piso alto (por escaleras)", nota: "La base (box) se fabrica en dos piezas para subirla por las escaleras." } ] },
-  { id: "vivienda", cat: "sofas", label: "¿Dónde va el sofá?", requerida: true, opciones: [
+  { id: "vivienda", cat: ["sofas", "tapizado"], label: "¿Dónde va el mueble?", requerida: true, opciones: [
     { v: "Casa (planta baja)", nota: "" },
     { v: "Apartamento o piso alto (por escaleras)", nota: "Lo fabricamos pensando en el acceso por escaleras." } ] },
   { id: "lado", cat: "sofas", label: "Lado del diván (mirando el sofá de frente)", requerida: true, opciones: [
@@ -997,12 +1085,12 @@ const PREGUNTAS = [
     { v: "Sin gavetas" },
     { v: "Gavetas en un lado", extra: true, nota: "Las gavetas tienen un costo adicional." },
     { v: "Gavetas en ambos lados", extra: true, nota: "Las gavetas tienen un costo adicional." } ] },
-  { id: "soporte", label: "Tipo de soporte", requerida: true, opciones: [
+  { id: "soporte", cat: ["camas", "sofas", "tapizado"], label: "Tipo de soporte", requerida: true, opciones: [
     { v: "Patas de metal", nota: "Sin costo adicional." },
     { v: "Deslizadores", nota: "Sin costo adicional." } ] },
-  { id: "colorPatas", label: "Color de las patas", requerida: true, si: e => e.soporte === "Patas de metal", opciones: [
+  { id: "colorPatas", cat: ["camas", "sofas", "tapizado"], label: "Color de las patas", requerida: true, si: e => e.soporte === "Patas de metal", opciones: [
     { v: "Plateada" }, { v: "Dorada" }, { v: "Negra" } ] },
-  { id: "accesorios", cat: "sofas", label: "Accesorios (puedes elegir varios)", multi: true, opciones: [
+  { id: "accesorios", cat: ["sofas", "tapizado"], label: "Accesorios (puedes elegir varios)", multi: true, opciones: [
     { v: "Puerto USB", extra: true }, { v: "Portavasos", extra: true }, { v: "Luz LED inferior", extra: true },
     { v: "Bandeja de madera en el brazo", extra: true }, { v: "Baúl de almacenamiento en el diván", extra: true } ] },
   { id: "cojines", cat: "sofas", label: "Cojines decorativos (obsequio)", requerida: true, defecto: "Sí, quiero mis cojines", opciones: [
@@ -1012,7 +1100,8 @@ const PREGUNTAS = [
     { v: "Delivery", nota: ENVIO_GRATIS ? "¡Despacho gratis por promoción vigente!" : "El costo del delivery depende de tu ciudad. Te lo indicamos en la cotización." } ] }
 ];
 let elec = {};
-const preguntasDe = p => PREGUNTAS.filter(q => !q.cat || q.cat === p.cat);
+const aplica = (q, p) => !q.cat || [].concat(q.cat).includes(fam(p));
+const preguntasDe = p => PREGUNTAS.filter(q => aplica(q, p));
 function renderPreguntas(){
   if (!actual) return;
   const cont = $("m-pers");
@@ -1028,7 +1117,7 @@ function renderPreguntas(){
     </div>`;
   }).join("");
   cont.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
-    const q = PREGUNTAS.find(x => x.id === b.dataset.q && (!x.cat || x.cat === actual.cat));
+    const q = PREGUNTAS.find(x => x.id === b.dataset.q && aplica(x, actual));
     if (q && q.multi) { const a = elec[q.id] || []; elec[q.id] = a.includes(b.dataset.v) ? a.filter(x => x !== b.dataset.v) : [...a, b.dataset.v]; }
     else elec[b.dataset.q] = b.dataset.v;
     if (b.dataset.q === "soporte" && b.dataset.v !== "Patas de metal") delete elec.colorPatas;
@@ -1039,8 +1128,8 @@ function renderPreguntas(){
     mensaje();
   }));
   const ent = cont.querySelector('.grupo[data-q="entrega"]');
-  cont.insertBefore(pickTela.box, ent);
-  if (actual.cat === "sofas" && elec.cojines && elec.cojines.startsWith("Sí")) cont.insertBefore(pickCojin.box, ent);
+  if (conTela(actual)) cont.insertBefore(pickTela.box, ent); else pickTela.box.remove();
+  if (fam(actual) === "sofas" && elec.cojines && elec.cojines.startsWith("Sí")) cont.insertBefore(pickCojin.box, ent);
 }
 
 /* Selector de tela y color (se usa para la tela principal y para los cojines) */
@@ -1093,18 +1182,18 @@ const pickCojin = crearSelector("cojin", "Tela y color de los cojines", "ELEGIR 
 function faltante(){
   const q = preguntasDe(actual).find(q => q.id !== "entrega" && q.requerida && (!q.si || q.si(elec)) && !elec[q.id]);
   if (q) return q;
-  if (!elec.tela) return { id: "tela", label: "Tela y color del mueble" };
-  if (actual.cat === "sofas" && elec.cojines && elec.cojines.startsWith("Sí") && !elec.cojin) return { id: "cojin", label: "Tela y color de los cojines" };
+  if (conTela(actual) && !elec.tela) return { id: "tela", label: "Tela y color del mueble" };
+  if (fam(actual) === "sofas" && elec.cojines && elec.cojines.startsWith("Sí") && !elec.cojin) return { id: "cojin", label: "Tela y color de los cojines" };
   return preguntasDe(actual).find(q => q.requerida && (!q.si || q.si(elec)) && !elec[q.id]);
 }
 function piezas(){
-  if (actual.cat !== "camas" || !elec.vivienda) return "";
+  if (fam(actual) !== "camas" || !elec.vivienda) return "";
   return elec.vivienda.startsWith("Apartamento") ? "Base en dos piezas" : "Base en una sola pieza";
 }
 function mensaje(){
-  const art = actual.cat === "sofas" ? "el" : "la";
+  const art = fam(actual) === "camas" ? "la" : "el";
   let t = `Hola Muebles Ideal, me interesa ${art} ${actual.nombre}.`;
-  if (talla) t += ` ${actual.cat === "sofas" ? "Medidas" : "Tamaño"}: ${talla}.`;
+  if (talla) t += ` ${fam(actual) === "camas" ? "Tamaño" : "Medidas"}: ${talla}.`;
   if (elec.lado) t += ` ${elec.lado}.`;
   if (elec.accesorios && elec.accesorios.length) t += ` Accesorios: ${elec.accesorios.map(a => PRECIOS_EXTRA[a] ? `${a} (+$${PRECIOS_EXTRA[a]})` : a).join(", ")}.`;
   if (elec.vivienda) t += ` Va para: ${elec.vivienda}.`;
@@ -1129,26 +1218,26 @@ function opciones(cont, lista, esColor){
 }
 let volverA = null;
 function abrir(id){
-  const p = PRODUCTOS.find(x => x.id === id); if (!p) return;
+  const p = PRODUCTOS.find(x => x.id === id); if (!p || !catVisible(p.cat)) return;
   const f = FICHA[id] || {};
   actual = p; talla = ""; color = "";
-  elec = {}; PREGUNTAS.forEach(q => { if (q.defecto && (!q.cat || q.cat === p.cat)) elec[q.id] = q.defecto; });
+  elec = {}; PREGUNTAS.forEach(q => { if (q.defecto && aplica(q, p)) elec[q.id] = q.defecto; });
   $("m-dir-box").hidden = true;
   pickTela.reset(); pickCojin.reset(); $("m-medida-box").hidden = true;
   $("m-img").src = p.img; $("m-img").alt = p.nombre;
   modal.querySelector(".sheet-photo").style.setProperty("--m-img", `url("${p.img}")`);
-  $("m-cat").textContent = p.linea ? `Línea ${LINEAS[p.linea].nombre} · Hecha a medida` : "Sofás · Hecho a medida";
+  $("m-cat").textContent = p.linea && LINEAS[p.linea] && fam(p) === "camas" ? `Línea ${LINEAS[p.linea].nombre} · Hecha a medida` : `${(catDe(p) || { nombre: "Muebles" }).nombre} · Hecho a medida`;
   $("m-nombre").textContent = p.nombre;
   $("m-desc").textContent = p.desc;
   $("m-feat").innerHTML = (f.feat || []).map(t => `<li><svg><use href="#i-check"/></svg>${t}</li>`).join("");
-  $("m-size-label").textContent = p.cat === "camas" ? "Tamaño (medida del colchón)" : "Medidas";
-  opciones($("m-sizes"), p.cat === "camas" ? TAMANOS_CAMA : [`Estándar ${FABRICACION[p.id] && FABRICACION[p.id].medidasConfirmadas ? "(" + medidasSofa(p.id) + ")" : "(medidas por confirmar)"}`, "Medida especial"], false);
+  $("m-size-label").textContent = fam(p) === "camas" ? "Tamaño (medida del colchón)" : "Medidas";
+  opciones($("m-sizes"), fam(p) === "camas" ? TAMANOS_CAMA : fam(p) !== "sofas" ? ["Estándar", "Medida especial"] : [`Estándar ${FABRICACION[p.id] && FABRICACION[p.id].medidasConfirmadas ? "(" + medidasSofa(p.id) + ")" : "(medidas por confirmar)"}`, "Medida especial"], false);
   renderPreguntas();
   $("m-specs").innerHTML = especificaciones(p, f).map(([k,v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
   const tiene = p.precio !== "" && p.precio != null;
   $("m-price").className = tiene ? "price" : "price ask";
   $("m-price").textContent = tiene ? fmt(p.precio) : "Precio a consultar";
-  mensaje();
+  mensaje(); ponerCantidad(1); botonesPedido();
   document.getElementById("m-estado").hidden = true;
   if (modal.hidden) volverA = document.activeElement;
   modal.hidden = false; document.body.classList.add("lock");
@@ -1190,7 +1279,7 @@ function leerHash(){
 }
 window.addEventListener("hashchange", leerHash);
 modal.querySelectorAll("[data-close]").forEach(el => el.addEventListener("click", cerrar));
-document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!modal.hidden) cerrar(); else if (!pEnv.hidden) cerrarEnvios(); else cerrarPanel(); });
+document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!$("pedido").hidden) cerrarPedido(); else if (!modal.hidden) cerrar(); else if (!pEnv.hidden) cerrarEnvios(); else cerrarPanel(); });
 leerHash();
 
 /* Menú y pie se desvanecen según la distancia */
@@ -1287,15 +1376,15 @@ const valorTexto = v => String(v).replace(/^(.*)\|(\d{4})\|#[0-9a-f]{6}$/i, "$1 
 const filasHtml = pares => pares.map(([k, v]) =>
   `<tr><td style="padding:11px 12px 11px 0;border-bottom:1px solid #e6e1d6;color:#7a7368;font-size:13px;width:40%;vertical-align:top">${escHtml(k)}</td>` +
   `<td style="padding:11px 0;border-bottom:1px solid #e6e1d6;color:#141414;font-size:14px;font-weight:bold;vertical-align:top">${valorHtml(k, v)}</td></tr>`).join("");
-async function enviarCotizacion(campos, asunto, respuesta, registro){
+async function enviarCotizacion(campos, asunto, respuesta, registro, op = {}){
   const esClub = !!respuesta;
   const mensajeCliente = esClub
     ? "Desde ahora serás de los primeros en conocer nuestras ofertas, los lanzamientos de nuevos modelos y las promociones especiales para clientes registrados."
-    : `Gracias por escribir a Muebles Ideal. Recibimos tu solicitud${campos.Modelo ? " de cotización de la " + campos.Modelo : ""} y muy pronto te enviaremos el precio y el tiempo de entrega. Este es el resumen de lo que nos pediste:`;
+    : `Gracias por escribir a Muebles Ideal. Recibimos tu solicitud${op.texto ? " de cotización de " + op.texto : campos.Modelo ? " de cotización de la " + campos.Modelo : ""} y muy pronto te enviaremos el precio y el tiempo de entrega. Este es el resumen de lo que nos pediste:`;
   const asuntoCliente = esClub ? "¡Bienvenido al Club Muebles Ideal!" : "Recibimos tu solicitud - Muebles Ideal";
   const titulo = esClub ? "¡Bienvenido al Club!" : "¡Recibimos tu solicitud!";
   const etiquetas = { name: "Nombre", email: "Correo" };
-  const pares = Object.entries(campos).map(([k, v]) => [etiquetas[k] || k, v]);
+  const pares = op.pares ? [["Nombre", campos.name], ["Correo", campos.email]].concat(op.pares) : Object.entries(campos).map(([k, v]) => [etiquetas[k] || k, v]);
   const detalle = pares.map(([k, v]) => `${k}: ${valorTexto(v)}`).join("  |  ");
   const SITIO = "https://mueblesideal2020-commits.github.io/muebles-ideal/";
   const prod = PRODUCTOS.find(p => p.nombre === campos.Modelo || p.nombre === campos["Producto de interés"]);
@@ -1325,10 +1414,10 @@ function validar(nomEl, mailEl, estEl){
   if (!emailOk(m)) { estado(estEl, "error", "Revisa tu correo electrónico: lo necesitamos para enviarte la confirmación."); mailEl.focus(); return false; }
   return true;
 }
-async function procesar(btn, estEl, campos, asunto, textoBtn, registro){
+async function procesar(btn, estEl, campos, asunto, textoBtn, registro, op){
   btn.disabled = true; btn.textContent = "Enviando…";
   try {
-    await enviarCotizacion(campos, asunto, null, registro);
+    await enviarCotizacion(campos, asunto, null, registro, op);
     estado(estEl, "ok", `¡Listo, ${campos.name}! Recibimos tu solicitud y te enviamos una confirmación a ${campos.email}. Te responderemos muy pronto.`);
     return true;
   } catch (e) {
@@ -1397,76 +1486,198 @@ function numeroOrden(){
   const d = new Date(), p = n => String(n).padStart(2, "0");
   return `MI-${String(d.getFullYear()).slice(2)}${p(d.getMonth() + 1)}${p(d.getDate())}-${Math.floor(1000 + Math.random() * 9000)}`;
 }
-function enlaceOrden(orden, v){
-  const esCama = actual.cat === "camas";
+function enlaceOrden(orden, v, extra){
+  const esCama = fam(actual) === "camas";
   const tel = k => elec[k + "Codigo"] ? { n: elec[k], c: elec[k + "Codigo"], h: elec[k + "Hex"], sp: elec[k + "Sp"], nm: elec[k + "Nombre"] } : { n: elec[k] || "Por asesorar" };
   const datos = {
     v: 1, n: orden, f: new Date().toISOString(),
     c: { n: v("m-nom"), e: v("m-email"), t: v("m-tel"), ci: v("m-ciudad"), d: v("m-dir"), mapa: /^https?:\/\//.test(v("m-mapa")) ? v("m-mapa") : "" },
-    p: { id: actual.id, n: actual.nombre, cat: actual.cat, l: actual.linea ? LINEAS[actual.linea].nombre : "", img: /^data:/.test(actual.img) ? "" : actual.img.replace(/^img\//, "") },
+    p: { id: actual.id, n: actual.nombre, cat: actual.cat, fam: fam(actual), cn: (catDe(actual) || {}).nombre || "", l: actual.linea ? LINEAS[actual.linea].nombre : "", img: /^data:/.test(actual.img) ? "" : actual.img.replace(/^img\//, "") },
     o: { talla: talla || "", medida: v("m-medida"), viv: elec.vivienda, base: piezas(), gav: elec.gavetas || "", sop: elec.soporte, cp: elec.colorPatas || "",
          lado: elec.lado || "", acc: elec.accesorios || [], precios: PRECIOS_EXTRA, coj: elec.cojines || "", ent: elec.entrega, envGratis: ENVIO_GRATIS },
     tela: tel("tela"),
-    cojin: !esCama && elec.cojines && elec.cojines.startsWith("Sí") ? Object.assign(tel("cojin"), { cant: (FABRICACION[actual.id] || {}).cojines || 4 }) : null,
-    fab: esCama ? null : FABRICACION[actual.id] || null,
+    cojin: fam(actual) === "sofas" && elec.cojines && elec.cojines.startsWith("Sí") ? Object.assign(tel("cojin"), { cant: (FABRICACION[actual.id] || {}).cojines || 4 }) : null,
+    fab: fam(actual) === "sofas" ? FABRICACION[actual.id] || null : null,
     mat: MATERIALES[actual.id] || null
   };
+  if (extra) Object.assign(datos, extra);
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(datos)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   return "https://mueblesideal2020-commits.github.io/muebles-ideal/orden.html#" + b64;
 }
 
+/* ===== MI PEDIDO: varios muebles en una sola solicitud =====
+   Cada mueble guarda sus elecciones (tamaño, tela, accesorios…) y su cantidad.
+   Al enviar sale UNA cotización con un número de pedido y una orden de fabricación por mueble (MI-…-1, -2…). */
+let CANT = 1;
+function ponerCantidad(n){ CANT = Math.max(1, Math.min(20, n)); $("m-cant").textContent = CANT; }
+$("m-menos").addEventListener("click", () => ponerCantidad(CANT - 1));
+$("m-mas").addEventListener("click", () => ponerCantidad(CANT + 1));
+
+let CARRITO = [];
+try { CARRITO = JSON.parse(localStorage.getItem("mi-pedido") || "[]").filter(x => x && x.pid && x.elec); } catch (e) { CARRITO = []; }
+function guardarCarrito(){ try { localStorage.setItem("mi-pedido", JSON.stringify(CARRITO)); } catch (e) {} pintarFab(); }
+const totalPiezas = () => CARRITO.reduce((a, x) => a + x.cantidad, 0);
+function pintarFab(){ $("pedido-n").textContent = totalPiezas(); $("pedido-fab").hidden = !CARRITO.length; }
+function botonesPedido(){
+  const n = CARRITO.length;
+  $("m-enviar").textContent = n ? "AGREGAR Y ENVIAR PEDIDO" : "SOLICITAR COTIZACIÓN";
+  $("m-nota-pedido").textContent = n ? `Ya tienes ${n} mueble${n === 1 ? "" : "s"} en tu pedido. Este se suma y envías todo en una sola solicitud.` : "¿Necesitas varios muebles? Agrégalos a tu pedido y envía una sola solicitud.";
+}
+function validarEleccion(est){
+  const falta = faltante();
+  if (!falta) return true;
+  estado(est, "error", `Elige una opción en "${falta.label}" para continuar.`);
+  const g = $("m-pers").querySelector(`.grupo[data-q="${falta.id}"]`);
+  if (g) { g.scrollIntoView({ behavior: "smooth", block: "center" }); g.classList.add("aviso"); setTimeout(() => g.classList.remove("aviso"), 1600); }
+  return false;
+}
+function capturar(){
+  return { pid: actual.id, nombre: actual.nombre, cat: actual.cat, linea: actual.linea || "", img: /^data:/.test(actual.img) ? "" : actual.img,
+    cantidad: CANT, elec: JSON.parse(JSON.stringify(elec)), talla, medida: $("m-medida").value.trim() };
+}
+/* Ejecuta fn con el estado del modal (actual, elec, talla) de un mueble guardado */
+function conItem(it, fn){
+  const prev = [actual, elec, talla];
+  actual = PRODUCTOS.find(p => p.id === it.pid) || { id: it.pid, nombre: it.nombre, cat: it.cat, img: it.img || "", linea: it.linea || undefined };
+  elec = it.elec; talla = it.talla;
+  try { return fn(); } finally { actual = prev[0]; elec = prev[1]; talla = prev[2]; }
+}
+function camposItem(it){
+  const F = fam(actual), esCama = F === "camas", c = [["Modelo", actual.nombre]];
+  if (!esCama || !actual.linea) c.push(["Categoría", (catDe(actual) || { nombre: "Mueble" }).nombre]);
+  if (esCama && actual.linea && LINEAS[actual.linea]) c.push(["Línea", LINEAS[actual.linea].nombre]);
+  c.push([esCama ? "Tamaño" : "Medidas", (talla || "Por definir") + (talla === "Medida especial" && it.medida ? `: ${it.medida}` : "")]);
+  if (F === "sofas") { c.push(["Tipo", (FABRICACION[actual.id] || {}).tipo || "Sofá"]); c.push(["Diván", elec.lado || "No aplica"]); }
+  if (F !== "otro") { c.push(["Tela", elec.tela || "Por asesorar"]);
+    c.push(["Color", elec.telaCodigo ? `${elec.telaNombre}|${elec.telaCodigo}|${elec.telaHex}` : "Por asesorar"]); }
+  if (F === "sofas" || F === "tapizado") {
+    const acc = elec.accesorios || [];
+    c.push(["Accesorios", acc.length ? acc.map(a => PRECIOS_EXTRA[a] ? `${a} (+$${PRECIOS_EXTRA[a]})` : `${a} (por cotizar)`).join(", ") : "Ninguno"]);
+    if (acc.length) c.push(["Cargos adicionales", `$${acc.reduce((t, a) => t + (PRECIOS_EXTRA[a] || 0), 0)}${acc.some(a => !PRECIOS_EXTRA[a]) ? " + accesorios por cotizar" : ""}${it.cantidad > 1 ? " por unidad" : ""}`]);
+    const quiere = elec.cojines && elec.cojines.startsWith("Sí");
+    if (F === "sofas") c.push(["Cojines (obsequio)", quiere ? `Sí · ${(FABRICACION[actual.id] || {}).cojines || 4} unidades · ${elec.cojin}` : "No"]);
+    if (quiere) c.push(["Color de cojines", elec.cojinCodigo ? `${elec.cojinNombre}|${elec.cojinCodigo}|${elec.cojinHex}` : "Por asesorar"]);
+  }
+  if (elec.vivienda) c.push(["Va para", elec.vivienda]);
+  if (esCama) { c.push(["Fabricación de la base", piezas()]); c.push(["Gavetas", elec.gavetas || "Sin gavetas"]); }
+  if (elec.soporte) c.push(["Soporte", elec.soporte + (elec.colorPatas ? ` (${elec.colorPatas.toLowerCase()})` : "")]);
+  return c;
+}
+function datosItem(it){
+  const esCama = fam(actual) === "camas", quiere = fam(actual) === "sofas" && elec.cojines && elec.cojines.startsWith("Sí");
+  return { modelo: actual.nombre, cantidad: it.cantidad, tamano: talla || "Por definir", medida: it.medida || "",
+    color: !conTela(actual) ? "" : elec.telaCodigo ? `${elec.tela} · ${elec.telaNombre} (ref. ${elec.telaCodigo})` : "Tela por asesorar",
+    lado: elec.lado || "", accesorios: (elec.accesorios || []).join(", "), cojines: fam(actual) !== "sofas" ? "" : (quiere ? `Sí · ${(FABRICACION[actual.id] || {}).cojines || 4} unidades · ${elec.cojin}` : "No"),
+    colorCojines: elec.cojinCodigo ? `${elec.cojin} · ${elec.cojinNombre} (ref. ${elec.cojinCodigo})` : (elec.cojin || ""),
+    linea: esCama && actual.linea && LINEAS[actual.linea] ? LINEAS[actual.linea].nombre : (catDe(actual) || { nombre: "" }).nombre, categoria: (catDe(actual) || { nombre: "" }).nombre, vivienda: elec.vivienda || "", piezas: piezas(),
+    gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte || "", colorPatas: elec.colorPatas || "", entrega: elec.entrega || "" };
+}
+async function enviarPedido(items, cli, btn, est, textoBtn){
+  const orden = numeroOrden(), n = items.length, piezasTot = items.reduce((a, x) => a + x.cantidad, 0);
+  const vv = it => id => ({ "m-nom": cli.nom, "m-email": cli.email, "m-tel": cli.tel, "m-ciudad": cli.ciudad, "m-dir": cli.dir, "m-mapa": cli.mapa, "m-medida": it.medida || "" })[id] || "";
+  const pares = [["Teléfono", cli.tel || "No indicado"], ["Ciudad", cli.ciudad || "No indicada"]], regItems = [];
+  let ordenUnica = "";
+  items.forEach((it, i) => conItem(it, () => {
+    const sub = n > 1 ? `${orden}-${i + 1}` : orden;
+    if (n > 1) pares.push([`PRODUCTO ${i + 1} DE ${n}`, `${it.cantidad} × ${actual.nombre}`]);
+    else if (it.cantidad > 1) pares.push(["Cantidad", `${it.cantidad} unidades`]);
+    pares.push(...camposItem(it).filter(([k]) => !(n > 1 && k === "Modelo")));
+    const link = "ORDEN|" + enlaceOrden(sub, vv(it), { q: it.cantidad, i: n > 1 ? [i + 1, n] : null, ped: n > 1 ? orden : "" });
+    if (n > 1) { pares.push(["N° de orden", sub]); pares.push(["Orden de fabricación", link]); } else ordenUnica = link;
+    regItems.push(Object.assign(datosItem(it), { orden: sub }));
+  }));
+  const entregas = [...new Set(items.map(x => x.elec.entrega).filter(Boolean))], delivery = entregas.includes("Delivery");
+  pares.push(["Entrega", entregas.length ? entregas.join(" / ") + (delivery && ENVIO_GRATIS ? " (gratis por promoción)" : "") : "Por definir"]);
+  if (delivery) { pares.push(["Dirección", cli.dir]); if (/^https?:\/\//.test(cli.mapa)) pares.push(["Ubicación", "MAPA|" + cli.mapa]); }
+  pares.push([n > 1 ? "N° de pedido" : "N° de orden", orden]);
+  if (ordenUnica) pares.push(["Orden de fabricación", ordenUnica]);
+  const resumen = items.map(x => `${x.cantidad} × ${x.nombre}`).join(", ");
+  const base = n === 1 ? (({ orden: _o, ...r }) => r)(regItems[0]) : { modelo: `Pedido: ${resumen}`, tamano: `${piezasTot} muebles` };
+  const data = Object.assign(base, { nombre: cli.nom, email: cli.email, telefono: cli.tel, ciudad: cli.ciudad, origen: n > 1 ? "pedido" : "ficha", orden,
+    entrega: entregas.join(" / "), direccion: delivery ? cli.dir : "", mapa: delivery ? cli.mapa : "", cantidad: piezasTot, items: regItems });
+  const asunto = n > 1 ? `Nuevo pedido ${orden}: ${piezasTot} muebles — ${cli.nom}` : `Nueva cotización ${orden}: ${items[0].cantidad > 1 ? items[0].cantidad + " × " : ""}${items[0].nombre} — ${cli.nom}`;
+  const texto = n > 1 ? `tu pedido de ${piezasTot} muebles` : items[0].cantidad > 1 ? `${items[0].cantidad} unidades de ${items[0].nombre}` : "";
+  return procesar(btn, est, { name: cli.nom, email: cli.email, Modelo: items[0].nombre }, asunto, textoBtn, { col: "cotizaciones", data }, { pares, texto });
+}
+function pasarDatos(){
+  [["m-nom", "p-nom"], ["m-email", "p-email"], ["m-tel", "p-tel"], ["m-ciudad", "p-ciudad"], ["m-dir", "p-dir"], ["m-mapa", "p-mapa"]]
+    .forEach(([a, b]) => { if ($(a).value.trim() && !$(b).value.trim()) $(b).value = $(a).value.trim(); });
+}
+
+/* Botones del modal */
+$("m-agregar").addEventListener("click", () => {
+  if (!actual || !validarEleccion($("m-estado"))) return;
+  CARRITO.push(capturar()); guardarCarrito(); pasarDatos();
+  const nom = actual.nombre; cerrar();
+  aviso(`${CANT > 1 ? CANT + " × " : ""}${nom} agregado a tu pedido`);
+});
 document.getElementById("m-form").addEventListener("submit", async e => {
   e.preventDefault();
   if (!actual) return;
-  const v = id => document.getElementById(id).value.trim();
-  const est = document.getElementById("m-estado");
-  const falta = faltante();
-  if (falta) {
-    estado(est, "error", `Elige una opción en "${falta.label}" para continuar.`);
-    const g = $("m-pers").querySelector(`.grupo[data-q="${falta.id}"]`);
-    if (g) { g.scrollIntoView({ behavior: "smooth", block: "center" }); g.classList.add("aviso"); setTimeout(() => g.classList.remove("aviso"), 1600); }
-    return;
-  }
+  const v = id => document.getElementById(id).value.trim(), est = document.getElementById("m-estado");
+  if (!validarEleccion(est)) return;
+  if (CARRITO.length) { CARRITO.push(capturar()); guardarCarrito(); pasarDatos(); cerrar(); abrirPedido(); return; }
   if (elec.entrega === "Delivery" && !v("m-dir")) { estado(est, "error", "Escribe la dirección de entrega para calcular el delivery."); $("m-dir").focus(); return; }
   if (!validar(document.getElementById("m-nom"), document.getElementById("m-email"), est)) return;
-  const esCama = actual.cat === "camas";
-  const campos = {
-    name: v("m-nom"), email: v("m-email"), "Teléfono": v("m-tel") || "No indicado", Ciudad: v("m-ciudad") || "No indicada",
-    Modelo: actual.nombre
-  };
-  if (actual.linea) campos["Línea"] = LINEAS[actual.linea].nombre;
-  const orden = numeroOrden();
-  campos[esCama ? "Tamaño" : "Medidas"] = (talla || "Por definir") + (talla === "Medida especial" && v("m-medida") ? `: ${v("m-medida")}` : "");
-  if (!esCama) { campos.Tipo = (FABRICACION[actual.id] || {}).tipo || "Sofá"; campos["Diván"] = elec.lado; }
-  campos.Tela = elec.tela;
-  campos["Color"] = elec.telaCodigo ? `${elec.telaNombre}|${elec.telaCodigo}|${elec.telaHex}` : "Por asesorar";
-  if (!esCama) {
-    const acc = elec.accesorios || [];
-    campos.Accesorios = acc.length ? acc.map(a => PRECIOS_EXTRA[a] ? `${a} (+$${PRECIOS_EXTRA[a]})` : `${a} (por cotizar)`).join(", ") : "Ninguno";
-    if (acc.length) campos["Cargos adicionales"] = `$${acc.reduce((t, a) => t + (PRECIOS_EXTRA[a] || 0), 0)}${acc.some(a => !PRECIOS_EXTRA[a]) ? " + accesorios por cotizar" : ""}`;
-    const quiere = elec.cojines && elec.cojines.startsWith("Sí");
-    campos["Cojines (obsequio)"] = quiere ? `Sí · ${(FABRICACION[actual.id] || {}).cojines || 4} unidades · ${elec.cojin}` : "No";
-    if (quiere) campos["Color de cojines"] = elec.cojinCodigo ? `${elec.cojinNombre}|${elec.cojinCodigo}|${elec.cojinHex}` : "Por asesorar";
-  }
-  campos["Va para"] = elec.vivienda;
-  if (esCama) { campos["Fabricación de la base"] = piezas(); campos.Gavetas = elec.gavetas || "Sin gavetas"; }
-  campos.Soporte = elec.soporte + (elec.colorPatas ? ` (${elec.colorPatas.toLowerCase()})` : "");
-  campos.Entrega = elec.entrega + (elec.entrega === "Delivery" && ENVIO_GRATIS ? " (gratis por promoción)" : "");
-  if (elec.entrega === "Delivery") { campos["Dirección"] = v("m-dir"); if (/^https?:\/\//.test(v("m-mapa"))) campos["Ubicación"] = "MAPA|" + v("m-mapa"); }
-  campos["N° de orden"] = orden;
-  campos["Orden de fabricación"] = "ORDEN|" + enlaceOrden(orden, v);
-  await procesar(document.getElementById("m-enviar"), est, campos,
-    `Nueva cotización ${orden}: ${actual.nombre} — ${v("m-nom")}`, "SOLICITAR COTIZACIÓN", { col: "cotizaciones", data: {
-    nombre: v("m-nom"), email: v("m-email"), telefono: v("m-tel"), ciudad: v("m-ciudad"),
-    modelo: actual.nombre, tamano: talla || "Por definir", color: elec.telaCodigo ? `${elec.tela} · ${elec.telaNombre} (ref. ${elec.telaCodigo})` : "Tela por asesorar", origen: "ficha", orden,
-    lado: elec.lado || "", accesorios: (elec.accesorios || []).join(", "), cojines: campos["Cojines (obsequio)"] || "",
-    colorCojines: elec.cojinCodigo ? `${elec.cojin} · ${elec.cojinNombre} (ref. ${elec.cojinCodigo})` : (elec.cojin || ""), medida: v("m-medida"),
-    linea: actual.linea ? LINEAS[actual.linea].nombre : "Sofás", vivienda: elec.vivienda, piezas: piezas(),
-    gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte, colorPatas: elec.colorPatas || "",
-    entrega: elec.entrega, direccion: elec.entrega === "Delivery" ? v("m-dir") : "", mapa: elec.entrega === "Delivery" ? v("m-mapa") : ""
-  } });
+  await enviarPedido([capturar()], { nom: v("m-nom"), email: v("m-email"), tel: v("m-tel"), ciudad: v("m-ciudad"), dir: v("m-dir"), mapa: v("m-mapa") },
+    document.getElementById("m-enviar"), est, "SOLICITAR COTIZACIÓN");
 });
+
+/* Cajón "Mi pedido" */
+function resumenItem(it){
+  const e = it.elec;
+  return [it.talla || (fam(it) === "camas" ? "Tamaño por definir" : "Medidas por definir"), e.tela ? e.tela + (e.telaNombre ? " · " + e.telaNombre : "") : "",
+    e.lado, e.gavetas, e.accesorios && e.accesorios.length ? e.accesorios.join(", ") : "", e.entrega].filter(Boolean).join(" · ");
+}
+function pintarPedido(){
+  const L = $("ped-lista"), tot = totalPiezas();
+  L.innerHTML = CARRITO.length ? CARRITO.map((it, i) => {
+    const p = PRODUCTOS.find(x => x.id === it.pid), img = p ? p.img : (it.img || IMG_BASE + "hero-cama.jpg");
+    return `<div class="ped-item" style="margin-bottom:10px"><img src="${escHtml(img)}" alt=""><div><h3>${escHtml(it.nombre)}</h3><p>${escHtml(resumenItem(it))}</p>
+      <div class="fila-ped"><div class="stepper"><button type="button" data-ped-menos="${i}" aria-label="Uno menos">−</button><output>${it.cantidad}</output><button type="button" data-ped-mas="${i}" aria-label="Uno más">+</button></div>
+      <button type="button" class="ped-quitar" data-ped-quitar="${i}">Quitar</button></div></div></div>`; }).join("")
+      + `<p class="ped-total">${CARRITO.length} modelo${CARRITO.length === 1 ? "" : "s"} · ${tot} mueble${tot === 1 ? "" : "s"} en total</p>`
+    : `<p class="ped-vacio">Tu pedido está vacío. Elige un mueble del catálogo y toca <b>Agregar a mi pedido</b>.</p>`;
+  const cambia = (i, d) => { CARRITO[i].cantidad = Math.max(1, Math.min(20, CARRITO[i].cantidad + d)); guardarCarrito(); pintarPedido(); };
+  L.querySelectorAll("[data-ped-menos]").forEach(b => b.addEventListener("click", () => cambia(+b.dataset.pedMenos, -1)));
+  L.querySelectorAll("[data-ped-mas]").forEach(b => b.addEventListener("click", () => cambia(+b.dataset.pedMas, 1)));
+  L.querySelectorAll("[data-ped-quitar]").forEach(b => b.addEventListener("click", () => { CARRITO.splice(+b.dataset.pedQuitar, 1); guardarCarrito(); pintarPedido(); }));
+  $("p-dir-box").hidden = !CARRITO.some(x => x.elec.entrega === "Delivery");
+  $("p-enviar").disabled = !CARRITO.length;
+}
+let volverPed = null;
+function abrirPedido(){
+  pintarPedido(); $("p-estado").hidden = true;
+  if ($("pedido").hidden) volverPed = document.activeElement;
+  $("pedido").hidden = false; document.body.classList.add("lock");
+  $("pedido").querySelector(".cajon-in").scrollTop = 0;
+  $("pedido").querySelector(".close").focus({ preventScroll: true });
+}
+function cerrarPedido(){
+  if ($("pedido").hidden) return;
+  $("pedido").hidden = true;
+  if (modal.hidden && panel.hidden) document.body.classList.remove("lock");
+  if (volverPed && volverPed.focus && !$("pedido-fab").hidden) volverPed.focus({ preventScroll: true });
+}
+$("pedido-fab").addEventListener("click", abrirPedido);
+document.querySelectorAll("[data-cerrar-pedido]").forEach(b => b.addEventListener("click", cerrarPedido));
+$("ped-mas").addEventListener("click", () => { cerrarPedido(); abrirPanel(); });
+["p-dir", "p-ciudad"].forEach(id => $(id).addEventListener("input", () => {
+  $("p-buscar-mapa").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([$("p-dir").value.trim(), $("p-ciudad").value.trim(), "Venezuela"].filter(Boolean).join(", "));
+}));
+$("ped-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!CARRITO.length) return;
+  const v = id => $(id).value.trim(), est = $("p-estado"), conDir = !$("p-dir-box").hidden;
+  if (conDir && !v("p-dir")) { estado(est, "error", "Escribe la dirección de entrega para calcular el delivery."); $("p-dir").focus(); return; }
+  if (!validar($("p-nom"), $("p-email"), est)) return;
+  const ok = await enviarPedido(CARRITO.slice(), { nom: v("p-nom"), email: v("p-email"), tel: v("p-tel"), ciudad: v("p-ciudad"), dir: conDir ? v("p-dir") : "", mapa: conDir ? v("p-mapa") : "" },
+    $("p-enviar"), est, "ENVIAR SOLICITUD");
+  if (ok) { CARRITO = []; guardarCarrito(); const keep = est.textContent; pintarPedido(); est.hidden = false; est.textContent = keep; }
+});
+pintarFab();
 armar();
+pintarChips(); filtrar(filtroActual);
 
 /* ===== CATÁLOGO DESDE FIREBASE (lo que cambies en el panel admin) =====
    Si la base de datos está vacía o no responde, la página usa el catálogo incluido arriba. */
@@ -1485,6 +1696,7 @@ async function cargarCatalogo(){
       if (typeof c.envioGratis === "boolean") ENVIO_GRATIS = c.envioGratis;
       if (Array.isArray(c.accesorios)) { const q = PREGUNTAS.find(x => x.id === "accesorios"); if (q) q.opciones = c.accesorios.map(v => ({ v, extra: true })); }
       if (c.pagos) window.DATOS_PAGO = c.pagos;
+      if (Array.isArray(c.categorias) && c.categorias.length) CATEGORIAS.splice(0, CATEGORIAS.length, ...c.categorias.map(x => Object.assign({ tipo: "otro", visible: true }, x)).sort((a, b) => (a.orden || 0) - (b.orden || 0)));
       const qe = PREGUNTAS.find(x => x.id === "entrega");
       if (qe) qe.opciones[1].nota = ENVIO_GRATIS ? "¡Despacho gratis por promoción vigente!" : "El costo del delivery depende de tu ciudad. Te lo indicamos en la cotización.";
     }
@@ -1499,13 +1711,13 @@ async function cargarCatalogo(){
       if (lista.length) {
         Object.keys(FICHA).forEach(k => delete FICHA[k]); Object.keys(FABRICACION).forEach(k => delete FABRICACION[k]);
         PRODUCTOS.splice(0, PRODUCTOS.length, ...lista.map(p => {
-          FICHA[p.id] = p.ficha || {}; if (p.cat === "sofas" && p.fab) FABRICACION[p.id] = p.fab;
+          FICHA[p.id] = p.ficha || {}; if (fam(p) === "sofas" && p.fab) FABRICACION[p.id] = p.fab;
           if (p.materiales) MATERIALES[p.id] = p.materiales;
           return { id: p.id, cat: p.cat, linea: p.linea || undefined, nombre: p.nombre, img: resolverImg(p.img), desc: p.desc || "", tela: "Tela a elegir", precio: p.precio == null ? "" : p.precio, destacado: !!p.destacado, tag: p.tag || "" };
         }));
       }
     }
-    renderLineas(); filtrar(filtroActual);
+    renderLineas(); pintarChips(); filtrar(filtroActual);
     if (!panel.hidden) filtrarPanel(filtroActual);
     if (location.hash.startsWith("#p-")) leerHash();
   } catch (e) { /* sin conexión: se mantiene el catálogo incluido */ }
