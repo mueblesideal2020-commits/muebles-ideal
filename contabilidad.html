@@ -1157,9 +1157,19 @@ const DOMINIO_PERSONAL = "personal.mueblesideal.app";
 const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const CFGP_BASE = { horario: { 0: null, 1: { e: "08:00", s: "17:00" }, 2: { e: "08:00", s: "17:00" }, 3: { e: "08:00", s: "17:00" }, 4: { e: "08:00", s: "17:00" }, 5: { e: "08:00", s: "17:00" }, 6: { e: "08:00", s: "12:00" } }, tolerancia: 10, taller: null, radio: 150 };
 let TRABAJOS = {}, ASIST = [], CFGP = JSON.parse(JSON.stringify(CFGP_BASE)), DIA_ASIS = hoy();
+/* El código se guarda solo con letras y números (sin guiones ni espacios): así no falla si el teléfono cambia el guion */
+const normCodigo = c => String(c || "").toUpperCase().normalize("NFKD").replace(/[^0-9A-Z]/g, "");
 async function hashCodigo(c){
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(c || "").trim().toUpperCase().replace(/\s+/g, "")));
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normCodigo(c)));
   return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+}
+/* Revisa que cada empleado con acceso tenga su llave de entrada (y la crea si falta) */
+async function repararAccesos(){
+  for (const e of EMPLEADOS.filter(e => e.acceso && e.acceso.email && e.acceso.activo !== false && e.codigo)) {
+    try { const ref = db.collection("accesos").doc(await hashCodigo(e.codigo)), d = await ref.get();
+      if (!d.exists || d.data().email !== e.acceso.email) await ref.set({ email: e.acceso.email }); }
+    catch (err) { console.error("acceso", e.nombre, err); }
+  }
 }
 async function cargarPersonal(){
   try {
@@ -1169,6 +1179,7 @@ async function cargarPersonal(){
     if (cp.exists) CFGP = Object.assign(JSON.parse(JSON.stringify(CFGP_BASE)), cp.data());
   } catch (e) { console.error(e); }
   programarSync();
+  repararAccesos();
 }
 /* Copia ordenada (para comparar sin importar el orden de las llaves) */
 const estable = o => JSON.stringify(Object.keys(o).sort().reduce((a, k) => (a[k] = o[k], a), {}));
@@ -1201,7 +1212,10 @@ async function darAccesoPortal(emp, pin){
   const sec = (firebase.apps || []).find(a => a.name === "personal") || firebase.initializeApp(FIREBASE_CONFIG, "personal");
   await sec.auth().createUserWithEmailAndPassword(email, pin);
   await sec.auth().signOut().catch(() => {});
-  await db.collection("accesos").doc(await hashCodigo(emp.codigo)).set({ email });
+  const llave = db.collection("accesos").doc(await hashCodigo(emp.codigo));
+  await llave.set({ email });
+  const comprobado = await llave.get();
+  if (!comprobado.exists || comprobado.data().email !== email) throw new Error("No se pudo guardar la llave de entrada. Revisa que publicaste las reglas nuevas de Firestore.");
   const acceso = { activo: true, email, v, desde: hoy() };
   await db.collection("empleados").doc(emp.id).update({ acceso, pinCambiado: false });
   for (const a of ASIST.filter(a => a.empleadoId === emp.id && a.email !== email)) { await db.collection("asistencias").doc(a.id).update({ email }); a.email = email; }

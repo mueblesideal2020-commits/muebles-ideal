@@ -166,9 +166,14 @@ const msg = (id, t, tipo) => { const m = $(id); m.textContent = t; m.className =
 
 let YO = null, E = null, CFG = { horario: {}, tolerancia: 10, taller: null, radio: 150 }, TRAB = [], ASIS = [], vista = "inicio", filtroP = "pend";
 
-async function hashCodigo(c){
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(c || "").trim().toUpperCase().replace(/\s+/g, "")));
-  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+const normCodigo = c => String(c || "").toUpperCase().normalize("NFKD").replace(/[^0-9A-Z]/g, "");
+async function sha(t){ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
+/* Busca la llave con el código limpio y, por compatibilidad, con el formato con guion (####-######) */
+async function buscarAcceso(codigo){
+  const n = normCodigo(codigo), formas = [n];
+  if (/^\d{10}/.test(n)) formas.push(n.slice(0, 4) + "-" + n.slice(4, 10) + (n.length > 10 ? "-" + n.slice(10) : ""));
+  for (const f of formas) { const d = await db.collection("accesos").doc(await sha(f)).get(); if (d.exists) return d.data().email; }
+  return null;
 }
 function mostrar(v){ ["v-entrar", "v-pin", "v-app"].forEach(k => $(k).hidden = k !== v); }
 
@@ -181,14 +186,16 @@ $("f-entrar").addEventListener("submit", async e => {
   if (pin.length !== 6) return msg("m-entrar", "El PIN tiene 6 números.", "err");
   const b = $("b-entrar"); b.disabled = true; b.textContent = "Entrando…";
   try {
-    const a = await db.collection("accesos").doc(await hashCodigo(codigo)).get();
-    if (!a.exists) throw Object.assign(new Error("sin acceso"), { code: "sin-acceso" });
-    await auth.signInWithEmailAndPassword(a.data().email, pin);
+    const email = await buscarAcceso(codigo);
+    if (!email) throw Object.assign(new Error("sin acceso"), { code: "sin-acceso" });
+    await auth.signInWithEmailAndPassword(email, pin);
     try { localStorage.setItem("mi-personal-codigo", codigo); } catch (er) {}
     $("pin").value = "";
   } catch (err) {
     const c = err.code || "";
+    console.error(err);
     msg("m-entrar", c === "sin-acceso" ? "Ese código no tiene acceso. Revísalo o pídele acceso al encargado."
+      : /permission-denied|insufficient/.test(c) ? "El portal aún no está activado en el sistema (permisos). Avísale al encargado."
       : /invalid-credential|wrong-password|user-not-found|invalid-login/.test(c) ? "PIN incorrecto." : /too-many/.test(c) ? "Demasiados intentos. Espera unos minutos." : "No se pudo entrar. Revisa tu conexión.", "err");
   } finally { b.disabled = false; b.textContent = "ENTRAR"; }
 });
