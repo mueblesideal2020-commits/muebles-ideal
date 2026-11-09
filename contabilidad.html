@@ -1187,7 +1187,7 @@ function pintarEmpleados(){
 function abrirEmpleado(e0){
   const nuevo = !e0, ed = $("editor-in"); $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
   const x = Object.assign({ nombre: "", cedula: "", nacimiento: "", telefono: "", roles: [], pctVenta: "", activo: true }, e0 ? JSON.parse(JSON.stringify(e0)) : {});
-  let confirmar = false, pinNuevo = "";
+  let confirmar = false, pinNuevo = "", pinSug = pinAleatorio();
   function render(){
     const hist = nuevo ? [] : lineasNomina().filter(l => l.empleadoId === x.id).sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 40);
     const cod = codigoEmp(x.cedula, x.nacimiento, x.id);
@@ -1206,10 +1206,14 @@ function abrirEmpleado(e0){
           ${x.roles.includes(ROL_VENTAS) ? `<label class="f" style="max-width:280px">Su % por cada venta <small>vacío = ${fmtN(num(PRIV.comisiones.ventas))}% (el general)</small><input type="text" inputmode="decimal" data-k="pctVenta" value="${inPct(num(x.pctVenta))}"></label>` : ""}
           <p class="ayuda">En producción cobra su parte del % del equipo (en <b>Cajas y ajustes → Comisiones</b>).</p>
           ${!nuevo ? `<label class="chk"><input type="checkbox" id="e-activo" ${x.activo !== false ? "checked" : ""}> Activo (aparece para asignar en proyectos)</label>` : ""}</div>
-        ${bloqueAcceso(x, nuevo, pinNuevo)}
+        ${bloqueAcceso(x, nuevo, pinNuevo, pinSug)}
         ${!nuevo ? `<div class="bloque"><h3>Historial de proyectos</h3>${hist.length ? `<div class="wrap-t"><table class="t"><tbody>${hist.map(l => `<tr><td>${fechaCorta(l.fecha)}</td><td><b>${esc(l.venta.numero || "")}</b> · ${esc(l.venta.cliente || "")}<span class="sub">${esc(l.rol)} · ${fmtN(l.pct)}%</span></td><td class="num">${fmtU(l.monto)}</td><td>${l.pagado ? `<span class="chip ingreso">Pagado</span>` : `<span class="chip retiro">Pendiente</span>`}</td></tr>`).join("")}</tbody></table></div>` : `<p class="ayuda">Aún no tiene proyectos.</p>`}
           <p style="margin:0"><button class="btn borde mini" id="e-del">Eliminar empleado</button></p>
-          ${confirmar ? `<div class="confirma"><span>${hist.length ? "Tiene proyectos registrados: mejor desmárcalo como Activo para conservar su historial." : "¿Eliminar a este empleado?"}</span>${hist.length ? "" : `<button class="btn peligro mini" id="e-del-si">Sí, eliminar</button>`}<button class="btn borde mini" id="e-del-no">Cancelar</button></div>` : ""}</div>` : ""}
+          ${confirmar ? (() => { const pend = hist.filter(l => !l.pagado).reduce((t, l) => t + l.monto, 0);
+            return `<div class="confirma" style="flex-direction:column;align-items:flex-start"><span><b>¿Eliminar a ${esc(x.nombre)}?</b> Desaparece de la lista de empleados${x.acceso && x.acceso.email ? " y pierde el acceso al portal" : ""}.
+              ${hist.length ? ` Sus proyectos ya pagados siguen en las ventas.${pend > 0.009 ? ` <b>Tiene ${fmtU(pend)} pendiente por pagar</b>: ese monto deja de aparecer en la nómina.` : ""}` : ""}
+              Si solo dejó de trabajar, puedes desmarcar <b>Activo</b> para conservar su historial.</span>
+              <span style="display:flex;gap:10px"><button class="btn peligro mini" id="e-del-si">Sí, eliminar</button><button class="btn borde mini" id="e-del-no">Cancelar</button></span></div>`; })() : ""}</div>` : ""}
         <p class="msg err" id="e-err" hidden></p>
       </div>`;
     ed.querySelectorAll("[data-k]").forEach(i => i.addEventListener(i.type === "date" ? "change" : "input", () => { x[i.dataset.k] = i.dataset.k === "pctVenta" ? numP(i.value) : i.value; $("e-cod").textContent = codigoEmp(x.cedula, x.nacimiento, x.id) || "—"; }));
@@ -1228,7 +1232,15 @@ function abrirEmpleado(e0){
     });
     on("ac-estado", async () => { try { await cambiarEstadoAcceso(empleado(x.id), x.acceso.activo === false); x.acceso = empleado(x.id).acceso; render(); } catch (e) { acErr("No se pudo cambiar el acceso."); } });
     on("e-del", () => { confirmar = true; render(); }); on("e-del-no", () => { confirmar = false; render(); });
-    on("e-del-si", async () => { try { await db.collection("empleados").doc(x.id).delete(); EMPLEADOS = EMPLEADOS.filter(e => e.id !== x.id); cerrarEditor(); refrescar(); toast("Empleado eliminado."); } catch (e) { toast("No se pudo eliminar."); } });
+    on("e-del-si", async () => {
+      const b = $("e-del-si"); b.disabled = true; b.textContent = "Eliminando…";
+      try {
+        await db.collection("empleados").doc(x.id).delete();
+        if (x.codigo) await db.collection("accesos").doc(await hashCodigo(x.codigo)).delete().catch(() => {});   /* sin llave ya no puede entrar al portal */
+        EMPLEADOS = EMPLEADOS.filter(e => e.id !== x.id); cerrarEditor(); refrescar(); toast(`${x.nombre} fue eliminado.`);
+      } catch (e) { console.error(e); toast("No se pudo eliminar. Revisa tu conexión."); b.disabled = false; b.textContent = "Sí, eliminar"; }
+    });
+    const pinIn = $("ac-pin"); if (pinIn) pinIn.addEventListener("input", () => pinSug = pinIn.value);
   }
   async function guardar(){
     const err = t => { const n = $("e-err"); n.textContent = t; n.hidden = false; n.scrollIntoView({ block: "center" }); };
@@ -1291,7 +1303,7 @@ function programarSync(){ clearTimeout(syncT); syncT = setTimeout(() => sincroni
 async function sincronizarTrabajos(){
   if (ROL !== "dueno") return;
   const quiero = {};
-  lineasNomina().forEach(l => {
+  lineasNomina().filter(l => empleado(l.empleadoId)).forEach(l => {
     const e = empleado(l.empleadoId), id = `${l.venta.id}_${l.item.id}_${l.id}`.replace(/\//g, "-");
     quiero[id] = { empleadoId: l.empleadoId, email: (e && e.acceso && e.acceso.activo !== false && e.acceso.email) || "", fecha: l.fecha || "", semana: viernesDe(l.fecha || hoy()),
       ventaId: l.venta.id, numero: l.venta.numero || "", producto: l.item.producto || l.venta.producto || "", cantidad: num(l.item.cantidad) || 1,
@@ -1330,7 +1342,7 @@ async function cambiarEstadoAcceso(emp, activo){
   await db.collection("empleados").doc(emp.id).update({ acceso });
   empleado(emp.id).acceso = acceso; programarSync();
 }
-function bloqueAcceso(x, nuevo, tmp){
+function bloqueAcceso(x, nuevo, tmp, pinSug){
   if (nuevo) return `<div class="bloque"><h3>Portal del personal</h3><p class="ayuda">Guarda primero al empleado. Después podrás darle acceso al portal.</p></div>`;
   const a = x.acceso, url = location.href.replace(/contabilidad\.html.*$/, "personal.html");
   return `<div class="bloque"><h3>Portal del personal</h3>
@@ -1339,10 +1351,10 @@ function bloqueAcceso(x, nuevo, tmp){
     ${a && a.email ? `<p style="margin:0">Estado: <span class="chip ${a.activo === false ? "est-anulado" : "ingreso"}">${a.activo === false ? "Sin acceso" : "Con acceso"}</span> ${x.pinCambiado ? "" : `<span class="ayuda">· aún no ha cambiado el PIN inicial</span>`}</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
         <button type="button" class="btn borde mini" id="ac-estado">${a.activo === false ? "Devolver acceso" : "Quitar acceso"}</button>
-        <label class="f" style="max-width:150px">Nuevo PIN<input type="text" inputmode="numeric" maxlength="6" id="ac-pin" value="${pinAleatorio()}"></label>
+        <label class="f" style="max-width:150px">Nuevo PIN<input type="text" inputmode="numeric" maxlength="6" id="ac-pin" value="${pinSug}"></label>
         <button type="button" class="btn borde mini" id="ac-dar">Cambiar PIN</button></div>
       <p class="ayuda">Si olvidó su PIN, ponle uno nuevo aquí. El anterior deja de servir.</p>`
-    : `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end"><label class="f" style="max-width:170px">PIN inicial <small>6 números</small><input type="text" inputmode="numeric" maxlength="6" id="ac-pin" value="${pinAleatorio()}"></label>
+    : `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end"><label class="f" style="max-width:170px">PIN inicial <small>6 números</small><input type="text" inputmode="numeric" maxlength="6" id="ac-pin" value="${pinSug}"></label>
         <button type="button" class="btn oro" id="ac-dar">DAR ACCESO AL PORTAL</button></div>`}
     <p class="msg err" id="ac-err" hidden></p></div>`;
 }
