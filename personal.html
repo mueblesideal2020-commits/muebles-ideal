@@ -41,7 +41,6 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-weight: 700; fon
 .entrar img { height: 72px; width: auto; align-self: center; }
 .entrar h1 { text-align: center; font-size: 1.15rem; text-transform: uppercase; letter-spacing: .1em; }
 .entrar p.sub { text-align: center; color: var(--muted); margin: -8px 0 4px; font-size: .95rem; }
-#pin, #pin1, #pin2 { letter-spacing: .5em; font-family: var(--display); text-align: center; }
 
 /* App */
 .top { position: sticky; top: 0; z-index: 10; background: var(--ink); color: #fff; padding: calc(12px + env(safe-area-inset-top, 0px)) 18px 12px; display: flex; align-items: center; gap: 12px; }
@@ -94,31 +93,17 @@ main { padding: 18px 16px calc(96px + env(safe-area-inset-bottom, 0px)); max-wid
 </head>
 <body>
 
-<!-- Entrar con código + PIN -->
+<!-- Entrar con correo y contraseña -->
 <section class="entrar" id="v-entrar" hidden>
   <form id="f-entrar" novalidate>
     <img src="logo-v.png" alt="Muebles Ideal">
     <h1>Personal</h1>
-    <p class="sub">Entra con tu código de empleado y tu PIN.</p>
-    <label class="f">Código de empleado<input id="codigo" autocomplete="username" autocapitalize="characters" placeholder="Ej. 7890-140395"></label>
-    <label class="f">PIN<input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="••••••"></label>
+    <p class="sub">Entra con tu correo y tu contraseña.</p>
+    <label class="f">Correo<input id="correo" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="tucorreo@gmail.com"></label>
+    <label class="f">Contraseña<input id="clave" type="password" autocomplete="current-password"></label>
     <button class="btn oro" type="submit" id="b-entrar">ENTRAR</button>
     <p class="msg" id="m-entrar" hidden></p>
-    <p class="sub" style="margin:0;font-size:.85rem">¿No tienes código o olvidaste el PIN? Pídeselo al encargado.</p>
-  </form>
-</section>
-
-<!-- Primer ingreso: cambiar PIN -->
-<section class="entrar" id="v-pin" hidden>
-  <form id="f-pin" novalidate>
-    <img src="logo-v.png" alt="Muebles Ideal">
-    <h1>Crea tu PIN</h1>
-    <p class="sub">Elige 6 números que solo tú sepas.</p>
-    <label class="f">Nuevo PIN<input id="pin1" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
-    <label class="f">Repite el PIN<input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
-    <button class="btn oro" type="submit" id="b-pin">GUARDAR PIN</button>
-    <p class="msg" id="m-pin" hidden></p>
-    <button class="btn borde" type="button" id="pin-cancelar" hidden>Cancelar</button>
+    <p class="sub" style="margin:0;font-size:.9rem">¿Primera vez u olvidaste la contraseña?<br><button type="button" class="btn borde" id="b-olvide" style="margin-top:10px;min-height:44px">Enviarme un correo para crearla</button></p>
   </form>
 </section>
 
@@ -166,73 +151,45 @@ const msg = (id, t, tipo) => { const m = $(id); m.textContent = t; m.className =
 
 let YO = null, E = null, CFG = { horario: {}, tolerancia: 10, taller: null, radio: 150 }, TRAB = [], ASIS = [], vista = "inicio", filtroP = "pend";
 
-const normCodigo = c => String(c || "").toUpperCase().normalize("NFKD").replace(/[^0-9A-Z]/g, "");
-async function sha(t){ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
-/* Busca la llave con el código limpio y, por compatibilidad, con el formato con guion (####-######) */
-async function buscarAcceso(codigo){
-  const n = normCodigo(codigo), formas = [n];
-  if (/^\d{10}/.test(n)) formas.push(n.slice(0, 4) + "-" + n.slice(4, 10) + (n.length > 10 ? "-" + n.slice(10) : ""));
-  for (const f of formas) { const d = await db.collection("accesos").doc(await sha(f)).get(); if (d.exists) return d.data().email; }
-  return null;
-}
-function mostrar(v){ ["v-entrar", "v-pin", "v-app"].forEach(k => $(k).hidden = k !== v); }
+function mostrar(v){ ["v-entrar", "v-app"].forEach(k => $(k).hidden = k !== v); }
 
 /* ---- Entrar ---- */
-try { const c = localStorage.getItem("mi-personal-codigo"); if (c) $("codigo").value = c; } catch (e) {}
+try { const c = localStorage.getItem("mi-personal-correo"); if (c) $("correo").value = c; } catch (e) {}
 $("f-entrar").addEventListener("submit", async e => {
   e.preventDefault(); msg("m-entrar", "", "");
-  const codigo = $("codigo").value.trim().toUpperCase(), pin = $("pin").value.replace(/\D/g, "");
-  if (!codigo) return msg("m-entrar", "Escribe tu código de empleado.", "err");
-  if (pin.length !== 6) return msg("m-entrar", "El PIN tiene 6 números.", "err");
+  const correo = $("correo").value.trim().toLowerCase(), clave = $("clave").value;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) return msg("m-entrar", "Escribe tu correo.", "err");
+  if (!clave) return msg("m-entrar", "Escribe tu contraseña.", "err");
   const b = $("b-entrar"); b.disabled = true; b.textContent = "Entrando…";
   try {
-    const email = await buscarAcceso(codigo);
-    if (!email) throw Object.assign(new Error("sin acceso"), { code: "sin-acceso" });
-    await auth.signInWithEmailAndPassword(email, pin);
-    try { localStorage.setItem("mi-personal-codigo", codigo); } catch (er) {}
-    $("pin").value = "";
+    await auth.signInWithEmailAndPassword(correo, clave);
+    try { localStorage.setItem("mi-personal-correo", correo); } catch (er) {}
+    $("clave").value = "";
   } catch (err) {
-    const c = err.code || "";
-    console.error(err);
-    msg("m-entrar", c === "sin-acceso" ? "Ese código no tiene acceso. Revísalo o pídele acceso al encargado."
-      : /permission-denied|insufficient/.test(c) ? "El portal aún no está activado en el sistema (permisos). Avísale al encargado."
-      : /invalid-credential|wrong-password|user-not-found|invalid-login/.test(c) ? "PIN incorrecto." : /too-many/.test(c) ? "Demasiados intentos. Espera unos minutos." : "No se pudo entrar. Revisa tu conexión.", "err");
+    console.error(err); const c = err.code || "";
+    msg("m-entrar", /invalid-credential|wrong-password|user-not-found|invalid-login|invalid-email/.test(c) ? "Correo o contraseña incorrectos. Si es tu primera vez, toca «Enviarme un correo para crearla»."
+      : /too-many/.test(c) ? "Demasiados intentos. Espera unos minutos." : "No se pudo entrar. Revisa tu conexión.", "err");
   } finally { b.disabled = false; b.textContent = "ENTRAR"; }
+});
+$("b-olvide").addEventListener("click", async () => {
+  const correo = $("correo").value.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) return msg("m-entrar", "Escribe primero tu correo arriba.", "err");
+  try { await auth.sendPasswordResetEmail(correo); msg("m-entrar", `Te enviamos un correo a ${correo} para crear tu contraseña. Revisa también la carpeta de spam.`, "ok"); }
+  catch (err) { msg("m-entrar", "No se pudo enviar el correo. Revisa que esté bien escrito.", "err"); }
 });
 
 auth.onAuthStateChanged(async u => {
   YO = u; E = null;
   if (!u) { mostrar("v-entrar"); return; }
+  let motivo = "";
   try {
-    const q = await db.collection("empleados").where("acceso.email", "==", u.email).limit(1).get();
-    if (q.empty) throw new Error("sin ficha");
-    E = Object.assign({ id: q.docs[0].id }, q.docs[0].data());
-    if (!E.acceso || E.acceso.activo === false) throw new Error("inactivo");
-  } catch (e) {
-    await auth.signOut(); msg("m-entrar", "Tu acceso no está activo. Habla con el encargado.", "err"); return;
-  }
-  if (!E.pinCambiado) { $("pin-cancelar").hidden = true; mostrar("v-pin"); return; }
+    const q = await db.collection("empleados").where("acceso.email", "==", (u.email || "").toLowerCase()).limit(1).get();
+    if (q.empty) motivo = "Este correo no está registrado como empleado. Habla con el encargado.";
+    else { E = Object.assign({ id: q.docs[0].id }, q.docs[0].data()); if (!E.acceso || E.acceso.activo === false) motivo = "Tu acceso no está activo. Habla con el encargado."; }
+  } catch (e) { console.error(e); motivo = "El portal aún no está activado en el sistema (permisos). Avísale al encargado."; }
+  if (motivo) { await auth.signOut(); msg("m-entrar", motivo, "err"); return; }
   await entrarApp();
 });
-
-/* ---- Cambiar PIN (obligatorio la primera vez) ---- */
-$("f-pin").addEventListener("submit", async e => {
-  e.preventDefault();
-  const p1 = $("pin1").value.replace(/\D/g, ""), p2 = $("pin2").value.replace(/\D/g, "");
-  if (p1.length !== 6) return msg("m-pin", "El PIN debe tener 6 números.", "err");
-  if (/^(\d)\1{5}$/.test(p1) || p1 === "123456") return msg("m-pin", "Ese PIN es muy fácil de adivinar. Elige otro.", "err");
-  if (p1 !== p2) return msg("m-pin", "Los dos PIN no coinciden.", "err");
-  const b = $("b-pin"); b.disabled = true; b.textContent = "Guardando…";
-  try {
-    await auth.currentUser.updatePassword(p1);
-    await db.collection("empleados").doc(E.id).update({ pinCambiado: true });
-    E.pinCambiado = true; $("pin1").value = $("pin2").value = ""; msg("m-pin", "", "");
-    toast("PIN guardado."); await entrarApp();
-  } catch (err) {
-    msg("m-pin", /requires-recent-login/.test(err.code || "") ? "Por seguridad, sal y vuelve a entrar para cambiar el PIN." : "No se pudo guardar el PIN.", "err");
-  } finally { b.disabled = false; b.textContent = "GUARDAR PIN"; }
-});
-$("pin-cancelar").addEventListener("click", () => { mostrar("v-app"); pintar(); });
 
 /* ---- Datos ---- */
 async function entrarApp(){
@@ -369,13 +326,13 @@ function pintarAsistencia(){
 function pintarPerfil(){
   $("main").innerHTML = `
     <div class="card perfil">
-      <p style="margin:0 0 4px;color:var(--muted);font-size:.85rem">Tu código</p><p class="cod" style="margin:0 0 16px">${esc(E.codigo || "")}</p>
-      <dl><dt>Nombre</dt><dd>${esc(E.nombre || "")}</dd><dt>Cargo</dt><dd>${esc((E.roles || []).join(", "))}</dd>${E.telefono ? `<dt>Teléfono</dt><dd>${esc(E.telefono)}</dd>` : ""}</dl>
+      <p style="margin:0 0 4px;color:var(--muted);font-size:.85rem">Tu código de empleado</p><p class="cod" style="margin:0 0 16px">${esc(E.codigo || "")}</p>
+      <dl><dt>Nombre</dt><dd>${esc(E.nombre || "")}</dd><dt>Correo</dt><dd style="word-break:break-all">${esc(YO.email || "")}</dd><dt>Cargo</dt><dd>${esc((E.roles || []).join(", "))}</dd>${E.telefono ? `<dt>Teléfono</dt><dd>${esc(E.telefono)}</dd>` : ""}</dl>
     </div>
-    <button class="btn borde" type="button" id="b-cpin">Cambiar mi PIN</button>
+    <button class="btn borde" type="button" id="b-cpin">Cambiar mi contraseña</button>
     <button class="btn" type="button" id="b-salir">Salir</button>
     <p class="nota">Para entrar más rápido, agrega esta página a tu pantalla de inicio desde el menú del navegador.</p>`;
-  $("b-cpin").addEventListener("click", () => { $("pin-cancelar").hidden = false; msg("m-pin", "", ""); mostrar("v-pin"); });
+  $("b-cpin").addEventListener("click", async () => { try { await auth.sendPasswordResetEmail(YO.email); toast("Te enviamos un correo para cambiar la contraseña."); } catch (e) { toast("No se pudo enviar el correo."); } });
   $("b-salir").addEventListener("click", () => auth.signOut());
 }
 </script>

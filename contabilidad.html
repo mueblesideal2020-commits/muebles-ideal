@@ -1175,19 +1175,40 @@ function codigoEmp(ced, nac, idAct){
 function pintarEmpleados(){
   const el = $("t-empleados"), todas = lineasNomina();
   el.innerHTML = `<div class="barra"><h2>Empleados</h2><button class="btn oro" id="e-nuevo">+ NUEVO EMPLEADO</button></div>
-    <div class="card wrap-t">${EMPLEADOS.length ? `<table class="t"><thead><tr><th>Código</th><th>Nombre</th><th class="ocultar-movil">Cargos</th><th class="num">Ganado en ${MESES[+MES.slice(5, 7) - 1].toLowerCase()}</th><th class="num">Por pagar</th></tr></thead><tbody>
+    <div class="card wrap-t">${EMPLEADOS.length ? `<table class="t"><thead><tr><th>Código</th><th>Nombre</th><th class="ocultar-movil">Cargos</th><th class="num">Ganado en ${MESES[+MES.slice(5, 7) - 1].toLowerCase()}</th><th class="num">Por pagar</th><th></th></tr></thead><tbody>
       ${EMPLEADOS.map(e => { const m = todas.filter(l => l.empleadoId === e.id); const mes = m.filter(l => l.fecha.startsWith(MES)).reduce((a, l) => a + l.monto, 0), pp = m.filter(l => !l.pagado).reduce((a, l) => a + l.monto, 0);
         return `<tr class="clic" data-e="${e.id}" style="${e.activo === false ? "opacity:.5" : ""}"><td><b>${esc(e.codigo || "")}</b></td><td>${esc(e.nombre)}${e.activo === false ? `<span class="sub">Inactivo</span>` : ""}<span class="sub">${esc(e.telefono || "")}</span></td>
           <td class="ocultar-movil">${(e.roles || []).map(r => `<span class="chip">${esc(r)}${r === ROL_VENTAS ? " " + fmtN(num(e.pctVenta) || num(PRIV.comisiones.ventas)) + "%" : ""}</span>`).join(" ")}</td>
-          <td class="num">${fmtU(mes)}</td><td class="num ${pp > 0.009 ? "menos" : ""}">${fmtU(pp)}</td></tr>`; }).join("")}</tbody></table>`
+          <td class="num">${fmtU(mes)}</td><td class="num ${pp > 0.009 ? "menos" : ""}">${fmtU(pp)}</td>
+          <td style="text-align:right"><button type="button" class="btn borde mini" data-e-del="${e.id}" aria-label="Eliminar a ${esc(e.nombre)}">Eliminar</button></td></tr>`; }).join("")}</tbody></table>`
       : `<p class="vacio">Registra a tu equipo: picador, armador, tapicero, corte y costura y ejecutivos de ventas.</p>`}</div>`;
   $("e-nuevo").addEventListener("click", () => abrirEmpleado(null));
-  el.querySelectorAll("[data-e]").forEach(r => r.addEventListener("click", () => abrirEmpleado(empleado(r.dataset.e))));
+  el.querySelectorAll("[data-e]").forEach(r => r.addEventListener("click", ev => { if (ev.target.closest("[data-e-del]")) return; abrirEmpleado(empleado(r.dataset.e)); }));
+  el.querySelectorAll("[data-e-del]").forEach(b => b.addEventListener("click", () => confirmarEliminar(empleado(b.dataset.eDel))));
+}
+/* Elimina al empleado: sale de la lista y del portal (su correo deja de servir). Lo ya pagado queda en las ventas. */
+async function eliminarEmpleado(e){
+  await db.collection("empleados").doc(e.id).delete();
+  if (e.codigo) await db.collection("accesos").doc(await hashCodigo(e.codigo)).delete().catch(() => {});
+  EMPLEADOS = EMPLEADOS.filter(z => z.id !== e.id);
+}
+function confirmarEliminar(e){
+  const ed = $("editor-in"); $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
+  const pend = lineasNomina().filter(l => l.empleadoId === e.id && !l.pagado).reduce((t, l) => t + l.monto, 0);
+  ed.innerHTML = `<header><h2>Eliminar empleado</h2><button class="btn borde mini" id="el-x">Cancelar</button></header>
+    <div class="form"><div class="bloque"><h3>${esc(e.nombre)} · ${esc(e.codigo || "")}</h3>
+      <p style="margin:0">Desaparece de la lista de empleados y de la asignación de proyectos${e.acceso && e.acceso.email ? `, y <b>pierde el acceso al portal</b>` : ""}.</p>
+      <p class="ayuda" style="margin:0">Sus proyectos ya pagados siguen guardados en las ventas.</p>
+      ${pend > 0.009 ? `<p class="msg warn" style="margin:0">Tiene <b>${fmtU(pend)}</b> pendiente por pagar. Si lo eliminas, ese monto deja de aparecer en la nómina. Págalo antes si corresponde.</p>` : ""}
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn peligro" id="el-si">SÍ, ELIMINAR</button><button class="btn borde" id="el-no">No, volver</button></div></div></div>`;
+  $("el-x").addEventListener("click", cerrarEditor); $("el-no").addEventListener("click", cerrarEditor);
+  $("el-si").addEventListener("click", async () => { const b = $("el-si"); b.disabled = true; b.textContent = "Eliminando…";
+    try { await eliminarEmpleado(e); cerrarEditor(); refrescar(); toast(`${e.nombre} fue eliminado.`); } catch (err) { console.error(err); toast("No se pudo eliminar."); b.disabled = false; b.textContent = "SÍ, ELIMINAR"; } });
 }
 function abrirEmpleado(e0){
   const nuevo = !e0, ed = $("editor-in"); $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
   const x = Object.assign({ nombre: "", cedula: "", nacimiento: "", telefono: "", roles: [], pctVenta: "", activo: true }, e0 ? JSON.parse(JSON.stringify(e0)) : {});
-  let confirmar = false, pinNuevo = "", pinSug = pinAleatorio();
+  let confirmar = false, avisoAcceso = "";
   function render(){
     const hist = nuevo ? [] : lineasNomina().filter(l => l.empleadoId === x.id).sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 40);
     const cod = codigoEmp(x.cedula, x.nacimiento, x.id);
@@ -1197,6 +1218,7 @@ function abrirEmpleado(e0){
           <label class="f">Nombre y apellido<input type="text" data-k="nombre" value="${esc(x.nombre)}"></label>
           <label class="f">Cédula<input type="text" inputmode="numeric" data-k="cedula" value="${esc(x.cedula)}" placeholder="V-24567890"></label>
           <label class="f">Fecha de nacimiento<input type="date" data-k="nacimiento" value="${esc(x.nacimiento)}"></label>
+          <label class="f">Correo <small>para entrar al portal</small><input type="email" data-k="email" value="${esc(x.email || "")}" autocapitalize="off" placeholder="empleado@gmail.com"></label>
           <label class="f">Teléfono <small>para enviarle su detalle</small><input type="tel" data-k="telefono" value="${esc(x.telefono)}"></label></div></div>
         <div class="bloque"><h3>Código del empleado</h3>
           <p class="codigo-grande" id="e-cod">${cod || "—"}</p>
@@ -1206,7 +1228,7 @@ function abrirEmpleado(e0){
           ${x.roles.includes(ROL_VENTAS) ? `<label class="f" style="max-width:280px">Su % por cada venta <small>vacío = ${fmtN(num(PRIV.comisiones.ventas))}% (el general)</small><input type="text" inputmode="decimal" data-k="pctVenta" value="${inPct(num(x.pctVenta))}"></label>` : ""}
           <p class="ayuda">En producción cobra su parte del % del equipo (en <b>Cajas y ajustes → Comisiones</b>).</p>
           ${!nuevo ? `<label class="chk"><input type="checkbox" id="e-activo" ${x.activo !== false ? "checked" : ""}> Activo (aparece para asignar en proyectos)</label>` : ""}</div>
-        ${bloqueAcceso(x, nuevo, pinNuevo, pinSug)}
+        ${bloqueAcceso(x, nuevo, avisoAcceso)}
         ${!nuevo ? `<div class="bloque"><h3>Historial de proyectos</h3>${hist.length ? `<div class="wrap-t"><table class="t"><tbody>${hist.map(l => `<tr><td>${fechaCorta(l.fecha)}</td><td><b>${esc(l.venta.numero || "")}</b> · ${esc(l.venta.cliente || "")}<span class="sub">${esc(l.rol)} · ${fmtN(l.pct)}%</span></td><td class="num">${fmtU(l.monto)}</td><td>${l.pagado ? `<span class="chip ingreso">Pagado</span>` : `<span class="chip retiro">Pendiente</span>`}</td></tr>`).join("")}</tbody></table></div>` : `<p class="ayuda">Aún no tiene proyectos.</p>`}
           <p style="margin:0"><button class="btn borde mini" id="e-del">Eliminar empleado</button></p>
           ${confirmar ? (() => { const pend = hist.filter(l => !l.pagado).reduce((t, l) => t + l.monto, 0);
@@ -1223,24 +1245,21 @@ function abrirEmpleado(e0){
     if ($("e-activo")) $("e-activo").addEventListener("change", ev => x.activo = ev.target.checked);
     const acErr = t => { const n = $("ac-err"); n.textContent = t; n.hidden = false; };
     on("ac-dar", async () => {
-      const pin = ($("ac-pin").value || "").replace(/\D/g, "");
-      if (pin.length !== 6) return acErr("El PIN debe tener 6 números.");
-      if (!x.codigo) return acErr("Guarda primero la cédula y la fecha de nacimiento para que tenga código.");
-      const b = $("ac-dar"); b.disabled = true; b.textContent = "Creando acceso…";
-      try { await darAccesoPortal(empleado(x.id), pin); Object.assign(x, { acceso: empleado(x.id).acceso, pinCambiado: false }); pinNuevo = pin; render(); toast("Acceso listo."); }
-      catch (e) { console.error(e); acErr("No se pudo crear el acceso: " + (e.message || e)); b.disabled = false; b.textContent = "Reintentar"; }
+      const correo = ($("ac-email").value || "").trim().toLowerCase();
+      if (!correoValido(correo)) return acErr("Escribe el correo del empleado.");
+      const b = $("ac-dar"), t = b.textContent; b.disabled = true; b.textContent = "Enviando…";
+      try { await darAccesoPortal(empleado(x.id), correo); Object.assign(x, { acceso: empleado(x.id).acceso, email: correo });
+        avisoAcceso = `Listo. Le enviamos a <b>${esc(correo)}</b> un correo para crear su contraseña (que revise también spam). Luego entra en personal.html con su correo.`; render(); toast("Acceso por correo listo."); }
+      catch (e) { console.error(e); acErr(e.code === "auth/invalid-email" ? "Ese correo no es válido." : (e.message || String(e))); b.disabled = false; b.textContent = t; }
     });
+    on("ac-reenviar", async () => { try { await auth.sendPasswordResetEmail(x.acceso.email); avisoAcceso = `Correo reenviado a <b>${esc(x.acceso.email)}</b>.`; render(); } catch (e) { acErr("No se pudo enviar el correo."); } });
     on("ac-estado", async () => { try { await cambiarEstadoAcceso(empleado(x.id), x.acceso.activo === false); x.acceso = empleado(x.id).acceso; render(); } catch (e) { acErr("No se pudo cambiar el acceso."); } });
     on("e-del", () => { confirmar = true; render(); }); on("e-del-no", () => { confirmar = false; render(); });
     on("e-del-si", async () => {
       const b = $("e-del-si"); b.disabled = true; b.textContent = "Eliminando…";
-      try {
-        await db.collection("empleados").doc(x.id).delete();
-        if (x.codigo) await db.collection("accesos").doc(await hashCodigo(x.codigo)).delete().catch(() => {});   /* sin llave ya no puede entrar al portal */
-        EMPLEADOS = EMPLEADOS.filter(e => e.id !== x.id); cerrarEditor(); refrescar(); toast(`${x.nombre} fue eliminado.`);
-      } catch (e) { console.error(e); toast("No se pudo eliminar. Revisa tu conexión."); b.disabled = false; b.textContent = "Sí, eliminar"; }
+      try { await eliminarEmpleado(empleado(x.id) || x); cerrarEditor(); refrescar(); toast(`${x.nombre} fue eliminado.`); }
+      catch (e) { console.error(e); toast("No se pudo eliminar. Revisa tu conexión."); b.disabled = false; b.textContent = "Sí, eliminar"; }
     });
-    const pinIn = $("ac-pin"); if (pinIn) pinIn.addEventListener("input", () => pinSug = pinIn.value);
   }
   async function guardar(){
     const err = t => { const n = $("e-err"); n.textContent = t; n.hidden = false; n.scrollIntoView({ block: "center" }); };
@@ -1248,7 +1267,7 @@ function abrirEmpleado(e0){
     if (String(x.cedula).replace(/\D/g, "").length < 4) return err("Escribe la cédula.");
     if (!x.nacimiento) return err("Escribe la fecha de nacimiento.");
     if (!x.roles.length) return err("Marca al menos un cargo.");
-    const id = x.id || nuevoId("e"), d = { nombre: x.nombre.trim(), cedula: String(x.cedula).trim(), nacimiento: x.nacimiento, telefono: (x.telefono || "").trim(), roles: x.roles,
+    const id = x.id || nuevoId("e"), d = { nombre: x.nombre.trim(), cedula: String(x.cedula).trim(), nacimiento: x.nacimiento, telefono: (x.telefono || "").trim(), email: String(x.email || "").trim().toLowerCase(), roles: x.roles,
       pctVenta: numP(x.pctVenta) || "", activo: x.activo !== false, codigo: codigoEmp(x.cedula, x.nacimiento, id) };
     if (x.acceso) { d.acceso = x.acceso; d.pinCambiado = !!x.pinCambiado; }
     const codigoViejo = e0 && e0.codigo;
@@ -1294,7 +1313,6 @@ async function cargarPersonal(){
     if (cp.exists) CFGP = Object.assign(JSON.parse(JSON.stringify(CFGP_BASE)), cp.data());
   } catch (e) { console.error(e); }
   programarSync();
-  repararAccesos();
 }
 /* Copia ordenada (para comparar sin importar el orden de las llaves) */
 const estable = o => JSON.stringify(Object.keys(o).sort().reduce((a, k) => (a[k] = o[k], a), {}));
@@ -1322,19 +1340,24 @@ async function sincronizarTrabajos(){
 
 /* ---- Acceso al portal (desde el editor del empleado) ---- */
 function pinAleatorio(){ return String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)); }
-async function darAccesoPortal(emp, pin){
-  const v = ((emp.acceso && emp.acceso.v) || 0) + 1, email = `p${String(emp.codigo).replace(/[^0-9a-z]/gi, "").toLowerCase()}v${v}@${DOMINIO_PERSONAL}`;
+const correoValido = c => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c || "");
+const accesoPorCorreo = a => !!(a && a.email && !a.email.endsWith("@" + DOMINIO_PERSONAL));
+/* Crea la cuenta del empleado con su correo y le envía el enlace para que él mismo cree su contraseña */
+async function darAccesoPortal(emp, correo){
+  const email = String(correo || "").trim().toLowerCase();
+  if (!correoValido(email)) throw new Error("Escribe un correo válido.");
+  if (email === DUENO) throw new Error("Ese es tu correo de dueño: usa el correo del empleado.");
+  const otro = EMPLEADOS.find(e => e.id !== emp.id && e.acceso && e.acceso.email === email);
+  if (otro) throw new Error(`Ese correo ya lo usa ${otro.nombre}.`);
   const sec = (firebase.apps || []).find(a => a.name === "personal") || firebase.initializeApp(FIREBASE_CONFIG, "personal");
-  await sec.auth().createUserWithEmailAndPassword(email, pin);
+  const clave = Array.from(crypto.getRandomValues(new Uint8Array(18)), b => b.toString(36)).join("") + "Aa1";
+  try { await sec.auth().createUserWithEmailAndPassword(email, clave); } catch (e) { if (!/email-already-in-use/.test(e.code || "")) throw e; }
   await sec.auth().signOut().catch(() => {});
-  const llave = db.collection("accesos").doc(await hashCodigo(emp.codigo));
-  await llave.set({ email });
-  const comprobado = await llave.get();
-  if (!comprobado.exists || comprobado.data().email !== email) throw new Error("No se pudo guardar la llave de entrada. Revisa que publicaste las reglas nuevas de Firestore.");
-  const acceso = { activo: true, email, v, desde: hoy() };
-  await db.collection("empleados").doc(emp.id).update({ acceso, pinCambiado: false });
+  await auth.sendPasswordResetEmail(email);
+  const acceso = { activo: true, email, desde: hoy(), tipo: "correo" };
+  await db.collection("empleados").doc(emp.id).update({ acceso, email });
   for (const a of ASIST.filter(a => a.empleadoId === emp.id && a.email !== email)) { await db.collection("asistencias").doc(a.id).update({ email }); a.email = email; }
-  Object.assign(empleado(emp.id), { acceso, pinCambiado: false });
+  Object.assign(empleado(emp.id), { acceso, email });
   programarSync();
 }
 async function cambiarEstadoAcceso(emp, activo){
@@ -1342,20 +1365,20 @@ async function cambiarEstadoAcceso(emp, activo){
   await db.collection("empleados").doc(emp.id).update({ acceso });
   empleado(emp.id).acceso = acceso; programarSync();
 }
-function bloqueAcceso(x, nuevo, tmp, pinSug){
+function bloqueAcceso(x, nuevo, aviso){
   if (nuevo) return `<div class="bloque"><h3>Portal del personal</h3><p class="ayuda">Guarda primero al empleado. Después podrás darle acceso al portal.</p></div>`;
   const a = x.acceso, url = location.href.replace(/contabilidad\.html.*$/, "personal.html");
   return `<div class="bloque"><h3>Portal del personal</h3>
-    <p class="ayuda">Con su <b>código</b> y un <b>PIN de 6 números</b> el empleado entra en <b>personal.html</b> desde su teléfono: ve sus proyectos, lo pagado, lo pendiente, y marca su entrada y salida. No ve clientes ni precios de venta.</p>
-    ${tmp ? `<p class="msg ok" style="margin:0">Listo. Entrégale estos datos:<br>Código: <b>${esc(x.codigo)}</b> · PIN: <b>${esc(tmp)}</b><br>Página: <b>${esc(url)}</b><br>La primera vez le pedirá cambiar el PIN.</p>` : ""}
-    ${a && a.email ? `<p style="margin:0">Estado: <span class="chip ${a.activo === false ? "est-anulado" : "ingreso"}">${a.activo === false ? "Sin acceso" : "Con acceso"}</span> ${x.pinCambiado ? "" : `<span class="ayuda">· aún no ha cambiado el PIN inicial</span>`}</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-        <button type="button" class="btn borde mini" id="ac-estado">${a.activo === false ? "Devolver acceso" : "Quitar acceso"}</button>
-        <label class="f" style="max-width:150px">Nuevo PIN<input type="text" inputmode="numeric" maxlength="6" id="ac-pin" value="${pinSug}"></label>
-        <button type="button" class="btn borde mini" id="ac-dar">Cambiar PIN</button></div>
-      <p class="ayuda">Si olvidó su PIN, ponle uno nuevo aquí. El anterior deja de servir.</p>`
-    : `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end"><label class="f" style="max-width:170px">PIN inicial <small>6 números</small><input type="text" inputmode="numeric" maxlength="6" id="ac-pin" value="${pinSug}"></label>
-        <button type="button" class="btn oro" id="ac-dar">DAR ACCESO AL PORTAL</button></div>`}
+    <p class="ayuda">El empleado entra en <b>personal.html</b> con su <b>correo</b> y una <b>contraseña que él mismo crea</b>. Ve sus proyectos, lo pagado y lo pendiente, y marca su entrada y salida. No ve clientes ni precios de venta.</p>
+    ${aviso ? `<p class="msg ok" style="margin:0">${aviso}</p>` : ""}
+    ${accesoPorCorreo(a) ? `<p style="margin:0">Estado: <span class="chip ${a.activo === false ? "est-anulado" : "ingreso"}">${a.activo === false ? "Sin acceso" : "Con acceso"}</span> · <b style="word-break:break-all">${esc(a.email)}</b></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" class="btn borde mini" id="ac-reenviar">Reenviar correo para crear contraseña</button>
+        <button type="button" class="btn borde mini" id="ac-estado">${a.activo === false ? "Devolver acceso" : "Quitar acceso"}</button></div>
+      <label class="f">Cambiar a otro correo <small>opcional</small><span style="display:flex;gap:8px"><input type="email" id="ac-email" placeholder="nuevo@correo.com" autocapitalize="off"><button type="button" class="btn borde mini" id="ac-dar">Cambiar</button></span></label>`
+    : `<label class="f">Correo del empleado<input type="email" id="ac-email" value="${esc(x.email || "")}" placeholder="empleado@gmail.com" autocapitalize="off"></label>
+      <p style="margin:0"><button type="button" class="btn oro" id="ac-dar">DAR ACCESO POR CORREO</button></p>
+      <p class="ayuda">Le llegará un correo para crear su contraseña. Después entra en <b>${esc(url)}</b> con su correo.</p>`}
     <p class="msg err" id="ac-err" hidden></p></div>`;
 }
 
