@@ -131,6 +131,13 @@ table.t tfoot td { font-weight: 700; border-top: 2px solid var(--line); }
 .lista-cot button { text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
 .lista-cot button:hover { border-color: var(--gold); }
 .anotar { max-width: 640px; }
+.arts { display: flex; flex-direction: column; gap: 10px; }
+.art { display: grid; grid-template-columns: 2fr 0.8fr 0.9fr 1fr; gap: 8px 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); }
+.art .art-n { grid-column: 1 / 2; } .art .art-c { grid-column: 1 / 3; }
+.art .art-s { grid-column: 3 / 5; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.art .art-s b { font-family: var(--display); font-weight: 500; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.art input, .art select { min-height: 40px; background: #fff; }
+@media (max-width: 640px) { .art { grid-template-columns: 1fr 1fr; } .art .art-n, .art .art-c { grid-column: 1 / -1; } .art .art-s { grid-column: 1 / -1; } }
 .emp { margin-bottom: 14px; overflow: hidden; }
 .emp-cab { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--soft); }
 .emp-cab h3 { font-size: 1.05rem; margin-right: auto; }
@@ -266,7 +273,25 @@ const TIPOS = {
 };
 const ESTADOS = ["Por fabricar", "En fabricación", "Listo para entregar", "Entregado", "Anulado"];
 const CAT_ING = ["Venta de muebles", "Venta de accesorios", "Reparaciones y tapizado", "Otros ingresos"];
-const CAT_GAS = ["Telas", "Madera y MDF", "Goma espuma y guata", "Herrajes, patas y rieles", "Grapas, pegamento y tornillos", "Accesorios (USB, portavasos…)", "Nómina y comisiones", "Mano de obra externa", "Flete y delivery", "Alquiler del local", "Servicios (luz, agua, internet)", "Publicidad y redes", "Herramientas y equipos", "Comisiones bancarias", "Impuestos y trámites", "Otros gastos"];
+const CAT_GAS = ["Telas", "Madera y MDF", "Goma espuma y guata", "Herrajes, patas y rieles", "Grapas, pegamento y tornillos", "Accesorios (USB, portavasos…)", "Nómina y comisiones", "Mano de obra externa", "Cincha y saco", "Combustible y transporte", "Flete y delivery", "Alquiler del local", "Servicios (luz, agua, internet)", "Publicidad y redes", "Herramientas y equipos", "Comisiones bancarias", "Impuestos y trámites", "Otros gastos"];
+/* Artículos frecuentes: al escribirlos se llenan solos la categoría y la unidad. Lo que compres se va sumando a esta lista. */
+const ARTICULOS_BASE = [
+  ["Tabla de 15", "Madera y MDF", "unid."], ["Tabla de 20", "Madera y MDF", "unid."], ["Listón 2,5 × 5", "Madera y MDF", "unid."], ["Lámina de MDF 4 mm", "Madera y MDF", "lámina"],
+  ["Goma 1\"", "Goma espuma y guata", "plancha"], ["Goma 2\"", "Goma espuma y guata", "plancha"], ["Goma 4\"", "Goma espuma y guata", "plancha"], ["Guata", "Goma espuma y guata", "m"],
+  ["Tornillo drywall 2\"", "Grapas, pegamento y tornillos", "bolsa"], ["Tornillo drywall 3\"", "Grapas, pegamento y tornillos", "bolsa"], ["Tornillo 4\"", "Grapas, pegamento y tornillos", "bolsa"],
+  ["Grapas", "Grapas, pegamento y tornillos", "caja"], ["Pegamento de contacto", "Grapas, pegamento y tornillos", "galón"], ["Cola blanca", "Grapas, pegamento y tornillos", "L"],
+  ["Cincha", "Cincha y saco", "m"], ["Saco (arpillera)", "Cincha y saco", "m"], ["Tela", "Telas", "m"], ["Patas de metal", "Herrajes, patas y rieles", "unid."],
+  ["Puerto USB", "Accesorios (USB, portavasos…)", "unid."], ["Portavasos", "Accesorios (USB, portavasos…)", "unid."], ["Gasolina", "Combustible y transporte", "L"], ["Flete", "Flete y delivery", "viaje"]
+];
+const UNIDADES = ["unid.", "bolsa", "caja", "plancha", "lámina", "m", "m²", "kg", "L", "galón", "rollo", "viaje", "servicio"];
+function articulosConocidos(){
+  const mapa = new Map(ARTICULOS_BASE.map(([n, cat, uni]) => [n.toLowerCase(), { n, cat, uni }]));
+  movsOrdenados(MOVS).slice().reverse().forEach(m => (m.lineas || []).forEach(l => { if (!l.art) return;
+    const k = l.art.toLowerCase(), prev = mapa.get(k) || {}; mapa.set(k, Object.assign({}, prev, { n: l.art, cat: l.cat || prev.cat, uni: l.uni || prev.uni, pu: l.pu, mon: m.moneda })); }));
+  return mapa;
+}
+const resumenLineas = ls => ls.map(l => `${fmtCant(l.cant)} ${l.art}`).join(", ");
+const fmtCant = n => (Math.round((n || 0) * 100) / 100).toLocaleString("es-VE", { maximumFractionDigits: 2 });
 const CAJAS_SUGERIDAS = [
   { nombre: "Banco (Pago Móvil y transferencias)", moneda: "VES" }, { nombre: "Efectivo en dólares", moneda: "USD" },
   { nombre: "Efectivo en bolívares", moneda: "VES" }, { nombre: "Binance (USDT)", moneda: "USD" }
@@ -335,6 +360,8 @@ async function cargar(){
       if (pu.exists) AJ = Object.assign(AJ, pu.data());
       if (pr.exists) PRIV = Object.assign(PRIV, pr.data());
       PRIV.comisiones = Object.assign(JSON.parse(JSON.stringify(COMISIONES_BASE)), PRIV.comisiones || {});
+      if (!AJ.catsV2) { ["Cincha y saco", "Combustible y transporte"].forEach(c => { if (!AJ.categoriasGasto.includes(c)) AJ.categoriasGasto.splice(Math.max(0, AJ.categoriasGasto.length - 1), 0, c); });
+        AJ.catsV2 = true; db.collection("contab").doc("publico").set(AJ).catch(() => {}); }
       await cargarPersonal();
     } else {
       /* El ayudante no ve ventas ni nómina: solo cajas, categorías y lo que él anota */
@@ -368,7 +395,11 @@ function totalesMes(m){
   const t = { ingreso: 0, gasto: 0, sueldo: 0, retiro: 0, aporte: 0, cat: {} };
   for (const x of MOVS) if ((x.fecha || "").startsWith(m) && x.tipo in t) {
     t[x.tipo] += x.usd || 0;
-    if (x.tipo === "gasto") t.cat[x.categoria || "Otros gastos"] = (t.cat[x.categoria || "Otros gastos"] || 0) + (x.usd || 0);
+    if (x.tipo === "gasto") {
+      const ls = (x.lineas || []).filter(l => l.sub > 0), tot = ls.reduce((s, l) => s + l.sub, 0);
+      if (ls.length && tot) ls.forEach(l => { const c = l.cat || "Otros gastos"; t.cat[c] = (t.cat[c] || 0) + (x.usd || 0) * l.sub / tot; });
+      else t.cat[x.categoria || "Otros gastos"] = (t.cat[x.categoria || "Otros gastos"] || 0) + (x.usd || 0);
+    }
   }
   t.utilidad = t.ingreso - t.gasto; t.queda = t.utilidad - t.sueldo - t.retiro;
   return t;
@@ -458,12 +489,15 @@ function grafMeses(serie){
 /* ===== MOVIMIENTOS ===== */
 function filaMov(m, conVenta = true){
   const c = cuenta(m.cuenta), t = TIPOS[m.tipo] || { n: m.tipo, s: 0 }, v = m.ventaId && venta(m.ventaId);
-  const titulo = m.tipo === "transferencia" ? `${esc(nomCuenta(m.cuenta))} → ${esc(nomCuenta(m.cuentaDestino))}` : esc(m.categoria || t.n);
+  const ls = m.lineas || [];
+  const titulo = m.tipo === "transferencia" ? `${esc(nomCuenta(m.cuenta))} → ${esc(nomCuenta(m.cuentaDestino))}`
+    : ls.length ? `${esc(m.proveedor || "Compra")} · ${ls.length} artículo${ls.length === 1 ? "" : "s"}<span class="sub">${esc(resumenLineas(ls))}</span>`
+    : esc(m.categoria || t.n) + (m.proveedor ? `<span class="sub">${esc(m.proveedor)}</span>` : "");
   const signo = t.s > 0 ? "mas" : t.s < 0 ? "menos" : "";
   return `<tr class="clic" data-mov="${m.id}">
     <td>${fechaCorta(m.fecha)}</td>
     <td><span class="chip ${m.tipo}">${t.n}</span></td>
-    <td>${titulo}${m.descripcion ? `<span class="sub">${esc(m.descripcion)}</span>` : ""}${conVenta && v ? `<span class="sub">Venta ${esc(v.numero || "")} · ${esc(v.cliente || "")}</span>` : ""}${ROL === "dueno" && m.creadoPor && m.creadoPor !== DUENO ? `<span class="sub">Anotado por ${esc(m.creadoPor)}</span>` : ""}</td>
+    <td>${titulo}${m.descripcion && !(ls.length && m.descripcion === resumenLineas(ls)) ? `<span class="sub">${esc(m.descripcion)}</span>` : ""}${conVenta && v ? `<span class="sub">Venta ${esc(v.numero || "")} · ${esc(v.cliente || "")}</span>` : ""}${ROL === "dueno" && m.creadoPor && m.creadoPor !== DUENO ? `<span class="sub">Anotado por ${esc(m.creadoPor)}</span>` : ""}</td>
     <td class="ocultar-movil">${m.tipo === "transferencia" ? "" : esc(c ? c.nombre : "")}</td>
     <td class="num">${fmtM(m.monto, m.moneda)}${m.moneda === "VES" && m.tasa ? `<span class="sub">tasa ${fmtN(m.tasa)}</span>` : ""}</td>
     <td class="num ${signo}">${t.s < 0 ? "−" : t.s > 0 ? "+" : ""}${fmtU(m.usd)}</td></tr>`;
@@ -472,7 +506,7 @@ function filtrarMovs(){
   const q = filtro.q.toLowerCase();
   return movsOrdenados(MOVS).filter(m => (!filtro.mes || (m.fecha || "").startsWith(filtro.mes)) && (!filtro.tipo || m.tipo === filtro.tipo)
     && (!filtro.cuenta || m.cuenta === filtro.cuenta || m.cuentaDestino === filtro.cuenta)
-    && (!q || [m.categoria, m.descripcion, m.ref, nomCuenta(m.cuenta), (venta(m.ventaId) || {}).cliente].join(" ").toLowerCase().includes(q)));
+    && (!q || [m.categoria, m.descripcion, m.ref, m.proveedor, nomCuenta(m.cuenta), (venta(m.ventaId) || {}).cliente, ...(m.lineas || []).map(l => l.art + " " + l.cat)].join(" ").toLowerCase().includes(q)));
 }
 function pintarMovs(){
   const el = $("t-movimientos");
@@ -516,7 +550,11 @@ function formMov(el, m, pre, op){
   const nuevo = !m;
   const tiposOk = ROL === "dueno" ? Object.keys(TIPOS) : ["gasto", "ingreso"];
   const activas = CUENTAS.filter(c => c.activa !== false || (m && (c.id === m.cuenta || c.id === m.cuentaDestino)));
-  const x = Object.assign({ tipo: "gasto", fecha: hoy(), cuenta: "", monto: 0, tasa: (AJ.tasa && AJ.tasa.valor) || 0, categoria: "", ventaId: "", descripcion: "", ref: "", cuentaDestino: "", montoDestino: 0 }, m || {}, pre);
+  const x = Object.assign({ tipo: "gasto", fecha: hoy(), cuenta: "", monto: 0, tasa: (AJ.tasa && AJ.tasa.valor) || 0, categoria: "", ventaId: "", descripcion: "", ref: "", cuentaDestino: "", montoDestino: 0, proveedor: "" }, m ? JSON.parse(JSON.stringify(m)) : {}, pre);
+  x.lineas = (x.lineas || []).map(l => Object.assign({}, l));
+  let multi = x.lineas.length > 0;
+  const lineaVacia = () => ({ art: "", cant: 1, uni: "", pu: 0, sub: 0, cat: "" });
+  const totalLineas = () => Math.round(x.lineas.reduce((s, l) => s + num(l.cant) * num(l.pu), 0) * 100) / 100;
   if (!x.cuenta) x.cuenta = (x.tipo === "sueldo" && PRIV.sueldo.cuenta) || (activas[0] && activas[0].id) || "";
   if (x.tipo === "sueldo" && nuevo && !x.monto && PRIV.sueldo.monto) { const c = cuenta(x.cuenta); x.monto = c && c.moneda === "VES" ? num(PRIV.sueldo.monto) * x.tasa : num(PRIV.sueldo.monto); }
   let destManual = !nuevo, confirmar = false;
@@ -543,7 +581,7 @@ function formMov(el, m, pre, op){
           <div class="fila">
             <label class="f">Fecha<input type="date" id="mv-fecha" value="${x.fecha}"></label>
             <label class="f">${t === "transferencia" ? "Caja de donde sale" : t === "ingreso" || t === "aporte" ? "Caja donde entró" : "Caja de donde salió"}<select id="mv-cuenta">${opCaja(x.cuenta)}</select></label>
-            <label class="f">Monto <small>en ${mon === "VES" ? "bolívares" : "dólares"}</small><input type="text" inputmode="decimal" id="mv-monto" value="${inNum(x.monto)}" placeholder="0,00"></label>
+            <label class="f">${multi && t === "gasto" ? "Total de la compra" : "Monto"} <small>en ${mon === "VES" ? "bolívares" : "dólares"}${multi && t === "gasto" ? " · se suma solo" : ""}</small><input type="text" inputmode="decimal" id="mv-monto" value="${inNum(x.monto)}" placeholder="0,00" ${multi && t === "gasto" ? "readonly" : ""}></label>
             ${usaBs ? `<label class="f">Tasa <small>Bs por $1</small><input type="text" inputmode="decimal" id="mv-tasa" value="${inNum(x.tasa)}"></label>` : ""}
           </div>
           <p class="equiv" id="mv-eq"></p></div>
@@ -551,8 +589,9 @@ function formMov(el, m, pre, op){
             <label class="f">Caja que recibe<select id="mv-dest"><option value="">Elige…</option>${opCaja(x.cuentaDestino)}</select></label>
             <label class="f">Monto que entra <small>en ${mon2 === "VES" ? "bolívares" : "dólares"}</small><input type="text" inputmode="decimal" id="mv-monto2" value="${inNum(x.montoDestino)}"></label></div>
             <p class="ayuda">Se calcula con la tasa. Cámbialo si recibiste otra cantidad (por ejemplo, por comisión).</p></div>` : ""}
+        ${t === "gasto" ? bloqueCompra(mon) : ""}
         <div class="bloque"><h3>Detalle</h3>
-          ${cats.length ? `<label class="f">Categoría<select id="mv-cat"><option value="">Elige…</option>${cats.map(c => `<option ${c === x.categoria ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>` : ""}
+          ${cats.length && !(multi && t === "gasto") ? `<label class="f">Categoría<select id="mv-cat"><option value="">Elige…</option>${cats.map(c => `<option ${c === x.categoria ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>` : ""}
           ${(t === "ingreso" || t === "gasto") && VENTAS.length ? `<label class="f">${t === "ingreso" ? "¿Es un abono de una venta?" : "¿Es un costo de una venta específica?"} <small>Opcional</small><select id="mv-venta"><option value="">No</option>${ventasAbiertas.map(v => `<option value="${v.id}" ${v.id === x.ventaId ? "selected" : ""}>${esc(v.numero || "Sin N°")} · ${esc(v.cliente || "")} · ${esc(v.producto || "")}</option>`).join("")}</select></label>` : ""}
           <label class="f">Descripción<input type="text" id="mv-desc" value="${esc(x.descripcion)}" placeholder="${t === "gasto" ? "Ej: 12 m de tela Mariscal gris" : t === "ingreso" ? "Ej: Abono 50% sofá Grafito" : ""}"></label>
           <label class="f">Referencia <small>N° de operación o comprobante (opcional)</small><input type="text" id="mv-ref" value="${esc(x.ref)}"></label></div>
@@ -568,7 +607,7 @@ function formMov(el, m, pre, op){
     on("mv-x", "click", cerrarEditor);
     el.querySelectorAll("[data-tipo]").forEach(b => b.addEventListener("click", () => { x.tipo = b.dataset.tipo; x.categoria = ""; render(); }));
     on("mv-fecha", "change", e => { x.fecha = e.target.value || hoy(); render(); });
-    on("mv-cuenta", "change", e => { x.cuenta = e.target.value; convertir(); render(); });
+    on("mv-cuenta", "change", e => { x.cuenta = e.target.value; convertir(); render(); recalcCompra(); });
     on("mv-dest", "change", e => { x.cuentaDestino = e.target.value; destManual = false; convertir(); render(); });
     on("mv-monto", "input", e => { x.monto = num(e.target.value); convertir(); actualizarDest(); pintarEq(); });
     on("mv-tasa", "input", e => { x.tasa = num(e.target.value); convertir(); actualizarDest(); pintarEq(); });
@@ -578,12 +617,65 @@ function formMov(el, m, pre, op){
     on("mv-desc", "input", e => x.descripcion = e.target.value);
     on("mv-ref", "input", e => x.ref = e.target.value);
     on("mv-ok", "click", guardar);
+    eventosCompra();
     on("mv-del", "click", () => { confirmar = true; render(); });
     on("mv-del-no", "click", () => { confirmar = false; render(); });
     on("mv-del-si", "click", async () => {
       try { await db.collection("movimientos").doc(m.id).delete(); MOVS = MOVS.filter(z => z.id !== m.id); await desmarcarNomina(m.id); toast("Movimiento eliminado."); op.alTerminar(); }
       catch (err) { console.error(err); toast("No se pudo eliminar."); }
     });
+  }
+  /* ---- Compra con varios artículos ---- */
+  function bloqueCompra(mon){
+    const arts = articulosConocidos(), provs = [...new Set(MOVS.map(z => z.proveedor).filter(Boolean))];
+    const sim = mon === "VES" ? "Bs" : "$", cats = AJ.categoriasGasto;
+    return `<div class="bloque"><h3>¿Qué compraste?</h3>
+      <div class="seg"><button type="button" data-multi="0" aria-pressed="${!multi}">Un solo concepto</button><button type="button" data-multi="1" aria-pressed="${multi}">Varios artículos</button></div>
+      <label class="f">Proveedor <small>dónde compraste · opcional</small><input type="text" id="mv-prov" list="dl-prov" value="${esc(x.proveedor)}" placeholder="Ej: Maderera El Roble"></label>
+      ${multi ? `<div class="arts">${x.lineas.map((l, i) => `<div class="art">
+          <label class="f art-n">Artículo<input type="text" data-l="${i}|art" list="dl-art" value="${esc(l.art)}" placeholder="Ej: Tabla de 15"></label>
+          <label class="f">Cantidad<input type="text" inputmode="decimal" data-l="${i}|cant" value="${l.cant ? String(l.cant).replace(".", ",") : ""}"></label>
+          <label class="f">Unidad<input type="text" data-l="${i}|uni" list="dl-uni" value="${esc(l.uni)}" placeholder="unid."></label>
+          <label class="f">Precio c/u (${sim})<input type="text" inputmode="decimal" data-l="${i}|pu" value="${inNum(num(l.pu))}" placeholder="0,00"></label>
+          <label class="f art-c">Categoría<select data-l="${i}|cat"><option value="">Elige…</option>${cats.concat(l.cat && !cats.includes(l.cat) ? [l.cat] : []).map(c => `<option ${c === l.cat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>
+          <div class="art-s"><span class="ayuda">Subtotal</span><b data-sub="${i}">${fmtM(num(l.cant) * num(l.pu), mon)}</b>${x.lineas.length > 1 ? `<button type="button" class="link" data-lq="${i}">Quitar</button>` : ""}</div>
+        </div>`).join("")}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><button type="button" class="btn borde mini" id="mv-art-mas">+ Agregar artículo</button>
+          <span class="equiv" style="margin:0">Total: <b id="mv-tot">${fmtM(totalLineas(), mon)}</b> · ${x.lineas.length} artículo${x.lineas.length === 1 ? "" : "s"}</span></div>` : `<p class="ayuda">¿Compraste varias cosas en un mismo pago? Toca <b>Varios artículos</b> y anota cada una con su cantidad y precio.</p>`}
+      <datalist id="dl-art">${[...arts.values()].map(a => `<option value="${esc(a.n)}">`).join("")}</datalist>
+      <datalist id="dl-uni">${UNIDADES.map(u => `<option value="${u}">`).join("")}</datalist>
+      <datalist id="dl-prov">${provs.map(p => `<option value="${esc(p)}">`).join("")}</datalist></div>`;
+  }
+  function recalcCompra(){
+    if (!(multi && x.tipo === "gasto")) return;
+    const mon = monedaDe(x.cuenta);
+    x.lineas.forEach((l, i) => { l.sub = Math.round(num(l.cant) * num(l.pu) * 100) / 100; const n = el.querySelector(`[data-sub="${i}"]`); if (n) n.textContent = fmtM(l.sub, mon); });
+    x.monto = totalLineas();
+    const t = el.querySelector("#mv-tot"); if (t) t.textContent = fmtM(x.monto, mon);
+    const mm = el.querySelector("#mv-monto"); if (mm) mm.value = inNum(x.monto);
+    pintarEq();
+  }
+  function eventosCompra(){
+    el.querySelectorAll("[data-multi]").forEach(b => b.addEventListener("click", () => {
+      multi = b.dataset.multi === "1";
+      if (multi && !x.lineas.length) { x.lineas = [lineaVacia(), lineaVacia()]; if (x.monto && x.categoria) Object.assign(x.lineas[0], { art: x.descripcion || x.categoria, cant: 1, pu: x.monto, cat: x.categoria }); }
+      render(); recalcCompra();
+    }));
+    const prov = el.querySelector("#mv-prov"); if (prov) prov.addEventListener("input", e => x.proveedor = e.target.value);
+    el.querySelectorAll("[data-l]").forEach(inp => {
+      const [i, k] = inp.dataset.l.split("|"), l = x.lineas[+i];
+      inp.addEventListener(inp.tagName === "SELECT" ? "change" : "input", () => { l[k] = k === "cant" || k === "pu" ? num(inp.value) : inp.value; if (k === "cant" || k === "pu") recalcCompra(); });
+      if (k === "art") inp.addEventListener("change", () => {
+        const a = articulosConocidos().get(String(inp.value).trim().toLowerCase()); if (!a) return;
+        let cambio = false;
+        if (!l.cat && a.cat) { l.cat = a.cat; cambio = true; } if (!l.uni && a.uni) { l.uni = a.uni; cambio = true; }
+        if (!num(l.pu) && a.pu && a.mon === monedaDe(x.cuenta)) { l.pu = a.pu; cambio = true; }
+        if (cambio) { render(); recalcCompra(); const sig = el.querySelector(`[data-l="${i}|cant"]`); if (sig) { sig.focus(); sig.select && sig.select(); } }
+      });
+    });
+    el.querySelectorAll("[data-lq]").forEach(b => b.addEventListener("click", () => { x.lineas.splice(+b.dataset.lq, 1); render(); recalcCompra(); }));
+    const mas = el.querySelector("#mv-art-mas");
+    if (mas) mas.addEventListener("click", () => { x.lineas.push(lineaVacia()); render(); recalcCompra(); const ns = el.querySelectorAll('[data-l$="|art"]'); ns[ns.length - 1].focus(); });
   }
   function actualizarDest(){ const n = el.querySelector("#mv-monto2"); if (n && !destManual) n.value = inNum(x.montoDestino); }
   function pintarEq(){
@@ -593,6 +685,16 @@ function formMov(el, m, pre, op){
   async function guardar(){
     const err = t => { const n = el.querySelector("#mv-err"); n.textContent = t; n.hidden = false; };
     const mon = monedaDe(x.cuenta), mon2 = monedaDe(x.cuentaDestino);
+    const compra = multi && x.tipo === "gasto";
+    let lineas = [];
+    if (compra) {
+      lineas = x.lineas.filter(l => String(l.art || "").trim() || num(l.pu)).map(l => ({ art: String(l.art || "").trim().slice(0, 80), cant: num(l.cant), uni: String(l.uni || "").trim().slice(0, 20), pu: Math.round(num(l.pu) * 100) / 100, sub: Math.round(num(l.cant) * num(l.pu) * 100) / 100, cat: l.cat || "" }));
+      if (!lineas.length) return err("Anota al menos un artículo.");
+      const mal = lineas.findIndex(l => !l.art || !(l.cant > 0) || !(l.pu > 0) || !l.cat);
+      if (mal >= 0) { const l = lineas[mal]; return err(`Artículo ${mal + 1}: ${!l.art ? "escribe qué compraste" : !(l.cant > 0) ? "escribe la cantidad" : !(l.pu > 0) ? "escribe el precio" : "elige la categoría"}.`); }
+      x.monto = Math.round(lineas.reduce((s, l) => s + l.sub, 0) * 100) / 100;
+      const cs = [...new Set(lineas.map(l => l.cat))]; x.categoria = cs.length === 1 ? cs[0] : "Compra variada";
+    }
     if (!cuenta(x.cuenta)) return err("Elige la caja.");
     if (!(x.monto > 0)) return err("Escribe un monto mayor que cero.");
     if ((mon === "VES" || (x.tipo === "transferencia" && mon2 === "VES")) && !(x.tasa > 0)) return err("Escribe la tasa del día.");
@@ -602,7 +704,8 @@ function formMov(el, m, pre, op){
     const r = n => Math.round(n * 100) / 100;
     const d = { fecha: x.fecha, tipo: x.tipo, cuenta: x.cuenta, moneda: mon, monto: r(x.monto), tasa: mon === "VES" || x.tipo === "transferencia" ? r(x.tasa) || null : null, usd: r(usdDe()),
       categoria: x.tipo === "ingreso" || x.tipo === "gasto" ? x.categoria : "", ventaId: x.tipo === "ingreso" || x.tipo === "gasto" ? (x.ventaId || "") : "",
-      descripcion: (x.descripcion || "").trim().slice(0, 300), ref: (x.ref || "").trim().slice(0, 80),
+      descripcion: ((x.descripcion || "").trim() || (compra ? resumenLineas(lineas) : "")).slice(0, 300), ref: (x.ref || "").trim().slice(0, 80),
+      proveedor: (x.proveedor || "").trim().slice(0, 80), lineas: compra ? lineas : [],
       cuentaDestino: x.tipo === "transferencia" ? x.cuentaDestino : "", monedaDestino: x.tipo === "transferencia" ? mon2 : "", montoDestino: x.tipo === "transferencia" ? r(x.montoDestino) : 0,
       creadoPor: (m && m.creadoPor) || YO };
     const b = el.querySelector("#mv-ok"); b.disabled = true; b.textContent = "Guardando…";
@@ -1360,8 +1463,11 @@ function pintarMios(){
 function cargarScript(src){ return new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
 async function exportar(mes, movs){
   const ls = movs || movsOrdenados(MOVS).filter(m => !mes || (m.fecha || "").startsWith(mes));
-  const hojaMov = [["Fecha", "Tipo", "Categoría", "Descripción", "Caja", "Moneda", "Monto", "Tasa", "Equivalente $", "Caja destino", "Monto destino", "Venta", "Cliente", "Referencia", "Anotado por"],
-    ...ls.map(m => { const v = venta(m.ventaId) || {}; return [m.fecha, (TIPOS[m.tipo] || {}).n || m.tipo, m.categoria, m.descripcion, nomCuenta(m.cuenta), m.moneda === "VES" ? "Bs" : "$", m.monto, m.tasa || "", m.usd,
+  const hojaCompras = [["Fecha", "Proveedor", "Artículo", "Cantidad", "Unidad", "Precio c/u", "Moneda", "Subtotal", "Subtotal $", "Categoría", "Caja"],
+    ...ls.filter(m => (m.lineas || []).length).flatMap(m => { const tot = m.lineas.reduce((s, l) => s + l.sub, 0) || 1;
+      return m.lineas.map(l => [m.fecha, m.proveedor || "", l.art, l.cant, l.uni, l.pu, m.moneda === "VES" ? "Bs" : "$", l.sub, Math.round((m.usd || 0) * l.sub / tot * 100) / 100, l.cat, nomCuenta(m.cuenta)]); })];
+  const hojaMov = [["Fecha", "Tipo", "Categoría", "Proveedor", "Descripción", "Caja", "Moneda", "Monto", "Tasa", "Equivalente $", "Caja destino", "Monto destino", "Venta", "Cliente", "Referencia", "Anotado por"],
+    ...ls.map(m => { const v = venta(m.ventaId) || {}; return [m.fecha, (TIPOS[m.tipo] || {}).n || m.tipo, m.categoria, m.proveedor || "", m.descripcion, nomCuenta(m.cuenta), m.moneda === "VES" ? "Bs" : "$", m.monto, m.tasa || "", m.usd,
       m.cuentaDestino ? nomCuenta(m.cuentaDestino) : "", m.montoDestino || "", v.numero || "", v.cliente || "", m.ref, m.creadoPor]; })];
   const hojaVen = [["N°", "Fecha", "Cliente", "Teléfono", "Producto", "Estado", "Total $", "Cobrado $", "Saldo $", "Costos $", "Comisiones $", "Ganancia $"],
     ...VENTAS.filter(v => !mes || (v.fecha || "").startsWith(mes) || saldoVenta(v) > 0.009).sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""))
@@ -1373,7 +1479,8 @@ async function exportar(mes, movs){
   const hojas = [];
   if (mes) { const t = totalesMes(mes);
     hojas.push(["Resumen", [["Muebles Ideal · " + nombreMes(mes)], [], ["Entró (ingresos) $", t.ingreso], ["Gastos del negocio $", t.gasto], ["Utilidad $", t.utilidad], ["Sueldo del dueño $", t.sueldo], ["Retiros personales $", t.retiro], ["Aportes del dueño $", t.aporte], ["Quedó en el negocio $", t.queda], [], ["Gastos por categoría"], ...Object.entries(t.cat).sort((a, b) => b[1] - a[1])]]); }
-  hojas.push(["Movimientos", hojaMov], ["Ventas", hojaVen], ["Nómina", hojaNom], ["Cajas", hojaCaj]);
+  hojas.push(["Movimientos", hojaMov]); if (hojaCompras.length > 1) hojas.push(["Detalle de compras", hojaCompras]);
+  hojas.push(["Ventas", hojaVen], ["Nómina", hojaNom], ["Cajas", hojaCaj]);
   const nombre = "Contabilidad-MueblesIdeal-" + (mes || "todo");
   toast("Preparando Excel…");
   try {
