@@ -132,7 +132,6 @@ table.ed input[type=text], table.ed input[type=number] { padding: 7px 8px; }
     <img src="logo-mark.png" alt="">
     <h1>Panel Muebles Ideal</h1>
     <span class="yo" id="yo"></span>
-    <a class="btn oro mini" href="contabilidad.html">Contabilidad</a>
     <a class="btn borde mini" href="index.html" target="_blank" rel="noopener">Ver página</a>
     <button class="btn borde mini" id="salir" type="button">Salir</button>
   </div>
@@ -171,7 +170,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "971429499996",
   appId: "1:971429499996:web:ba6aabf7e61514e0e8c299"
 };
-const IMG_BASE = "";
+const IMG_BASE = "img/";
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(), db = firebase.firestore();
 const $ = id => document.getElementById(id);
@@ -231,6 +230,8 @@ $("l-reset").addEventListener("click", async () => {
 });
 $("salir").addEventListener("click", () => auth.signOut());
 auth.onAuthStateChanged(async u => {
+  /* El catálogo de la página solo lo maneja el dueño; los demás vuelven al panel */
+  if (u && (u.email || "").toLowerCase() !== "mueblesideal2020@gmail.com") { location.replace("panel.html"); return; }
   $("v-login").hidden = !!u; $("v-panel").hidden = !u;
   if (u) { $("yo").textContent = u.email; await cargarTodo(); }
 });
@@ -601,5 +602,6 @@ function pintarPagos(){
   $("pg-guardar").addEventListener("click", async () => { try { await guardarConfig(); toast("Datos de pago guardados."); } catch (err) { toast("No se pudo guardar: " + (err.message || err)); } });
 }
 </script>
+<script src="menu.js"></script>
 </body>
 </html>

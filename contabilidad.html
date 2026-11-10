@@ -537,7 +537,7 @@ function abrirApartado(ing){
   const ed = $("editor-in"); ed._dueno = null; $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
   const b = PRIV.bancos, dest = cuenta(b.resguardo), orig = cuenta(ing.cuenta), v = ing.ventaId && venta(ing.ventaId);
   const base = ing.usd || 0, rep = calcReparto(base);
-  const x = { fecha: hoy(), tasa: ing.tasa || (AJ.tasa && AJ.tasa.valor) || 0, parte: Object.assign({}, rep.parte), pct: { gastos: num(b.pct.gastos), reserva: num(b.pct.reserva), dueno: num(b.pct.dueno) }, ref: "" };
+  const x = { fecha: hoy(), tasa: ing.tasa || (AJ.tasa && AJ.tasa.valor) || 0, parte: Object.assign({}, rep.parte), ref: "" };
   const r2 = n => Math.round(n * 100) / 100;
   const total = () => r2(x.parte.gastos + x.parte.reserva + x.parte.dueno);
   const enMon = (usd, c) => c.moneda === "VES" ? r2(usd * x.tasa) : usd;
@@ -549,8 +549,7 @@ function abrirApartado(ing){
           <p style="margin:0"><b>${fmtU(base)}</b> que entraron a <b>${esc(orig.nombre)}</b> el ${fechaCorta(ing.fecha)}${v ? ` · ${esc(v.numero || "")} ${esc(v.cliente || "")}` : ""}.</p>
           <p class="ayuda">Pasa a ${esc(dest.nombre)} la parte de gastos fijos, reserva y tu ganancia. Lo demás se queda en ${esc(orig.nombre)} para materiales, nómina y comisión.</p></div>
         <div class="bloque"><h3>Cuánto va a cada pote</h3>
-          <p class="ayuda">Puedes cambiar el % de este cobro. Los porcentajes de siempre se cambian en Cajas y ajustes.</p>
-          <div class="fila">${Object.keys(POTES).map(k => `<label class="f">${POTES[k]} <small>% del cobro · <span data-pt-usd="${k}">${fmtU(x.parte[k])}</span></small><input type="text" inputmode="decimal" data-pt="${k}" value="${inPct(x.pct[k]) || "0"}"></label>`).join("")}</div>
+          <div class="fila">${Object.keys(POTES).map(k => `<label class="f">${POTES[k]} <small>${fmtP(num(b.pct[k]))} % · en $</small><input type="text" inputmode="decimal" data-pt="${k}" value="${inNum(x.parte[k])}"></label>`).join("")}</div>
           <p class="equiv" id="ap-tot"></p></div>
         <div class="bloque"><h3>Transferencia</h3><div class="fila">
           <label class="f">Fecha<input type="date" id="ap-f" value="${x.fecha}"></label>
@@ -564,8 +563,7 @@ function abrirApartado(ing){
       </div>`;
     pintarTot();
     const on = (id, ev, f) => { const n = ed.querySelector("#" + id); if (n) n.addEventListener(ev, f); };
-    ed.querySelectorAll("[data-pt]").forEach(i => i.addEventListener("input", () => { const k = i.dataset.pt; x.pct[k] = numP(i.value); x.parte[k] = r2(base * x.pct[k] / 100);
-      const n = ed.querySelector(`[data-pt-usd="${k}"]`); if (n) n.textContent = fmtU(x.parte[k]); pintarTot(); }));
+    ed.querySelectorAll("[data-pt]").forEach(i => i.addEventListener("input", () => { x.parte[i.dataset.pt] = num(i.value); pintarTot(); }));
     on("ap-f", "change", e => x.fecha = e.target.value || hoy());
     on("ap-tasa", "input", e => { x.tasa = num(e.target.value); pintarTot(); });
     on("ap-ref", "input", e => x.ref = e.target.value);
@@ -878,7 +876,7 @@ function pintarVentas(){
   $("v-f-q").addEventListener("input", e => { filtro.qv = e.target.value; const p = e.target.selectionStart; pintarVentas(); const n = $("v-f-q"); n.focus(); n.setSelectionRange(p, p); });
   el.querySelectorAll("[data-v]").forEach(r => r.addEventListener("click", () => abrirVenta(venta(r.dataset.v))));
 }
-function nuevoItem(n){ return { id: "p" + n + "-" + Date.now().toString(36).slice(-4), producto: "", cantidad: 1, precio: 0, detalle: "", equipo: [], baseComision: 0, pctEquipo: 0, pctIndividual: false, pctEquipoManual: false }; }
+function nuevoItem(n){ return { id: "p" + n + "-" + Date.now().toString(36).slice(-4), producto: "", cantidad: 1, precio: 0, detalle: "", equipo: [], baseComision: 0, pctEquipo: 0, pctEquipoManual: false }; }
 const resumenItems = items => items.filter(it => it.producto).map(it => (it.cantidad > 1 ? it.cantidad + " × " : "") + it.producto).join(" + ");
 function abrirVenta(v0){
   const nuevo = !v0;
@@ -886,9 +884,9 @@ function abrirVenta(v0){
   /* Las ventas viejas (un solo producto) se pasan a la lista de productos */
   if (!x.items || !x.items.length) {
     x.items = [Object.assign(nuevoItem(1), { id: "p1", producto: x.producto || "", precio: num(x.total), detalle: x.detalle || "", equipo: x.equipo || [],
-      baseComision: x.baseComision || 0, pctEquipo: x.pctEquipo || 0, pctEquipoManual: !!x.pctEquipoManual, pctIndividual: !!x.pctIndividual })];
+      baseComision: x.baseComision || 0, pctEquipo: x.pctEquipo || 0, pctEquipoManual: !!x.pctEquipoManual })];
   }
-  ["equipo", "detalle", "baseComision", "pctEquipo", "pctEquipoManual", "pctIndividual"].forEach(k => delete x[k]);
+  ["equipo", "detalle", "baseComision", "pctEquipo", "pctEquipoManual"].forEach(k => delete x[k]);
   const ed = $("editor-in"); $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
   let cots = null, confirmar = false, quitar = -1; ed.innerHTML = "";
   const yo = {}; ed._dueno = yo; /* evita que un redibujo pendiente pise otra ventana abierta después */
@@ -1193,19 +1191,13 @@ function itemsDe(v){
   if (v.items && v.items.length) return v.items;
   if (!v._legado) Object.defineProperty(v, "_legado", { enumerable: false, configurable: true, writable: true,
     value: [{ id: "p1", producto: v.producto || "", cantidad: 1, get precio(){ return num(v.total); }, detalle: v.detalle || "",
-      get equipo(){ return v.equipo || (v.equipo = []); }, set equipo(a){ v.equipo = a; }, baseComision: v.baseComision, pctEquipo: v.pctEquipo, pctEquipoManual: v.pctEquipoManual, pctIndividual: v.pctIndividual }] });
+      get equipo(){ return v.equipo || (v.equipo = []); }, set equipo(a){ v.equipo = a; }, baseComision: v.baseComision, pctEquipo: v.pctEquipo, pctEquipoManual: v.pctEquipoManual }] });
   return v._legado;
 }
 const guardarEquipoVenta = v => db.collection("ventas").doc(v.id).update(v.items && v.items.length ? { items: v.items } : { equipo: v.equipo || [] });
 function recalcEquipo(v){
   v.equipo = (v.equipo || []).filter(l => l.empleadoId);
   const base = baseDe(v), prod = v.equipo.filter(l => l.rol !== ROL_VENTAS);
-  /* % a mano por trabajador: cada uno cobra su propio %; el total del equipo es la suma */
-  if (v.pctIndividual) {
-    v.equipo.forEach(l => { if (!l.pagado) l.monto = r2(base * num(l.pct) / 100); });
-    v.pctEquipo = r2(prod.reduce((a, l) => a + num(l.pct), 0)); v.pctEquipoManual = false;
-    return;
-  }
   if (!v.pctEquipoManual) v.pctEquipo = prod.length ? num(PRIV.comisiones.equipo[Math.min(prod.length, 4)]) : 0;
   const cada = prod.length ? num(v.pctEquipo) / prod.length : 0;
   v.equipo.forEach(l => { if (l.pagado) return;
@@ -1234,15 +1226,14 @@ function bloqueEquipo(x, k){
     const opts = (conCargo.length ? conCargo : act).slice(); if (l && !opts.some(e => e.id === l.empleadoId) && empleado(l.empleadoId)) opts.push(empleado(l.empleadoId));
     return `<tr><td><b>${rol}</b></td>
       <td><select data-eq-emp="${k}|${rol}" ${l && l.pagado ? "disabled" : ""} aria-label="${rol}"><option value="">${rol === ROL_VENTAS ? "— Sin ejecutivo —" : "— No trabajó —"}</option>${opts.map(e => `<option value="${e.id}" ${l && l.empleadoId === e.id ? "selected" : ""}>${esc(e.nombre)} · ${esc(e.codigo || "")}</option>`).join("")}</select></td>
-      <td class="num">${l ? (!l.pagado ? `<input class="pct" type="text" inputmode="decimal" data-eq-pct="${k}|${rol}" value="${inPct(l.pct)}" aria-label="% de ${rol}">` : fmtP(l.pct)) + "%" : ""}</td>
+      <td class="num">${l ? (rol === ROL_VENTAS && !l.pagado ? `<input class="pct" type="text" inputmode="decimal" data-eq-pct="${k}|${rol}" value="${inPct(l.pct)}" aria-label="% ${rol}">` : fmtN(l.pct)) + "%" : ""}</td>
       <td class="num"><b>${l ? fmtU(l.monto) : ""}</b></td>
       <td>${l ? (l.pagado ? `<span class="chip ingreso">Pagado ${fechaCorta(l.pagadoFecha)}</span>` : `<input type="date" data-eq-fecha="${k}|${rol}" value="${l.fecha}" aria-label="Fecha de trabajo">`) : ""}</td></tr>`;
   };
   return `<h3 style="margin-top:6px">Equipo que lo fabrica</h3>
     <p class="ayuda">La <b>fecha</b> decide en qué semana de nómina (sábado a viernes) se le paga a cada uno.</p>
     <div class="fila"><label class="f">Precio para comisiones <small>normalmente el precio de esta línea</small><input type="text" inputmode="decimal" data-eq-base="${k}" value="${inNum(baseDe(x))}"></label>
-      <label class="f">% del equipo de producción <small>${x.pctIndividual ? `cada uno con su % · suma de los ${prodN} · <button type="button" class="link" data-eq-auto="${k}">repartir en partes iguales</button>` : `${prodN ? `${prodN} trabajando · ${fmtP(num(x.pctEquipo) / prodN)}% cada uno` : "nadie asignado"}${x.pctEquipoManual ? ` · cambiado a mano · <button type="button" class="link" data-eq-auto="${k}">volver al automático</button>` : ""}`}</small><input type="text" inputmode="decimal" data-eq-pcteq="${k}" value="${inPct(num(x.pctEquipo))}" ${x.pctIndividual ? "readonly" : ""}></label></div>
-    <p class="ayuda">¿A uno le toca más que a otro? Escribe el <b>%</b> de cada trabajador en la tabla y se deja de repartir en partes iguales.</p>
+      <label class="f">% del equipo de producción <small>${prodN ? `${prodN} trabajando · ${fmtN(num(x.pctEquipo) / prodN)}% cada uno` : "nadie asignado"}${x.pctEquipoManual ? ` · cambiado a mano · <button type="button" class="link" data-eq-auto="${k}">volver al automático</button>` : ""}</small><input type="text" inputmode="decimal" data-eq-pcteq="${k}" value="${inNum(num(x.pctEquipo))}"></label></div>
     <div class="wrap-t"><table class="t eq"><thead><tr><th>Cargo</th><th>Empleado</th><th class="num">%</th><th class="num">Le toca</th><th>Fecha</th></tr></thead><tbody>${ROLES.map(fila).join("")}</tbody>
       <tfoot><tr><td colspan="3">Comisiones de este producto</td><td class="num">${fmtU(comisionesItem(x))}</td><td></td></tr></tfoot></table></div>`;
 }
@@ -1252,16 +1243,14 @@ function eventosEquipo(ed, items, render){
   ed.querySelectorAll("[data-eq-emp]").forEach(sel => sel.addEventListener("change", () => {
     const [it, rol] = par(sel.dataset.eqEmp), previa = linea(it, rol); it.equipo = (it.equipo || []).filter(l => l.rol !== rol);
     if (sel.value) { const e = empleado(sel.value);
-      it.equipo.push({ id: slug(rol), rol, empleadoId: sel.value, pct: rol === ROL_VENTAS ? (num(e && e.pctVenta) || num(PRIV.comisiones.ventas)) : it.pctIndividual ? ((previa && num(previa.pct)) || num(PRIV.comisiones.equipo[1]) || 5) : 0, monto: 0, fecha: (previa && previa.fecha) || hoy(), pagado: false }); }
+      it.equipo.push({ id: slug(rol), rol, empleadoId: sel.value, pct: rol === ROL_VENTAS ? (num(e && e.pctVenta) || num(PRIV.comisiones.ventas)) : 0, monto: 0, fecha: (previa && previa.fecha) || hoy(), pagado: false }); }
     render();
   }));
-  ed.querySelectorAll("[data-eq-pct]").forEach(i => i.addEventListener("change", () => { const [it, rol] = par(i.dataset.eqPct); linea(it, rol).pct = numP(i.value);
-    if (rol !== ROL_VENTAS && !it.pctIndividual) { it.pctIndividual = true; (it.equipo || []).forEach(l => { if (l.rol !== ROL_VENTAS && l.rol !== rol && !l.pagado) l.pct = r2(num(l.pct)); }); }
-    setTimeout(render, 0); }));
+  ed.querySelectorAll("[data-eq-pct]").forEach(i => i.addEventListener("change", () => { const [it, rol] = par(i.dataset.eqPct); linea(it, rol).pct = numP(i.value); setTimeout(render, 0); }));
   ed.querySelectorAll("[data-eq-fecha]").forEach(i => i.addEventListener("change", () => { const [it, rol] = par(i.dataset.eqFecha); linea(it, rol).fecha = i.value || hoy(); }));
   ed.querySelectorAll("[data-eq-base]").forEach(i => i.addEventListener("change", () => { items[+i.dataset.eqBase].baseComision = num(i.value); setTimeout(render, 0); }));
-  ed.querySelectorAll("[data-eq-pcteq]").forEach(i => i.addEventListener("change", () => { const it = items[+i.dataset.eqPcteq]; it.pctEquipo = numP(i.value); it.pctEquipoManual = true; setTimeout(render, 0); }));
-  ed.querySelectorAll("[data-eq-auto]").forEach(b => b.addEventListener("click", () => { const it = items[+b.dataset.eqAuto]; it.pctEquipoManual = false; it.pctIndividual = false; setTimeout(render, 0); }));
+  ed.querySelectorAll("[data-eq-pcteq]").forEach(i => i.addEventListener("change", () => { const it = items[+i.dataset.eqPcteq]; it.pctEquipo = num(i.value); it.pctEquipoManual = true; setTimeout(render, 0); }));
+  ed.querySelectorAll("[data-eq-auto]").forEach(b => b.addEventListener("click", () => { items[+b.dataset.eqAuto].pctEquipoManual = false; setTimeout(render, 0); }));
 }
 
 /* Pestaña Nómina */
