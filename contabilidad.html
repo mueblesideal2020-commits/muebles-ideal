@@ -204,7 +204,6 @@ table.t.eq select, table.t.eq input { min-height: 36px; padding: 6px 8px; }
     <h1>Contabilidad</h1>
     <span class="yo" id="yo"></span>
     <span class="tasa-top" id="tasa-top"></span>
-    <a class="btn borde mini solo-dueno" href="admin.html">Catálogo</a>
     <button class="btn borde mini" id="salir" type="button">Salir</button>
   </div>
   <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -238,6 +237,8 @@ const FIREBASE_CONFIG = {
   appId: "1:971429499996:web:ba6aabf7e61514e0e8c299"
 };
 const DUENO = "mueblesideal2020@gmail.com";
+/* Dueño y administrador manejan las cuentas; solo el dueño cambia cajas, porcentajes, sueldo y equipo */
+const gestor = () => ROL === "dueno" || ROL === "admin";
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(), db = firebase.firestore();
 const $ = id => document.getElementById(id);
@@ -253,6 +254,7 @@ const fmtU = n => (n < 0 ? "-$" : "$") + fmtN(Math.abs(n || 0));
 const fmtM = (n, mon) => mon === "VES" ? "Bs " + fmtN(n) : fmtU(n);
 const inNum = n => n ? String(Math.round(n * 100) / 100).replace(".", ",") : "";
 const numP = s => typeof s === "number" ? s : (parseFloat(String(s || "").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0); /* porcentajes: 8.333 o 8,333 */
+const fmtP = n => (Math.round((n || 0) * 100) / 100).toLocaleString("es-VE", { maximumFractionDigits: 2 });
 const inPct = n => n ? String(Math.round(n * 1000) / 1000).replace(".", ",") : "";
 const hoy = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -293,7 +295,7 @@ function articulosConocidos(){
 const resumenLineas = ls => ls.map(l => `${fmtCant(l.cant)} ${l.art}`).join(", ");
 const fmtCant = n => (Math.round((n || 0) * 100) / 100).toLocaleString("es-VE", { maximumFractionDigits: 2 });
 const CAJAS_SUGERIDAS = [
-  { nombre: "Banco (Pago Móvil y transferencias)", moneda: "VES" }, { nombre: "Efectivo en dólares", moneda: "USD" },
+  { nombre: "Banesco", moneda: "VES" }, { nombre: "Mercantil", moneda: "VES" }, { nombre: "Efectivo en dólares", moneda: "USD" },
   { nombre: "Efectivo en bolívares", moneda: "VES" }, { nombre: "Binance (USDT)", moneda: "USD" }
 ];
 
@@ -305,7 +307,8 @@ const CAT_NOMINA = "Nómina y comisiones";
 const COMISIONES_BASE = { equipo: { 1: 5, 2: 10, 3: 15, 4: 20 }, ventas: 8.333 };
 let ROL = null, YO = "", CUENTAS = [], MOVS = [], VENTAS = [], EQUIPO = [], EMPLEADOS = [];
 let AJ = { categoriasIngreso: CAT_ING, categoriasGasto: CAT_GAS, tasa: { valor: 0, fecha: "" } };
-let PRIV = { sueldo: { monto: 0, frecuencia: "mensual", cuenta: "" }, comisiones: JSON.parse(JSON.stringify(COMISIONES_BASE)) };
+const BANCOS_BASE = { operativa: "", resguardo: "", pct: { gastos: 5, reserva: 7, dueno: 15 }, desde: "" };
+let PRIV = { sueldo: { monto: 0, frecuencia: "mensual", cuenta: "" }, comisiones: JSON.parse(JSON.stringify(COMISIONES_BASE)), bancos: JSON.parse(JSON.stringify(BANCOS_BASE)) };
 let tab = "resumen", MES = hoy().slice(0, 7);
 const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const diaMas = (f, k) => { const d = new Date(f + "T12:00:00"); d.setDate(d.getDate() + k); return iso(d); };
@@ -338,14 +341,14 @@ auth.onAuthStateChanged(async u => {
   try { localStorage.setItem("mi-contab-email", YO); } catch (e) {}
   if (YO === DUENO) ROL = "dueno";
   else {
-    try { const d = await db.collection("equipo").doc(YO).get(); ROL = d.exists && d.data().activo !== false ? "ayudante" : null; }
+    try { const d = await db.collection("equipo").doc(YO).get(); ROL = d.exists && d.data().activo !== false ? (d.data().rol === "administrador" ? "admin" : "ayudante") : null; }
     catch (e) { ROL = null; }
   }
   if (!ROL) { $("sin-msg").textContent = `La cuenta ${YO} no tiene permiso para la contabilidad. Pídele al dueño que te agregue en Ajustes → Equipo.`; $("v-sin").hidden = false; return; }
-  $("yo").textContent = YO + (ROL === "ayudante" ? " · ayudante" : "");
+  $("yo").textContent = YO + (ROL === "ayudante" ? " · ayudante" : ROL === "admin" ? " · administrador" : "");
   document.querySelectorAll(".solo-dueno").forEach(x => x.hidden = ROL !== "dueno");
   $("v-panel").hidden = false;
-  tab = ROL === "dueno" ? "resumen" : "anotar";
+  tab = gestor() ? "resumen" : "anotar";
   await cargar();
 });
 
@@ -354,12 +357,13 @@ const lista = s => s.docs.map(d => Object.assign({ id: d.id }, d.data()));
 async function cargar(){
   try {
     const comun = [db.collection("cuentas").get(), db.collection("contab").doc("publico").get()];
-    if (ROL === "dueno") {
-      const [cu, pu, ve, mo, pr, eq, em] = await Promise.all([...comun, db.collection("ventas").get(), db.collection("movimientos").get(), db.collection("contab").doc("privado").get(), db.collection("equipo").get(), db.collection("empleados").get()]);
+    if (gestor()) {
+      const [cu, pu, ve, mo, pr, eq, em] = await Promise.all([...comun, db.collection("ventas").get(), db.collection("movimientos").get(), db.collection("contab").doc("privado").get(), ROL === "dueno" ? db.collection("equipo").get() : Promise.resolve({ docs: [] }), db.collection("empleados").get()]);
       CUENTAS = lista(cu); VENTAS = lista(ve); MOVS = lista(mo); EQUIPO = lista(eq); EMPLEADOS = lista(em).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
       if (pu.exists) AJ = Object.assign(AJ, pu.data());
       if (pr.exists) PRIV = Object.assign(PRIV, pr.data());
       PRIV.comisiones = Object.assign(JSON.parse(JSON.stringify(COMISIONES_BASE)), PRIV.comisiones || {});
+      PRIV.bancos = Object.assign(JSON.parse(JSON.stringify(BANCOS_BASE)), PRIV.bancos || {}); PRIV.bancos.pct = Object.assign({}, BANCOS_BASE.pct, PRIV.bancos.pct || {});
       if (!AJ.catsV2) { ["Cincha y saco", "Combustible y transporte"].forEach(c => { if (!AJ.categoriasGasto.includes(c)) AJ.categoriasGasto.splice(Math.max(0, AJ.categoriasGasto.length - 1), 0, c); });
         AJ.catsV2 = true; db.collection("contab").doc("publico").set(AJ).catch(() => {}); }
       await cargarPersonal();
@@ -404,14 +408,47 @@ function totalesMes(m){
   t.utilidad = t.ingreso - t.gasto; t.queda = t.utilidad - t.sueldo - t.retiro;
   return t;
 }
+/* ===== Dos bancos: uno para el día a día (Banesco) y otro de resguardo (Mercantil) =====
+   De cada cobro de venta se aparta un % al banco de resguardo, dividido en tres potes. */
+const POTES = { gastos: "Gastos fijos", reserva: "Reserva", dueno: "Ganancia del dueño" };
+const POTES_AYUDA = { gastos: "Luz, agua, aseo, teléfono, internet", reserva: "Herramientas, reparaciones, emergencias, meses flojos", dueno: "Tu sueldo y tu ganancia" };
+const bancosListos = () => gestor() && !!(PRIV.bancos && PRIV.bancos.resguardo && cuenta(PRIV.bancos.resguardo));
+const pctTotal = () => { const p = PRIV.bancos.pct; return num(p.gastos) + num(p.reserva) + num(p.dueno); };
+const esCobroVenta = m => m.tipo === "ingreso" && (!!m.ventaId || /venta|reparaci|tapiz/i.test(m.categoria || ""));
+const potePorDefecto = (tipo, sale) => sale ? (tipo === "gasto" ? "gastos" : tipo === "transferencia" ? "reserva" : "dueno") : "reserva";
+function pendientesApartar(){
+  if (!bancosListos()) return [];
+  const b = PRIV.bancos, hechos = new Set(MOVS.filter(m => m.repartoDe).map(m => m.repartoDe));
+  return movsOrdenados(MOVS).filter(m => esCobroVenta(m) && !m.sinReparto && !hechos.has(m.id) && m.cuenta !== b.resguardo && (m.fecha || "") >= (b.desde || ""));
+}
+function saldoPotes(){
+  const b = PRIV.bancos, r = { gastos: 0, reserva: 0, dueno: 0 }, c = cuenta(b.resguardo);
+  if (!c) return r;
+  r.reserva += aUSD(num(c.inicial), c.moneda);
+  for (const m of MOVS) {
+    if (m.tipo === "transferencia" && m.cuentaDestino === b.resguardo && m.cuenta !== b.resguardo) {
+      if (m.reparto) for (const k in r) r[k] += num(m.reparto[k]); else r[m.pote || "reserva"] += m.usd || 0;
+    }
+    if (m.cuenta === b.resguardo) {
+      if (m.tipo === "ingreso" || m.tipo === "aporte") r[m.pote || "reserva"] += m.usd || 0;
+      else if (!(m.tipo === "transferencia" && m.cuentaDestino === b.resguardo)) r[m.pote || potePorDefecto(m.tipo, true)] -= m.usd || 0;
+    }
+  }
+  return r;
+}
+function calcReparto(usd){
+  const p = PRIV.bancos.pct, r2 = n => Math.round(n * 100) / 100;
+  const parte = { gastos: r2(usd * num(p.gastos) / 100), reserva: r2(usd * num(p.reserva) / 100), dueno: r2(usd * num(p.dueno) / 100) };
+  return { parte, total: r2(parte.gastos + parte.reserva + parte.dueno) };
+}
 const VECES = { mensual: 1, quincenal: 2, semanal: 4 };
 const sueldoEsperado = () => num(PRIV.sueldo.monto) * (VECES[PRIV.sueldo.frecuencia] || 1);
 
 /* ===== Pestañas ===== */
 function pintarTabs(){
   const porCobrar = VENTAS.filter(v => saldoVenta(v) > 0.009).length;
-  const t = ROL === "dueno"
-    ? [["resumen", "Resumen"], ["movimientos", "Ingresos y gastos"], ["ventas", "Ventas"], ["cobrar", "Por cobrar" + (porCobrar ? `<span class="n">${porCobrar}</span>` : "")], ["nomina", "Nómina"], ["asistencia", "Asistencia"], ["empleados", "Empleados"], ["ajustes", "Cajas y ajustes"]]
+  const t = gestor()
+    ? [["resumen", "Resumen"], ["movimientos", "Ingresos y gastos"], ["ventas", "Ventas"], ["cobrar", "Por cobrar" + (porCobrar ? `<span class="n">${porCobrar}</span>` : "")], ["nomina", "Nómina"], ["asistencia", "Asistencia"], ["empleados", "Empleados"]].concat([["ajustes", ROL === "dueno" ? "Cajas y ajustes" : "Tasa del dólar"]])
     : [["anotar", "Anotar"], ["mios", "Mis registros"]];
   $("tabs").innerHTML = t.map(([k, n]) => `<button class="tab" role="tab" data-t="${k}" aria-selected="${k === tab}">${n}</button>`).join("");
   $("tabs").querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { tab = b.dataset.t; pintarTabs(); pintar(); window.scrollTo(0, 0); }));
@@ -422,7 +459,7 @@ function pintar(){
   ["resumen", "movimientos", "ventas", "cobrar", "nomina", "asistencia", "empleados", "ajustes", "anotar", "mios"].forEach(k => $("t-" + k).hidden = k !== tab);
   ({ resumen: pintarResumen, movimientos: pintarMovs, ventas: pintarVentas, cobrar: pintarCobrar, nomina: pintarNomina, asistencia: pintarAsistencia, empleados: pintarEmpleados, ajustes: pintarAjustes, anotar: pintarAnotar, mios: pintarMios })[tab]();
 }
-function refrescar(){ pintarTabs(); pintar(); if (ROL === "dueno") programarSync(); }
+function refrescar(){ pintarTabs(); pintar(); if (gestor()) programarSync(); }
 
 /* ===== RESUMEN ===== */
 function pintarResumen(){
@@ -443,7 +480,7 @@ function pintarResumen(){
   if (t.retiro > 0) alertas.push(`<p class="msg warn alerta">Este mes sacaste <b>${fmtU(t.retiro)}</b> en retiros personales fuera de tu sueldo.</p>`);
   if (esp && t.sueldo > esp + 0.01) alertas.push(`<p class="msg warn alerta">Te pagaste <b>${fmtU(t.sueldo)}</b> de sueldo y lo fijado es ${fmtU(esp)} al mes.</p>`);
   if (t.queda < 0 && (t.ingreso || t.gasto)) alertas.push(`<p class="msg err alerta">Este mes salió más dinero del que entró: el negocio quedó en <b>${fmtU(t.queda)}</b>.</p>`);
-  if (!(AJ.tasa && AJ.tasa.valor)) alertas.push(`<p class="msg warn alerta">Define la tasa del dólar en <b>Cajas y ajustes</b> para convertir los bolívares.</p>`);
+  if (!(AJ.tasa && AJ.tasa.valor)) alertas.push(`<p class="msg warn alerta">Define la tasa del dólar en <b>${ROL === "dueno" ? "Cajas y ajustes" : "Tasa del dólar"}</b> para convertir los bolívares.</p>`);
   el.innerHTML = `
     <div class="barra"><h2>${nombreMes(MES)}</h2>
       <button class="btn borde mini" id="r-ant" aria-label="Mes anterior">‹</button>
@@ -460,6 +497,7 @@ function pintarResumen(){
       <div class="card kpi ancho"><span>Por cobrar</span><b>${fmtU(porCobrar)}</b><small>Saldos pendientes de clientes</small></div>
     </div>
     ${alertas.join("")}
+    ${bloqueBancos()}
     <div class="dos" style="margin-top:14px">
       <div class="card panel"><h3>Entradas y gastos · últimos 6 meses</h3>
         <div class="leyenda"><span><i style="background:var(--gold)"></i>Entró</span><span><i style="background:var(--ink)"></i>Gastos</span></div>
@@ -474,6 +512,82 @@ function pintarResumen(){
   $("r-mes").addEventListener("change", e => e.target.value && ir(e.target.value));
   $("r-nuevo").addEventListener("click", () => abrirMov(null, { tipo: "gasto" }));
   $("r-xls").addEventListener("click", () => exportar(MES));
+  el.querySelectorAll("[data-apartar]").forEach(b => b.addEventListener("click", () => abrirApartado(MOVS.find(m => m.id === b.dataset.apartar))));
+  const cfg = $("r-bancos"); if (cfg) cfg.addEventListener("click", () => { tab = "ajustes"; refrescar(); setTimeout(() => { const n = $("a-bancos"); if (n) n.scrollIntoView({ behavior: "smooth" }); }, 50); });
+}
+function bloqueBancos(){
+  if (!bancosListos()) return `<div class="card panel" style="margin-top:14px"><h3>Organiza el dinero con dos bancos</h3>
+    <p class="ayuda">Usa <b>Banesco</b> para el día a día (cobros, materiales y nómina) y <b>Mercantil</b> para guardar lo apartado: gastos fijos, reserva y tu ganancia. Así no gastas sin querer lo que le toca a otra cosa.</p>
+    ${ROL === "dueno" ? `<p style="margin:12px 0 0"><button class="btn oro" id="r-bancos">CONFIGURAR LOS DOS BANCOS</button></p>` : `<p class="ayuda">El dueño lo activa en Cajas y ajustes.</p>`}</div>`;
+  const b = PRIV.bancos, op = cuenta(b.operativa), rs = cuenta(b.resguardo), pot = saldoPotes(), pend = pendientesApartar();
+  const real = aUSD(saldo(rs), rs.moneda), sumaPotes = pot.gastos + pot.reserva + pot.dueno, dif = real - sumaPotes;
+  const porApartar = pend.reduce((a, m) => a + calcReparto(m.usd || 0).total, 0);
+  return `<div class="card panel" style="margin-top:14px"><h3>${esc(op ? op.nombre : "Banco del día a día")} y ${esc(rs.nombre)}</h3>
+    <p class="ayuda">${op ? `<b>${esc(op.nombre)}</b>: cobros, materiales y nómina. ` : ""}<b>${esc(rs.nombre)}</b>: lo apartado de cada venta (${fmtP(pctTotal())} %), separado en potes.</p>
+    <div class="kpis" style="margin-top:10px">${Object.keys(POTES).map(k => `<div class="card kpi${pot[k] < -0.009 ? " rojo" : ""}"><span>${POTES[k]} · ${fmtP(num(b.pct[k]))} %</span><b>${fmtU(pot[k])}</b><small>${POTES_AYUDA[k]}</small></div>`).join("")}
+      <div class="card kpi"><span>Saldo real en ${esc(rs.nombre)}</span><b>${fmtM(saldo(rs), rs.moneda)}</b><small>${rs.moneda === "VES" ? "≈ " + fmtU(real) + " a la tasa de hoy" : ""}${rs.moneda === "VES" && dif < -1 ? ` · ${fmtU(-dif)} menos que los potes por la subida del dólar` : ""}</small></div></div>
+    ${pend.length ? `<p class="msg warn alerta" style="margin-top:12px">Tienes <b>${pend.length}</b> cobro${pend.length === 1 ? "" : "s"} sin apartar: faltan <b>${fmtU(porApartar)}</b> por pasar a ${esc(rs.nombre)}.</p>
+      <div class="wrap-t"><table class="t"><tbody>${pend.slice(0, 6).map(m => { const v = m.ventaId && venta(m.ventaId);
+        return `<tr><td>${fechaCorta(m.fecha)}</td><td>${esc(v ? (v.cliente || v.numero || "") : (m.descripcion || m.categoria || "Cobro"))}<span class="sub">Entró a ${esc(nomCuenta(m.cuenta))} · ${fmtU(m.usd)}</span></td>
+        <td class="num">${fmtU(calcReparto(m.usd || 0).total)}</td><td style="text-align:right"><button class="btn oro mini" data-apartar="${m.id}">Apartar</button></td></tr>`; }).join("")}</tbody></table></div>`
+      : `<p class="msg ok" style="margin-top:12px">Todos los cobros de venta están apartados. 👌</p>`}</div>`;
+}
+/* Hoja para pasar al banco de resguardo la parte de un cobro */
+function abrirApartado(ing){
+  const ed = $("editor-in"); ed._dueno = null; $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
+  const b = PRIV.bancos, dest = cuenta(b.resguardo), orig = cuenta(ing.cuenta), v = ing.ventaId && venta(ing.ventaId);
+  const base = ing.usd || 0, rep = calcReparto(base);
+  const x = { fecha: hoy(), tasa: ing.tasa || (AJ.tasa && AJ.tasa.valor) || 0, parte: Object.assign({}, rep.parte), pct: { gastos: num(b.pct.gastos), reserva: num(b.pct.reserva), dueno: num(b.pct.dueno) }, ref: "" };
+  const r2 = n => Math.round(n * 100) / 100;
+  const total = () => r2(x.parte.gastos + x.parte.reserva + x.parte.dueno);
+  const enMon = (usd, c) => c.moneda === "VES" ? r2(usd * x.tasa) : usd;
+  function render(){
+    const t = total(), usaBs = orig.moneda === "VES" || dest.moneda === "VES";
+    ed.innerHTML = `<header><h2>Apartar para ${esc(dest.nombre)}</h2><button class="btn borde mini" type="button" id="ap-x">Cerrar</button></header>
+      <div class="form">
+        <div class="bloque"><h3>Cobro</h3>
+          <p style="margin:0"><b>${fmtU(base)}</b> que entraron a <b>${esc(orig.nombre)}</b> el ${fechaCorta(ing.fecha)}${v ? ` · ${esc(v.numero || "")} ${esc(v.cliente || "")}` : ""}.</p>
+          <p class="ayuda">Pasa a ${esc(dest.nombre)} la parte de gastos fijos, reserva y tu ganancia. Lo demás se queda en ${esc(orig.nombre)} para materiales, nómina y comisión.</p></div>
+        <div class="bloque"><h3>Cuánto va a cada pote</h3>
+          <p class="ayuda">Puedes cambiar el % de este cobro. Los porcentajes de siempre se cambian en Cajas y ajustes.</p>
+          <div class="fila">${Object.keys(POTES).map(k => `<label class="f">${POTES[k]} <small>% del cobro · <span data-pt-usd="${k}">${fmtU(x.parte[k])}</span></small><input type="text" inputmode="decimal" data-pt="${k}" value="${inPct(x.pct[k]) || "0"}"></label>`).join("")}</div>
+          <p class="equiv" id="ap-tot"></p></div>
+        <div class="bloque"><h3>Transferencia</h3><div class="fila">
+          <label class="f">Fecha<input type="date" id="ap-f" value="${x.fecha}"></label>
+          ${usaBs ? `<label class="f">Tasa <small>Bs por $1</small><input type="text" inputmode="decimal" id="ap-tasa" value="${inNum(x.tasa)}"></label>` : ""}
+          <label class="f">Referencia <small>opcional</small><input type="text" id="ap-ref" value=""></label></div></div>
+        <p class="msg err" id="ap-err" hidden></p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn oro" type="button" id="ap-ok">ANOTAR LA TRANSFERENCIA</button>
+          <button class="btn borde" type="button" id="ap-luego">Ahora no</button>
+          <button class="btn borde" type="button" id="ap-no">Este cobro no se aparta</button></div>
+      </div>`;
+    pintarTot();
+    const on = (id, ev, f) => { const n = ed.querySelector("#" + id); if (n) n.addEventListener(ev, f); };
+    ed.querySelectorAll("[data-pt]").forEach(i => i.addEventListener("input", () => { const k = i.dataset.pt; x.pct[k] = numP(i.value); x.parte[k] = r2(base * x.pct[k] / 100);
+      const n = ed.querySelector(`[data-pt-usd="${k}"]`); if (n) n.textContent = fmtU(x.parte[k]); pintarTot(); }));
+    on("ap-f", "change", e => x.fecha = e.target.value || hoy());
+    on("ap-tasa", "input", e => { x.tasa = num(e.target.value); pintarTot(); });
+    on("ap-ref", "input", e => x.ref = e.target.value);
+    on("ap-x", "click", cerrarEditor); on("ap-luego", "click", () => { cerrarEditor(); refrescar(); });
+    on("ap-no", "click", async () => { try { await db.collection("movimientos").doc(ing.id).update({ sinReparto: true }); ing.sinReparto = true; toast("Listo, ese cobro no se aparta."); cerrarEditor(); refrescar(); } catch (e) { console.error(e); toast("No se pudo guardar."); } });
+    on("ap-ok", "click", guardar);
+  }
+  function pintarTot(){ const n = ed.querySelector("#ap-tot"), t = total();
+    n.innerHTML = `Total a pasar: <b>${fmtU(t)}</b>${orig.moneda === "VES" || dest.moneda === "VES" ? (x.tasa ? ` · ${fmtM(enMon(t, orig), orig.moneda)} salen de ${esc(orig.nombre)}` : " · escribe la tasa") : ""} · quedan ${fmtU(r2(base - t))} en ${esc(orig.nombre)}`; }
+  async function guardar(){
+    const err = t => { const n = ed.querySelector("#ap-err"); n.textContent = t; n.hidden = false; };
+    const t = total(); if (!(t > 0)) return err("El total debe ser mayor que cero.");
+    if ((orig.moneda === "VES" || dest.moneda === "VES") && !(x.tasa > 0)) return err("Escribe la tasa.");
+    const d = { fecha: x.fecha, tipo: "transferencia", cuenta: orig.id, moneda: orig.moneda, monto: enMon(t, orig), tasa: r2(x.tasa) || null, usd: t,
+      categoria: "", ventaId: "", descripcion: "Apartado de cobro" + (v ? " · " + (v.numero || v.cliente || "") : ""), ref: (x.ref || "").trim().slice(0, 80), proveedor: "", lineas: [],
+      cuentaDestino: dest.id, monedaDestino: dest.moneda, montoDestino: enMon(t, dest), reparto: { gastos: r2(x.parte.gastos), reserva: r2(x.parte.reserva), dueno: r2(x.parte.dueno) }, repartoDe: ing.id, creadoPor: YO };
+    const bt = ed.querySelector("#ap-ok"); bt.disabled = true; bt.textContent = "Guardando…";
+    try { const ref = await db.collection("movimientos").add(Object.assign({ creado: firebase.firestore.FieldValue.serverTimestamp() }, d)); MOVS.push(Object.assign({ id: ref.id }, d));
+      toast(`Apartado ${fmtU(t)} para ${dest.nombre}.`); cerrarEditor(); refrescar(); }
+    catch (e) { console.error(e); err("No se pudo guardar. Revisa tu conexión."); bt.disabled = false; bt.textContent = "ANOTAR LA TRANSFERENCIA"; }
+  }
+  render();
 }
 function grafMeses(serie){
   const W = 600, H = 230, pb = 26, pt = 18, max = Math.max(1, ...serie.map(s => Math.max(s.i, s.g)));
@@ -497,7 +611,7 @@ function filaMov(m, conVenta = true){
   return `<tr class="clic" data-mov="${m.id}">
     <td>${fechaCorta(m.fecha)}</td>
     <td><span class="chip ${m.tipo}">${t.n}</span></td>
-    <td>${titulo}${m.descripcion && !(ls.length && m.descripcion === resumenLineas(ls)) ? `<span class="sub">${esc(m.descripcion)}</span>` : ""}${conVenta && v ? `<span class="sub">Venta ${esc(v.numero || "")} · ${esc(v.cliente || "")}</span>` : ""}${ROL === "dueno" && m.creadoPor && m.creadoPor !== DUENO ? `<span class="sub">Anotado por ${esc(m.creadoPor)}</span>` : ""}</td>
+    <td>${titulo}${m.descripcion && !(ls.length && m.descripcion === resumenLineas(ls)) ? `<span class="sub">${esc(m.descripcion)}</span>` : ""}${conVenta && v ? `<span class="sub">Venta ${esc(v.numero || "")} · ${esc(v.cliente || "")}</span>` : ""}${gestor() && m.creadoPor && m.creadoPor !== DUENO ? `<span class="sub">Anotado por ${esc(m.creadoPor)}</span>` : ""}</td>
     <td class="ocultar-movil">${m.tipo === "transferencia" ? "" : esc(c ? c.nombre : "")}</td>
     <td class="num">${fmtM(m.monto, m.moneda)}${m.moneda === "VES" && m.tasa ? `<span class="sub">tasa ${fmtN(m.tasa)}</span>` : ""}</td>
     <td class="num ${signo}">${t.s < 0 ? "−" : t.s > 0 ? "+" : ""}${fmtU(m.usd)}</td></tr>`;
@@ -548,14 +662,15 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor
 
 function formMov(el, m, pre, op){
   const nuevo = !m;
-  const tiposOk = ROL === "dueno" ? Object.keys(TIPOS) : ["gasto", "ingreso"];
+  const tiposOk = gestor() ? Object.keys(TIPOS) : ["gasto", "ingreso"];
   const activas = CUENTAS.filter(c => c.activa !== false || (m && (c.id === m.cuenta || c.id === m.cuentaDestino)));
   const x = Object.assign({ tipo: "gasto", fecha: hoy(), cuenta: "", monto: 0, tasa: (AJ.tasa && AJ.tasa.valor) || 0, categoria: "", ventaId: "", descripcion: "", ref: "", cuentaDestino: "", montoDestino: 0, proveedor: "" }, m ? JSON.parse(JSON.stringify(m)) : {}, pre);
   x.lineas = (x.lineas || []).map(l => Object.assign({}, l));
   let multi = x.lineas.length > 0;
   const lineaVacia = () => ({ art: "", cant: 1, uni: "", pu: 0, sub: 0, cat: "" });
   const totalLineas = () => Math.round(x.lineas.reduce((s, l) => s + num(l.cant) * num(l.pu), 0) * 100) / 100;
-  if (!x.cuenta) x.cuenta = (x.tipo === "sueldo" && PRIV.sueldo.cuenta) || (activas[0] && activas[0].id) || "";
+  const opBanco = gestor() && PRIV.bancos && activas.some(c => c.id === PRIV.bancos.operativa) ? PRIV.bancos.operativa : "";
+  if (!x.cuenta) x.cuenta = (x.tipo === "sueldo" && PRIV.sueldo.cuenta) || opBanco || (activas[0] && activas[0].id) || "";
   if (x.tipo === "sueldo" && nuevo && !x.monto && PRIV.sueldo.monto) { const c = cuenta(x.cuenta); x.monto = c && c.moneda === "VES" ? num(PRIV.sueldo.monto) * x.tasa : num(PRIV.sueldo.monto); }
   let destManual = !nuevo, confirmar = false;
   const monedaDe = id => (cuenta(id) || {}).moneda || "USD";
@@ -590,6 +705,7 @@ function formMov(el, m, pre, op){
             <label class="f">Monto que entra <small>en ${mon2 === "VES" ? "bolívares" : "dólares"}</small><input type="text" inputmode="decimal" id="mv-monto2" value="${inNum(x.montoDestino)}"></label></div>
             <p class="ayuda">Se calcula con la tasa. Cámbialo si recibiste otra cantidad (por ejemplo, por comisión).</p></div>` : ""}
         ${t === "gasto" ? bloqueCompra(mon) : ""}
+        ${bloquePote()}
         <div class="bloque"><h3>Detalle</h3>
           ${cats.length && !(multi && t === "gasto") ? `<label class="f">Categoría<select id="mv-cat"><option value="">Elige…</option>${cats.map(c => `<option ${c === x.categoria ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>` : ""}
           ${(t === "ingreso" || t === "gasto") && VENTAS.length ? `<label class="f">${t === "ingreso" ? "¿Es un abono de una venta?" : "¿Es un costo de una venta específica?"} <small>Opcional</small><select id="mv-venta"><option value="">No</option>${ventasAbiertas.map(v => `<option value="${v.id}" ${v.id === x.ventaId ? "selected" : ""}>${esc(v.numero || "Sin N°")} · ${esc(v.cliente || "")} · ${esc(v.producto || "")}</option>`).join("")}</select></label>` : ""}
@@ -598,7 +714,7 @@ function formMov(el, m, pre, op){
         <p class="msg err" id="mv-err" hidden></p>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn oro" type="button" id="mv-ok" ${activas.length ? "" : "disabled"}>${nuevo ? "GUARDAR" : "GUARDAR CAMBIOS"}</button>
-          ${!nuevo && ROL === "dueno" ? `<button class="btn borde" type="button" id="mv-del">Eliminar</button>` : ""}
+          ${!nuevo && gestor() ? `<button class="btn borde" type="button" id="mv-del">Eliminar</button>` : ""}
         </div>
         ${confirmar ? `<div class="confirma"><span>¿Eliminar este movimiento? Los saldos se recalculan.${m && m.nomina ? " Los proyectos de esta nómina vuelven a quedar por pagar." : ""}</span><button class="btn peligro mini" id="mv-del-si">Sí, eliminar</button><button class="btn borde mini" id="mv-del-no">No</button></div>` : ""}
       </div>`;
@@ -617,6 +733,7 @@ function formMov(el, m, pre, op){
     on("mv-desc", "input", e => x.descripcion = e.target.value);
     on("mv-ref", "input", e => x.ref = e.target.value);
     on("mv-ok", "click", guardar);
+    el.querySelectorAll("[data-pote]").forEach(b => b.addEventListener("click", () => { x.pote = b.dataset.pote; el.querySelectorAll("[data-pote]").forEach(z => z.setAttribute("aria-pressed", z === b)); }));
     eventosCompra();
     on("mv-del", "click", () => { confirmar = true; render(); });
     on("mv-del-no", "click", () => { confirmar = false; render(); });
@@ -624,6 +741,20 @@ function formMov(el, m, pre, op){
       try { await db.collection("movimientos").doc(m.id).delete(); MOVS = MOVS.filter(z => z.id !== m.id); await desmarcarNomina(m.id); toast("Movimiento eliminado."); op.alTerminar(); }
       catch (err) { console.error(err); toast("No se pudo eliminar."); }
     });
+  }
+  /* ---- Pote del banco de resguardo ---- */
+  function infoPote(){
+    if (!bancosListos()) return null; const rs = PRIV.bancos.resguardo;
+    if (x.cuenta === rs && !(x.tipo === "transferencia" && x.cuentaDestino === rs)) return { sale: !(x.tipo === "ingreso" || x.tipo === "aporte") };
+    if (x.tipo === "transferencia" && x.cuentaDestino === rs) return { sale: false };
+    return null;
+  }
+  function bloquePote(){
+    const i = infoPote(); if (!i) return "";
+    const nb = esc(nomCuenta(PRIV.bancos.resguardo)), pot = saldoPotes(), sel = x.pote || potePorDefecto(x.tipo, i.sale);
+    return `<div class="bloque"><h3>${i.sale ? "¿De qué pote de " + nb + " sale?" : "¿A qué pote de " + nb + " entra?"}</h3>
+      <div class="seg">${Object.keys(POTES).map(k => `<button type="button" data-pote="${k}" aria-pressed="${k === sel}">${POTES[k]}</button>`).join("")}</div>
+      <p class="ayuda">Disponible: ${Object.keys(POTES).map(k => `${POTES[k].toLowerCase()} ${fmtU(pot[k])}`).join(" · ")}</p></div>`;
   }
   /* ---- Compra con varios artículos ---- */
   function bloqueCompra(mon){
@@ -708,11 +839,15 @@ function formMov(el, m, pre, op){
       proveedor: (x.proveedor || "").trim().slice(0, 80), lineas: compra ? lineas : [],
       cuentaDestino: x.tipo === "transferencia" ? x.cuentaDestino : "", monedaDestino: x.tipo === "transferencia" ? mon2 : "", montoDestino: x.tipo === "transferencia" ? r(x.montoDestino) : 0,
       creadoPor: (m && m.creadoPor) || YO };
+    const ip = infoPote(); if (ip) d.pote = x.pote || potePorDefecto(x.tipo, ip.sale); else if (m && m.pote) d.pote = "";
     const b = el.querySelector("#mv-ok"); b.disabled = true; b.textContent = "Guardando…";
     try {
-      if (nuevo) { const ref = await db.collection("movimientos").add(Object.assign({ creado: firebase.firestore.FieldValue.serverTimestamp() }, d)); MOVS.push(Object.assign({ id: ref.id }, d)); }
+      if (nuevo) { const ref = await db.collection("movimientos").add(Object.assign({ creado: firebase.firestore.FieldValue.serverTimestamp() }, d)); const nm = Object.assign({ id: ref.id }, d); MOVS.push(nm);
+        if (op.lateral && bancosListos() && esCobroVenta(nm) && nm.cuenta !== PRIV.bancos.resguardo && (nm.fecha || "") >= (PRIV.bancos.desde || "")) {
+          if (d.moneda === "VES" && d.tasa && d.fecha >= ((AJ.tasa && AJ.tasa.fecha) || "")) { AJ.tasa = { valor: d.tasa, fecha: d.fecha }; db.collection("contab").doc("publico").set(AJ).catch(() => {}); }
+          toast("Cobro anotado. Ahora aparta la parte para " + nomCuenta(PRIV.bancos.resguardo) + "."); refrescar(); abrirApartado(nm); return; } }
       else { await db.collection("movimientos").doc(m.id).update(d); Object.assign(MOVS.find(z => z.id === m.id), d); }
-      if (d.moneda === "VES" && d.tasa && ROL === "dueno" && d.fecha >= ((AJ.tasa && AJ.tasa.fecha) || "")) { AJ.tasa = { valor: d.tasa, fecha: d.fecha }; db.collection("contab").doc("publico").set(AJ).catch(() => {}); }
+      if (d.moneda === "VES" && d.tasa && gestor() && d.fecha >= ((AJ.tasa && AJ.tasa.fecha) || "")) { AJ.tasa = { valor: d.tasa, fecha: d.fecha }; db.collection("contab").doc("publico").set(AJ).catch(() => {}); }
       toast(nuevo ? "Anotado." : "Cambios guardados."); op.alTerminar();
     } catch (e) { console.error(e); err("No se pudo guardar. Revisa tu conexión e intenta de nuevo."); b.disabled = false; b.textContent = "GUARDAR"; }
   }
@@ -743,7 +878,7 @@ function pintarVentas(){
   $("v-f-q").addEventListener("input", e => { filtro.qv = e.target.value; const p = e.target.selectionStart; pintarVentas(); const n = $("v-f-q"); n.focus(); n.setSelectionRange(p, p); });
   el.querySelectorAll("[data-v]").forEach(r => r.addEventListener("click", () => abrirVenta(venta(r.dataset.v))));
 }
-function nuevoItem(n){ return { id: "p" + n + "-" + Date.now().toString(36).slice(-4), producto: "", cantidad: 1, precio: 0, detalle: "", equipo: [], baseComision: 0, pctEquipo: 0, pctEquipoManual: false }; }
+function nuevoItem(n){ return { id: "p" + n + "-" + Date.now().toString(36).slice(-4), producto: "", cantidad: 1, precio: 0, detalle: "", equipo: [], baseComision: 0, pctEquipo: 0, pctIndividual: false, pctEquipoManual: false }; }
 const resumenItems = items => items.filter(it => it.producto).map(it => (it.cantidad > 1 ? it.cantidad + " × " : "") + it.producto).join(" + ");
 function abrirVenta(v0){
   const nuevo = !v0;
@@ -751,9 +886,9 @@ function abrirVenta(v0){
   /* Las ventas viejas (un solo producto) se pasan a la lista de productos */
   if (!x.items || !x.items.length) {
     x.items = [Object.assign(nuevoItem(1), { id: "p1", producto: x.producto || "", precio: num(x.total), detalle: x.detalle || "", equipo: x.equipo || [],
-      baseComision: x.baseComision || 0, pctEquipo: x.pctEquipo || 0, pctEquipoManual: !!x.pctEquipoManual })];
+      baseComision: x.baseComision || 0, pctEquipo: x.pctEquipo || 0, pctEquipoManual: !!x.pctEquipoManual, pctIndividual: !!x.pctIndividual })];
   }
-  ["equipo", "detalle", "baseComision", "pctEquipo", "pctEquipoManual"].forEach(k => delete x[k]);
+  ["equipo", "detalle", "baseComision", "pctEquipo", "pctEquipoManual", "pctIndividual"].forEach(k => delete x[k]);
   const ed = $("editor-in"); $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
   let cots = null, confirmar = false, quitar = -1; ed.innerHTML = "";
   const yo = {}; ed._dueno = yo; /* evita que un redibujo pendiente pise otra ventana abierta después */
@@ -888,6 +1023,21 @@ function pintarCobrar(){
 }
 
 /* ===== AJUSTES ===== */
+/* El administrador solo puede actualizar la tasa; cajas, porcentajes, sueldo y equipo los cambia el dueño */
+function pintarTasaSola(){
+  const el = $("t-ajustes"), tv = AJ.tasa || {};
+  el.innerHTML = `<div class="barra"><h2>Tasa del dólar</h2></div><div class="form" style="padding:0">
+    <div class="bloque"><p class="ayuda">Se usa para convertir a dólares lo que entra y sale en bolívares. Cada movimiento guarda la tasa de su día.</p>
+      <div class="fila"><label class="f">Bs por $1<input type="text" inputmode="decimal" id="a-tasa" value="${inNum(tv.valor)}"></label><label class="f">Fecha<input type="date" id="a-tasa-f" value="${tv.fecha || hoy()}"></label></div>
+      <p style="display:flex;gap:10px;flex-wrap:wrap;margin:0"><button class="btn oro" id="a-tasa-ok">GUARDAR TASA</button><button class="btn borde" id="a-bcv">Buscar tasa BCV de hoy</button></p></div>
+    <p class="ayuda">Las cajas, los porcentajes de comisión y de apartado, el sueldo del dueño y el equipo solo los cambia el dueño.</p></div>`;
+  $("a-tasa-ok").addEventListener("click", async () => { const v = num($("a-tasa").value); if (!(v > 0)) return toast("Escribe la tasa.");
+    try { AJ.tasa = { valor: v, fecha: $("a-tasa-f").value || hoy() }; await db.collection("contab").doc("publico").set(AJ); toast("Tasa guardada."); pintarTabs(); } catch (e) { console.error(e); toast("No se pudo guardar."); } });
+  $("a-bcv").addEventListener("click", async () => { const b = $("a-bcv"); b.disabled = true;
+    try { const r = await fetch("https://ve.dolarapi.com/v1/dolares/oficial"); const j = await r.json(); const v = num(j.promedio); if (!(v > 0)) throw 0;
+      $("a-tasa").value = inNum(v); $("a-tasa-f").value = (j.fechaActualizacion || hoy()).slice(0, 10); toast("Tasa BCV encontrada. Revísala y guarda."); }
+    catch (e) { toast("No se pudo consultar la tasa. Escríbela a mano."); } finally { b.disabled = false; } });
+}
 async function crearCajasSugeridas(){
   try {
     let i = CUENTAS.length;
@@ -896,6 +1046,7 @@ async function crearCajasSugeridas(){
   } catch (e) { console.error(e); toast("No se pudieron crear las cajas. Revisa las reglas de Firestore."); }
 }
 function pintarAjustes(){
+  if (ROL !== "dueno") return pintarTasaSola();
   const el = $("t-ajustes"), s = PRIV.sueldo, tv = AJ.tasa || {};
   el.innerHTML = `<div class="barra"><h2>Cajas y ajustes</h2></div>
     <div class="form" style="padding:0">
@@ -915,6 +1066,19 @@ function pintarAjustes(){
           <tr><td><input type="text" id="a-nc" placeholder="Nueva caja, ej: Banesco"></td><td><select id="a-nm"><option value="VES">Bs</option><option value="USD">$</option></select></td><td colspan="3"><button class="btn borde mini" id="a-add">+ Agregar caja</button>${!CUENTAS.length ? ` <button class="btn oro mini" id="a-sug">Crear las sugeridas</button>` : ""}</td></tr>
         </tbody></table></div>
         <p style="margin:0"><button class="btn oro" id="a-cajas-ok">GUARDAR CAJAS</button></p></div>
+
+      <div class="bloque" id="a-bancos"><h3>Dos bancos: Banesco y Mercantil</h3>
+        <p class="ayuda"><b>Banco del día a día</b> (Banesco): ahí cobras a los clientes y de ahí pagas materiales, nómina y comisiones. <b>Banco de resguardo</b> (Mercantil): ahí pasas, de cada cobro de venta, un porcentaje separado en tres potes. De ahí pagas los servicios y tu sueldo.</p>
+        ${!(CUENTAS.some(c => /banesco/i.test(c.nombre)) && CUENTAS.some(c => /mercantil/i.test(c.nombre))) ? `<p style="margin:0"><button class="btn oro" id="a-bn-crear">PREPARAR BANESCO Y MERCANTIL</button></p>
+          <p class="ayuda">Crea las cajas que falten${CUENTAS.some(c => /^banco/i.test(c.nombre) && !/banesco|mercantil/i.test(c.nombre)) ? `. Tu caja <b>${esc(CUENTAS.find(c => /^banco/i.test(c.nombre) && !/banesco|mercantil/i.test(c.nombre)).nombre)}</b> pasa a llamarse Banesco (sus movimientos se mantienen)` : ""}.</p>` : ""}
+        <div class="fila">
+          <label class="f">Banco del día a día<select id="a-bn-op"><option value="">Elige…</option>${CUENTAS.map(c => `<option value="${c.id}" ${PRIV.bancos.operativa === c.id ? "selected" : ""}>${esc(c.nombre)}</option>`).join("")}</select></label>
+          <label class="f">Banco de resguardo<select id="a-bn-rs"><option value="">Elige…</option>${CUENTAS.map(c => `<option value="${c.id}" ${PRIV.bancos.resguardo === c.id ? "selected" : ""}>${esc(c.nombre)}</option>`).join("")}</select></label>
+          <label class="f">Apartar desde <small>cobros desde esta fecha</small><input type="date" id="a-bn-desde" value="${PRIV.bancos.desde || hoy()}"></label></div>
+        <p class="ayuda" style="margin-bottom:0">De cada cobro de venta se aparta:</p>
+        <div class="fila">${Object.keys(POTES).map(k => `<label class="f">${POTES[k]} <small>% del cobro · ${POTES_AYUDA[k].toLowerCase()}</small><input type="text" inputmode="decimal" id="a-bn-${k}" value="${inPct(num(PRIV.bancos.pct[k]))}"></label>`).join("")}</div>
+        <p class="ayuda" id="a-bn-ej"></p>
+        <p style="margin:0"><button class="btn oro" id="a-bn-ok">GUARDAR BANCOS</button></p></div>
 
       <div class="bloque"><h3>Sueldo del dueño</h3>
         <p class="ayuda">La regla para separar tu dinero: el negocio te paga un sueldo fijo y tú vives de ese sueldo. Lo demás se queda en el negocio para material, imprevistos y crecer. Si necesitas sacar algo extra, anótalo como <b>Retiro personal</b>.</p>
@@ -936,11 +1100,11 @@ function pintarAjustes(){
         <label class="f">De gastos <small>una por línea</small><textarea id="a-cg" style="min-height:240px">${esc(AJ.categoriasGasto.join("\n"))}</textarea></label></div>
         <p style="margin:0"><button class="btn oro" id="a-cat-ok">GUARDAR CATEGORÍAS</button></p></div>
 
-      <div class="bloque"><h3>Equipo</h3>
-        <p class="ayuda">Personas que pueden <b>anotar gastos e ingresos</b>. Solo ven lo que ellas mismas anotan: no ven saldos, sueldo, resumen ni ventas.</p>
-        ${EQUIPO.length ? `<div class="wrap-t"><table class="t"><tbody>${EQUIPO.map(p => `<tr><td><b>${esc(p.nombre || "")}</b><span class="sub">${esc(p.id)}</span></td><td><span class="chip ${p.activo === false ? "est-anulado" : "ingreso"}">${p.activo === false ? "Sin acceso" : "Activo"}</span></td>
+      <div class="bloque"><h3>Administrador y ayudantes</h3>
+        <p class="ayuda"><b>Administrador:</b> maneja las cuentas contigo. Ve todo (también tu sueldo y tus potes), anota ingresos y gastos, aparta a Mercantil, crea ventas, paga la nómina y maneja empleados y asistencia. No puede cambiar cajas, porcentajes, sueldo ni el equipo.<br><b>Ayudante:</b> solo anota gastos e ingresos y ve lo que él mismo anotó.</p>
+        ${EQUIPO.length ? `<div class="wrap-t"><table class="t"><tbody>${EQUIPO.map(p => `<tr><td><b>${esc(p.nombre || "")}</b><span class="sub">${esc(p.id)}</span></td><td><select data-eq-rol="${esc(p.id)}" aria-label="Rol de ${esc(p.nombre || p.id)}"><option value="ayudante" ${p.rol !== "administrador" ? "selected" : ""}>Ayudante</option><option value="administrador" ${p.rol === "administrador" ? "selected" : ""}>Administrador</option></select></td><td><span class="chip ${p.activo === false ? "est-anulado" : "ingreso"}">${p.activo === false ? "Sin acceso" : "Activo"}</span></td>
           <td style="text-align:right;white-space:nowrap"><button class="btn borde mini" data-eq-t="${esc(p.id)}">${p.activo === false ? "Activar" : "Quitar acceso"}</button> <button class="btn borde mini" data-eq-r="${esc(p.id)}">Reenviar enlace</button></td></tr>`).join("")}</tbody></table></div>` : ""}
-        <div class="fila"><label class="f">Nombre<input type="text" id="a-eq-n" placeholder="Ej: María"></label><label class="f">Correo<input type="email" id="a-eq-e" placeholder="correo@gmail.com"></label></div>
+        <div class="fila"><label class="f">Nombre<input type="text" id="a-eq-n" placeholder="Ej: María"></label><label class="f">Correo<input type="email" id="a-eq-e" placeholder="correo@gmail.com"></label><label class="f">Rol<select id="a-eq-rol"><option value="administrador">Administrador</option><option value="ayudante">Ayudante</option></select></label></div>
         <p style="margin:0"><button class="btn oro" id="a-eq-ok">AGREGAR AL EQUIPO</button></p>
         <p class="ayuda">Le llegará un correo para crear su contraseña. Luego entra en esta misma página: <b>contabilidad.html</b>.</p></div>
     </div>`;
@@ -959,6 +1123,30 @@ function pintarAjustes(){
   conBoton("a-add", async () => { const n = $("a-nc").value.trim(); if (!n) return toast("Escribe el nombre de la caja."); const id = slug(n) + (cuenta(slug(n)) ? "-" + Date.now().toString(36).slice(-3) : "");
     const d = { nombre: n, moneda: $("a-nm").value, inicial: 0, activa: true, orden: CUENTAS.length + 1 }; await db.collection("cuentas").doc(id).set(d); CUENTAS.push(Object.assign({ id }, d)); toast("Caja agregada."); pintarAjustes(); });
   conBoton("a-cajas-ok", async () => { for (const c of CUENTAS.filter(c => c._cambio)) { const { id, _cambio, ...d } = c; await db.collection("cuentas").doc(id).set(d); delete c._cambio; } toast("Cajas guardadas."); pintarAjustes(); });
+  const ejBn = () => { const g = numP($("a-bn-gastos").value), rv = numP($("a-bn-reserva").value), du = numP($("a-bn-dueno").value), eq = num(PRIV.comisiones.equipo[4]), ve = num(PRIV.comisiones.ventas);
+    const t = g + rv + du, mat = 100 - t - eq - ve;
+    $("a-bn-ej").innerHTML = `Ejemplo con un cobro de <b>$300</b>: pasas <b>${fmtU(300 * t / 100)}</b> al banco de resguardo (gastos ${fmtU(300 * g / 100)} · reserva ${fmtU(300 * rv / 100)} · tu ganancia ${fmtU(300 * du / 100)}) y quedan ${fmtU(300 - 300 * t / 100)} en el banco del día a día. `
+      + (mat > 0 ? `Después de pagar al equipo (${fmtP(eq)} %) y la comisión (${fmtP(ve)} %), te quedan ${fmtU(300 * mat / 100)} (${fmtP(mat)} %) para los materiales. Si los materiales de un modelo cuestan más que eso, súbele el precio.` : `<b>Con estos porcentajes no queda dinero para materiales.</b> Bájalos.`); };
+  ejBn(); ["gastos", "reserva", "dueno"].forEach(k => $("a-bn-" + k).addEventListener("input", ejBn));
+  conBoton("a-bn-crear", async () => {
+    const generico = CUENTAS.find(c => /^banco/i.test(c.nombre) && !/banesco|mercantil/i.test(c.nombre));
+    let ban = CUENTAS.find(c => /banesco/i.test(c.nombre)), mer = CUENTAS.find(c => /mercantil/i.test(c.nombre));
+    if (!ban && generico) { generico.nombre = "Banesco"; const { id, _cambio, ...d } = generico; await db.collection("cuentas").doc(id).set(d); ban = generico; }
+    for (const [n, ya] of [["Banesco", ban], ["Mercantil", mer]]) if (!ya) { const id = slug(n) + (cuenta(slug(n)) ? "-" + Date.now().toString(36).slice(-3) : "");
+      const d = { nombre: n, moneda: "VES", inicial: 0, activa: true, orden: CUENTAS.length + 1 }; await db.collection("cuentas").doc(id).set(d); CUENTAS.push(Object.assign({ id }, d)); if (n === "Banesco") ban = cuenta(id); else mer = cuenta(id); }
+    if (!PRIV.bancos.operativa) PRIV.bancos.operativa = ban.id; if (!PRIV.bancos.resguardo) PRIV.bancos.resguardo = mer.id; if (!PRIV.bancos.desde) PRIV.bancos.desde = hoy();
+    if (!PRIV.sueldo.cuenta) PRIV.sueldo.cuenta = PRIV.bancos.resguardo;
+    await db.collection("contab").doc("privado").set(PRIV);
+    toast("Listo: Banesco para el día a día y Mercantil de resguardo. Escribe el saldo inicial de cada una."); pintarAjustes(); pintarTabs();
+  });
+  conBoton("a-bn-ok", async () => {
+    const op = $("a-bn-op").value, rs = $("a-bn-rs").value;
+    if (!rs) return toast("Elige el banco de resguardo."); if (op && op === rs) return toast("Deben ser dos bancos distintos.");
+    const pct = { gastos: numP($("a-bn-gastos").value), reserva: numP($("a-bn-reserva").value), dueno: numP($("a-bn-dueno").value) };
+    if (pct.gastos + pct.reserva + pct.dueno >= 100) return toast("Los porcentajes suman demasiado.");
+    PRIV.bancos = { operativa: op, resguardo: rs, pct, desde: $("a-bn-desde").value || hoy() };
+    await db.collection("contab").doc("privado").set(PRIV); toast("Bancos guardados."); pintarAjustes();
+  });
   conBoton("a-s-ok", async () => { PRIV.sueldo = { monto: num($("a-s-monto").value), frecuencia: $("a-s-frec").value, cuenta: $("a-s-cuenta").value }; await db.collection("contab").doc("privado").set(PRIV); toast("Sueldo guardado."); });
   const ejemplo = () => { const p3 = num($("a-com-3").value), p4 = num($("a-com-4").value), pv = numP($("a-com-v").value);
     $("a-com-ej").innerHTML = `Ejemplo con una cama de <b>$300</b>: ejecutivo ${fmtU(300 * pv / 100)} · si trabajan 3, ${fmtU(300 * p3 / 100)} entre los tres (${fmtU(300 * p3 / 300)} c/u) · si trabajan 4, ${fmtU(300 * p4 / 100)} (${fmtU(300 * p4 / 400)} c/u).`; };
@@ -979,12 +1167,14 @@ function pintarAjustes(){
       await sec.auth().signOut().catch(() => {});
       await auth.sendPasswordResetEmail(em);
     } catch (e) { console.error(e); aviso = " No se pudo crear su acceso automáticamente: créalo en Firebase → Authentication → Agregar usuario."; }
-    const d = { nombre: n, activo: true, desde: hoy() };
+    const d = { nombre: n, activo: true, desde: hoy(), rol: $("a-eq-rol").value };
     await db.collection("equipo").doc(em).set(d); EQUIPO.push(Object.assign({ id: em }, d));
     toast(aviso ? "Agregado." + aviso : `Listo. Le enviamos a ${em} el enlace para crear su contraseña.`); pintarAjustes();
   });
   el.querySelectorAll("[data-eq-t]").forEach(b => b.addEventListener("click", async () => { const p = EQUIPO.find(z => z.id === b.dataset.eqT); p.activo = p.activo === false;
     try { await db.collection("equipo").doc(p.id).update({ activo: p.activo }); toast(p.activo ? "Acceso activado." : "Acceso quitado."); pintarAjustes(); } catch (e) { toast("No se pudo cambiar."); } }));
+  el.querySelectorAll("[data-eq-rol]").forEach(sl => sl.addEventListener("change", async () => { const p = EQUIPO.find(z => z.id === sl.dataset.eqRol);
+    try { await db.collection("equipo").doc(p.id).update({ rol: sl.value }); p.rol = sl.value; toast(`${p.nombre || p.id} ahora es ${sl.value}. Debe salir y volver a entrar.`); } catch (e) { console.error(e); toast("No se pudo cambiar el rol."); } }));
   el.querySelectorAll("[data-eq-r]").forEach(b => b.addEventListener("click", async () => { try { await auth.sendPasswordResetEmail(b.dataset.eqR); toast("Enlace reenviado."); } catch (e) { toast("No se pudo enviar."); } }));
 }
 
@@ -1003,13 +1193,19 @@ function itemsDe(v){
   if (v.items && v.items.length) return v.items;
   if (!v._legado) Object.defineProperty(v, "_legado", { enumerable: false, configurable: true, writable: true,
     value: [{ id: "p1", producto: v.producto || "", cantidad: 1, get precio(){ return num(v.total); }, detalle: v.detalle || "",
-      get equipo(){ return v.equipo || (v.equipo = []); }, set equipo(a){ v.equipo = a; }, baseComision: v.baseComision, pctEquipo: v.pctEquipo, pctEquipoManual: v.pctEquipoManual }] });
+      get equipo(){ return v.equipo || (v.equipo = []); }, set equipo(a){ v.equipo = a; }, baseComision: v.baseComision, pctEquipo: v.pctEquipo, pctEquipoManual: v.pctEquipoManual, pctIndividual: v.pctIndividual }] });
   return v._legado;
 }
 const guardarEquipoVenta = v => db.collection("ventas").doc(v.id).update(v.items && v.items.length ? { items: v.items } : { equipo: v.equipo || [] });
 function recalcEquipo(v){
   v.equipo = (v.equipo || []).filter(l => l.empleadoId);
   const base = baseDe(v), prod = v.equipo.filter(l => l.rol !== ROL_VENTAS);
+  /* % a mano por trabajador: cada uno cobra su propio %; el total del equipo es la suma */
+  if (v.pctIndividual) {
+    v.equipo.forEach(l => { if (!l.pagado) l.monto = r2(base * num(l.pct) / 100); });
+    v.pctEquipo = r2(prod.reduce((a, l) => a + num(l.pct), 0)); v.pctEquipoManual = false;
+    return;
+  }
   if (!v.pctEquipoManual) v.pctEquipo = prod.length ? num(PRIV.comisiones.equipo[Math.min(prod.length, 4)]) : 0;
   const cada = prod.length ? num(v.pctEquipo) / prod.length : 0;
   v.equipo.forEach(l => { if (l.pagado) return;
@@ -1028,7 +1224,7 @@ async function desmarcarNomina(movId){
 
 /* Tabla del equipo de un producto (k = posición del producto en la venta) */
 function bloqueEquipo(x, k){
-  if (ROL !== "dueno") return "";
+  if (!gestor()) return "";
   if (!EMPLEADOS.length) return `<p class="ayuda">Registra a tus empleados en la pestaña <b>Empleados</b> para asignar quién fabrica este producto.</p>`;
   const act = EMPLEADOS.filter(e => e.activo !== false);
   const linea = rol => (x.equipo || []).find(l => l.rol === rol);
@@ -1038,14 +1234,15 @@ function bloqueEquipo(x, k){
     const opts = (conCargo.length ? conCargo : act).slice(); if (l && !opts.some(e => e.id === l.empleadoId) && empleado(l.empleadoId)) opts.push(empleado(l.empleadoId));
     return `<tr><td><b>${rol}</b></td>
       <td><select data-eq-emp="${k}|${rol}" ${l && l.pagado ? "disabled" : ""} aria-label="${rol}"><option value="">${rol === ROL_VENTAS ? "— Sin ejecutivo —" : "— No trabajó —"}</option>${opts.map(e => `<option value="${e.id}" ${l && l.empleadoId === e.id ? "selected" : ""}>${esc(e.nombre)} · ${esc(e.codigo || "")}</option>`).join("")}</select></td>
-      <td class="num">${l ? (rol === ROL_VENTAS && !l.pagado ? `<input class="pct" type="text" inputmode="decimal" data-eq-pct="${k}|${rol}" value="${inPct(l.pct)}" aria-label="% ${rol}">` : fmtN(l.pct)) + "%" : ""}</td>
+      <td class="num">${l ? (!l.pagado ? `<input class="pct" type="text" inputmode="decimal" data-eq-pct="${k}|${rol}" value="${inPct(l.pct)}" aria-label="% de ${rol}">` : fmtP(l.pct)) + "%" : ""}</td>
       <td class="num"><b>${l ? fmtU(l.monto) : ""}</b></td>
       <td>${l ? (l.pagado ? `<span class="chip ingreso">Pagado ${fechaCorta(l.pagadoFecha)}</span>` : `<input type="date" data-eq-fecha="${k}|${rol}" value="${l.fecha}" aria-label="Fecha de trabajo">`) : ""}</td></tr>`;
   };
   return `<h3 style="margin-top:6px">Equipo que lo fabrica</h3>
     <p class="ayuda">La <b>fecha</b> decide en qué semana de nómina (sábado a viernes) se le paga a cada uno.</p>
     <div class="fila"><label class="f">Precio para comisiones <small>normalmente el precio de esta línea</small><input type="text" inputmode="decimal" data-eq-base="${k}" value="${inNum(baseDe(x))}"></label>
-      <label class="f">% del equipo de producción <small>${prodN ? `${prodN} trabajando · ${fmtN(num(x.pctEquipo) / prodN)}% cada uno` : "nadie asignado"}${x.pctEquipoManual ? ` · cambiado a mano · <button type="button" class="link" data-eq-auto="${k}">volver al automático</button>` : ""}</small><input type="text" inputmode="decimal" data-eq-pcteq="${k}" value="${inNum(num(x.pctEquipo))}"></label></div>
+      <label class="f">% del equipo de producción <small>${x.pctIndividual ? `cada uno con su % · suma de los ${prodN} · <button type="button" class="link" data-eq-auto="${k}">repartir en partes iguales</button>` : `${prodN ? `${prodN} trabajando · ${fmtP(num(x.pctEquipo) / prodN)}% cada uno` : "nadie asignado"}${x.pctEquipoManual ? ` · cambiado a mano · <button type="button" class="link" data-eq-auto="${k}">volver al automático</button>` : ""}`}</small><input type="text" inputmode="decimal" data-eq-pcteq="${k}" value="${inPct(num(x.pctEquipo))}" ${x.pctIndividual ? "readonly" : ""}></label></div>
+    <p class="ayuda">¿A uno le toca más que a otro? Escribe el <b>%</b> de cada trabajador en la tabla y se deja de repartir en partes iguales.</p>
     <div class="wrap-t"><table class="t eq"><thead><tr><th>Cargo</th><th>Empleado</th><th class="num">%</th><th class="num">Le toca</th><th>Fecha</th></tr></thead><tbody>${ROLES.map(fila).join("")}</tbody>
       <tfoot><tr><td colspan="3">Comisiones de este producto</td><td class="num">${fmtU(comisionesItem(x))}</td><td></td></tr></tfoot></table></div>`;
 }
@@ -1055,14 +1252,16 @@ function eventosEquipo(ed, items, render){
   ed.querySelectorAll("[data-eq-emp]").forEach(sel => sel.addEventListener("change", () => {
     const [it, rol] = par(sel.dataset.eqEmp), previa = linea(it, rol); it.equipo = (it.equipo || []).filter(l => l.rol !== rol);
     if (sel.value) { const e = empleado(sel.value);
-      it.equipo.push({ id: slug(rol), rol, empleadoId: sel.value, pct: rol === ROL_VENTAS ? (num(e && e.pctVenta) || num(PRIV.comisiones.ventas)) : 0, monto: 0, fecha: (previa && previa.fecha) || hoy(), pagado: false }); }
+      it.equipo.push({ id: slug(rol), rol, empleadoId: sel.value, pct: rol === ROL_VENTAS ? (num(e && e.pctVenta) || num(PRIV.comisiones.ventas)) : it.pctIndividual ? ((previa && num(previa.pct)) || num(PRIV.comisiones.equipo[1]) || 5) : 0, monto: 0, fecha: (previa && previa.fecha) || hoy(), pagado: false }); }
     render();
   }));
-  ed.querySelectorAll("[data-eq-pct]").forEach(i => i.addEventListener("change", () => { const [it, rol] = par(i.dataset.eqPct); linea(it, rol).pct = numP(i.value); setTimeout(render, 0); }));
+  ed.querySelectorAll("[data-eq-pct]").forEach(i => i.addEventListener("change", () => { const [it, rol] = par(i.dataset.eqPct); linea(it, rol).pct = numP(i.value);
+    if (rol !== ROL_VENTAS && !it.pctIndividual) { it.pctIndividual = true; (it.equipo || []).forEach(l => { if (l.rol !== ROL_VENTAS && l.rol !== rol && !l.pagado) l.pct = r2(num(l.pct)); }); }
+    setTimeout(render, 0); }));
   ed.querySelectorAll("[data-eq-fecha]").forEach(i => i.addEventListener("change", () => { const [it, rol] = par(i.dataset.eqFecha); linea(it, rol).fecha = i.value || hoy(); }));
   ed.querySelectorAll("[data-eq-base]").forEach(i => i.addEventListener("change", () => { items[+i.dataset.eqBase].baseComision = num(i.value); setTimeout(render, 0); }));
-  ed.querySelectorAll("[data-eq-pcteq]").forEach(i => i.addEventListener("change", () => { const it = items[+i.dataset.eqPcteq]; it.pctEquipo = num(i.value); it.pctEquipoManual = true; setTimeout(render, 0); }));
-  ed.querySelectorAll("[data-eq-auto]").forEach(b => b.addEventListener("click", () => { items[+b.dataset.eqAuto].pctEquipoManual = false; setTimeout(render, 0); }));
+  ed.querySelectorAll("[data-eq-pcteq]").forEach(i => i.addEventListener("change", () => { const it = items[+i.dataset.eqPcteq]; it.pctEquipo = numP(i.value); it.pctEquipoManual = true; setTimeout(render, 0); }));
+  ed.querySelectorAll("[data-eq-auto]").forEach(b => b.addEventListener("click", () => { const it = items[+b.dataset.eqAuto]; it.pctEquipoManual = false; it.pctIndividual = false; setTimeout(render, 0); }));
 }
 
 /* Pestaña Nómina */
@@ -1119,7 +1318,7 @@ function waNomina(g, ini, fin){
 function abrirPagoNomina(g){
   const ed = $("editor-in"); $("editor").hidden = false; document.body.style.overflow = "hidden"; $("editor").firstElementChild.scrollTop = 0;
   const activas = CUENTAS.filter(c => c.activa !== false), total = g.aPagar;
-  const x = { fecha: hoy(), cuenta: (cuenta(PRIV.sueldo.cuenta) && PRIV.sueldo.cuenta) || (activas[0] && activas[0].id) || "", tasa: (AJ.tasa && AJ.tasa.valor) || 0, ref: "" };
+  const x = { fecha: hoy(), cuenta: (PRIV.bancos && activas.some(c => c.id === PRIV.bancos.operativa) && PRIV.bancos.operativa) || (cuenta(PRIV.sueldo.cuenta) && PRIV.sueldo.cuenta) || (activas[0] && activas[0].id) || "", tasa: (AJ.tasa && AJ.tasa.valor) || 0, ref: "" };
   const nProy = new Set(g.porPagar.map(l => l.venta.id)).size;
   function render(){
     const mon = (cuenta(x.cuenta) || {}).moneda;
@@ -1319,7 +1518,7 @@ const estable = o => JSON.stringify(Object.keys(o).sort().reduce((a, k) => (a[k]
 let syncT = null;
 function programarSync(){ clearTimeout(syncT); syncT = setTimeout(() => sincronizarTrabajos().catch(e => console.error("sync", e)), 500); }
 async function sincronizarTrabajos(){
-  if (ROL !== "dueno") return;
+  if (!gestor()) return;
   const quiero = {};
   lineasNomina().filter(l => empleado(l.empleadoId)).forEach(l => {
     const e = empleado(l.empleadoId), id = `${l.venta.id}_${l.item.id}_${l.id}`.replace(/\//g, "-");
@@ -1532,5 +1731,6 @@ async function exportar(mes, movs){
   }
 }
 </script>
+<script src="menu.js"></script>
 </body>
 </html>
