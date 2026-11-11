@@ -19,6 +19,13 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: v
 .barra { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 12px max(16px, 3vw); background: #141414; color: #fff; }
 .barra span { font-family: var(--display); font-size: .9rem; letter-spacing: .04em; }
 .barra button { font: 600 .9rem var(--display); letter-spacing: .06em; padding: 11px 20px; border-radius: 999px; border: 0; background: #d4ad62; color: #141414; cursor: pointer; }
+.barra button[disabled] { opacity: .6; cursor: progress; }
+.barra-acc { display: flex; gap: 8px; flex-wrap: wrap; }
+.barra .sec-btn { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.4); }
+.barra-nota { flex-basis: 100%; margin: 4px 0 0; font-size: .82rem; color: #e9e2d2; }
+/* Modo captura para el PDF: igual que la impresión, hoja carta fija */
+body.captura .barra { display: none !important; }
+body.captura .hoja { width: 215.9mm !important; height: 279.4mm !important; min-height: 0 !important; margin: 0 0 12px !important; box-shadow: none !important; overflow: hidden !important; }
 .hoja { width: min(215.9mm, 100% - 24px); min-height: 279.4mm; margin: 18px auto; background: var(--paper); padding: 11mm 12mm 9mm; box-shadow: 0 20px 50px -30px rgba(0,0,0,.45); display: flex; flex-direction: column; }
 .hoja .cuerpo { flex: 1; }
 .minicab { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; }
@@ -30,6 +37,20 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: v
 .compacta .chk { width: 12px; height: 12px; }
 .compacta .sec { margin-top: 11px; }
 .cargos td.r, .cargos th.r { text-align: right; }
+.estructura .est-top { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; align-items: center; }
+.estructura .est-plano svg { max-height: 40mm; }
+.estructura .est-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+.estructura .est-t { margin-bottom: 4px; }
+.hoja.estructura table.t.est-t th { font-size: .7rem; text-transform: none; letter-spacing: 0; color: var(--ink); background: var(--soft); padding: 3px 5px; }
+.estructura .est-t th span { display: block; font-weight: 400; color: var(--muted); font-size: .64rem; }
+.estructura .est-t i { font-style: normal; color: var(--muted); font-size: .64rem; }
+.estructura .est-res { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.estructura .est-res div:last-child { grid-column: 1 / -1; }
+.estructura .est-res div { background: var(--soft); border-radius: 6px; padding: 3px 7px; }
+.estructura .est-res span { display: block; font-size: .64rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+.estructura .est-res b { font-family: var(--display); font-weight: 500; font-size: .82rem; }
+.hoja.estructura table.t.est-t td { padding: 1px 5px; font-size: .7rem; line-height: 1.18; }
+.hoja.estructura table.t.est-t td.r { white-space: nowrap; }
 .ubic { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; margin-top: 10px; padding: 10px; border: 1.5px solid var(--ink); border-radius: 8px; }
 .con-mapa .plano svg { max-height: 82mm; }
 .con-mapa .sec { margin-top: 9px; }
@@ -42,7 +63,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; margin: 0; letter-sp
 .cab .dpto { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
 .num { text-align: right; }
 .num b { display: block; font-family: var(--display); font-size: 1.25rem; font-weight: 600; letter-spacing: .04em; }
-.num small { color: var(--muted); }
+.num small { color: var(--muted); display: block; }
 .sec { margin-top: 12px; break-inside: avoid; }
 .sec > h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); font-weight: 600; padding-bottom: 6px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -67,7 +88,7 @@ table.t tfoot td { font-weight: 700; background: var(--soft); }
 .blank { color: #b9b3a8; }
 .chk { width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 3px; display: inline-block; }
 .plano { border: 1.5px solid var(--ink); border-radius: 8px; padding: 8px; }
-.plano svg { width: 100%; height: auto; max-height: 118mm; display: block; margin: 0 auto; }
+.plano svg { width: 100%; height: auto; max-height: 108mm; display: block; margin: 0 auto; }
 .aviso { margin-top: 8px; padding: 8px 10px; border-left: 4px solid var(--warn); background: #fdecea; color: #6d1a14; font-size: .86rem; }
 .ok { border-left-color: #2e7d32; background: #eaf4ea; color: #1b4d1e; }
 .firmas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
@@ -90,9 +111,13 @@ table.t tfoot td { font-weight: 700; background: var(--soft); }
 </style>
 </head>
 <body>
-<div class="barra"><span id="b-num">ORDEN DE FABRICACIÓN</span><button type="button" id="imprimir">IMPRIMIR / GUARDAR PDF</button></div>
+<div class="barra"><span id="b-num">ORDEN DE FABRICACIÓN</span>
+  <div class="barra-acc"><button type="button" id="pdf">DESCARGAR PDF</button><button type="button" id="imprimir" class="sec-btn">IMPRIMIR</button></div>
+  <p class="barra-nota" id="pdf-nota" hidden></p>
+</div>
 <main id="app"></main>
 
+<script src="estructura.js"></script>
 <script>
 /* Lee los datos del pedido que vienen en el enlace (después de #) */
 function leer(){
@@ -192,7 +217,7 @@ function materiales(D, patasTotal){
   const m = D.mat || (D.fab && D.fab.materiales) || {};
   const q = (k, def) => m[k] != null ? m[k] : (def != null ? def : null);
   const acc = (D.o.acc || []);
-  const cama = D.p.cat === "camas";
+  const cama = (D.p.fam || D.p.cat) === "camas";
   const grupos = [
     ["Estructura", [["Tablas / listones de madera", "unid.", "", "tablas"], ["Láminas de MDF o contraenchapado", "unid.", "", "mdf"], ["Tornillos", "unid.", "", "tornillos"], ["Grapas", "cajas", "", "grapas"], ["Pegamento de contacto", "L", "", "pegamento"]]],
     ["Relleno y tapizado", [["Goma espuma (alta densidad)", "láminas", "", "goma"], ["Guata / fibra", "m", "", "guata"], [`Tela principal · ${D.tela.n}${D.tela.c ? ` · ${D.tela.nm || ""} (ref. ${D.tela.c})` : ""}`, "m", "", "tela"], ["Cincha elástica", "m", "", "cincha"], ["Tafeta (tela de fondo)", "m", "", "tafeta"]]],
@@ -230,10 +255,10 @@ function bloqueTela(titulo, t, extra){
 }
 
 function render(){
-  if (!D || !D.p) { app.innerHTML = `<div class="error"><h2>No se pudo abrir la orden</h2><p>El enlace está incompleto. Ábrelo de nuevo desde el correo de la cotización.</p></div>`; document.getElementById("imprimir").hidden = true; return; }
+  if (!D || !D.p) { app.innerHTML = `<div class="error"><h2>No se pudo abrir la orden</h2><p>El enlace está incompleto. Ábrelo de nuevo desde el correo de la cotización.</p></div>`; document.getElementById("imprimir").hidden = true; document.getElementById("pdf").hidden = true; return; }
   document.title = `Orden ${D.n} · ${D.p.n}`;
-  document.getElementById("b-num").textContent = `ORDEN ${D.n}`;
-  const o = D.o, cama = D.p.cat === "camas";
+  document.getElementById("b-num").textContent = `ORDEN ${D.n}${(D.q || 1) > 1 ? " · × " + D.q : ""}`;
+  const o = D.o, cama = (D.p.fam || D.p.cat) === "camas";
   let despiece = "", plano = "", notaPlano = "", patasTotal = 0, resumenProd = [];
   if (cama) {
     const g = camaGeom(o);
@@ -257,35 +282,49 @@ function render(){
     notaPlano = D.fab.medidasConfirmadas && D.fab.piezasConfirmadas ? `<div class="aviso ok">Medidas confirmadas del modelo.</div>`
       : `<div class="aviso">${D.fab.medidasConfirmadas ? `Medida total confirmada (${D.fab.ancho} × ${D.fab.fondo} cm). ` : "<b>Medidas REFERENCIALES: confirmar las medidas de este modelo.</b> "}${D.fab.piezasConfirmadas ? "" : "El reparto entre piezas es referencial. "}${o.talla === "Medida especial" ? "<b>El cliente pidió medida especial: ver notas.</b>" : ""}</div>`;
     resumenProd = [["Tipo", D.fab.tipo], ["Piezas", `${D.fab.piezas.length}: ${D.fab.piezas.map(p => p.n).join(" + ")}`], ["Medidas", o.talla || "Por definir"], ["Medidas especiales", o.medida], ["Diván", o.lado], ["Va para", o.viv]];
+  } else {
+    /* Categorías sin plano automático (poltronas, comedores, centros de entretenimiento…) */
+    notaPlano = `<div class="aviso">Esta categoría no tiene plano automático. Fabricar según las medidas acordadas con el cliente.</div>`;
+    resumenProd = [["Categoría", D.p.cn || ""], ["Medidas", o.talla || "Por definir"], ["Medidas especiales", o.medida], ["Va para", o.viv]];
   }
   const precios = o.precios || { "Puerto USB": 50, "Portavasos": 25 };
   const acc = o.acc || [];
   const accTxt = acc.length ? acc.map(a => precios[a] ? `${a} (+$${precios[a]})` : `${a} (por cotizar)`).join(", ") : "Ninguno";
   const totalCargos = acc.reduce((t, a) => t + (precios[a] || 0), 0);
-  const cargos = cama ? "" : `<section class="sec"><h2>Cargos adicionales</h2>
+  const F = D.p.fam || (cama ? "camas" : "sofas"), conAcc = F === "sofas" || F === "tapizado", conTela = F !== "otro";
+  const cargos = !conAcc ? "" : `<section class="sec"><h2>Cargos adicionales</h2>
     <table class="t cargos"><thead><tr><th>Concepto</th><th class="c" style="width:80px">Cant.</th><th class="r" style="width:130px">Monto</th></tr></thead><tbody>
     ${acc.length ? acc.map(a => `<tr><td>${esc(a)}</td><td class="c">1</td><td class="r">${precios[a] ? "$" + precios[a] : "Por cotizar"}</td></tr>`).join("") : `<tr><td colspan="3">Sin accesorios adicionales</td></tr>`}
     ${D.cojin ? `<tr><td>Cojines decorativos (${D.cojin.cant})</td><td class="c">${D.cojin.cant}</td><td class="r">Obsequio</td></tr>` : ""}
     </tbody><tfoot><tr><td colspan="2">Total cargos adicionales${acc.some(a => !precios[a]) ? " (más accesorios por cotizar)" : ""}</td><td class="r">$${totalCargos}</td></tr></tfoot></table></section>`;
-  const cab = n => `<header class="minicab"><img src="logo-v.png" alt="Muebles Ideal"><div class="t1">Orden de fabricación · ${esc(D.p.n)}</div><div class="t2">${esc(D.n)}<div class="hojaN">Hoja ${n} de 3</div></div></header>`;
-  const pie = n => `<footer class="pie"><span>Muebles Ideal · Dpto. Fábrica · Mariara, Carabobo</span><span>Orden ${esc(D.n)} · Hoja ${n} de 3</span></footer>`;
+  /* Hoja 4: estructura de madera (solo sofás) */
+  let est = null;
+  if (window.Estructura && F === "sofas") {
+    const prm = Estructura.desdeModelo(D.fab, o), mm = /(\d{2,3}(?:[.,]\d)?)\s*[x×]\s*(\d{2,3}(?:[.,]\d)?)/i.exec(o.medida || "");
+    if (mm) { prm.largo = parseFloat(mm[1].replace(",", ".")); if (prm.tipo === "divan") prm.divanLargo = parseFloat(mm[2].replace(",", ".")); else prm.fondo = parseFloat(mm[2].replace(",", ".")); }
+    est = Estructura.calcular(prm); est.general = Estructura.planos(est).general; est.prm = prm;
+  }
+  const NH = est ? 4 : 3;
+  const cab = n => `<header class="minicab"><img src="logo-v.png" alt="Muebles Ideal"><div class="t1">Orden de fabricación · ${esc(D.p.n)}</div><div class="t2">${esc(D.n)}<div class="hojaN">Hoja ${n} de ${NH}</div></div></header>`;
+  const pie = n => `<footer class="pie"><span>Muebles Ideal · Dpto. Fábrica · Mariara, Carabobo</span><span>Orden ${esc(D.n)} · Hoja ${n} de ${NH}</span></footer>`;
   app.innerHTML = `
   <article class="hoja"><div class="cuerpo">
     <header class="cab">
       <img src="logo-v.png" alt="Muebles Ideal">
-      <div><div class="dpto">Dpto. Fábrica</div><h1>Orden de fabricación</h1><div class="hojaN">Hoja 1 de 3 · Pedido y despiece</div></div>
-      <div class="num"><b>${esc(D.n)}</b><small>${esc(fecha(D.f))}</small></div>
+      <div><div class="dpto">Dpto. Fábrica</div><h1>Orden de fabricación</h1><div class="hojaN">Hoja 1 de ${NH} · Pedido y despiece</div></div>
+      <div class="num"><b>${esc(D.n)}</b><small>${esc(fecha(D.f))}</small>${D.i ? `<small>Mueble ${D.i[0]} de ${D.i[1]} · pedido ${esc(D.ped || "")}</small>` : ""}</div>
     </header>
     <section class="sec"><h2>Producto</h2>
       <div class="prod"><img src="${esc(D.p.img)}" alt="${esc(D.p.n)}">
-        <div><h3 style="font-size:1.2rem;text-transform:uppercase;margin-bottom:4px">${esc(D.p.n)}</h3>
-        ${kv([["Línea", D.p.l], ...resumenProd, ["Soporte", `${o.sop || ""}${o.cp ? " · " + o.cp : ""}`], ...(cama ? [] : [["Accesorios", acc.length ? "Ver cargos adicionales" : "Ninguno"]])])}</div>
+        <div><h3 style="font-size:1.2rem;text-transform:uppercase;margin-bottom:4px">${esc(D.p.n)}${(D.q || 1) > 1 ? ` <span style="display:inline-block;background:#141414;color:#fff;border-radius:6px;padding:1px 9px;font-size:1rem">× ${D.q} UNIDADES</span>` : ""}</h3>
+        ${(D.q || 1) > 1 ? `<p style="margin:0 0 6px;font-size:.8rem;font-weight:700">Fabricar ${D.q} unidades iguales. El despiece y los materiales de esta orden son por unidad.</p>` : ""}
+        ${kv([["Línea", D.p.l], ...resumenProd, ["Soporte", `${o.sop || ""}${o.cp ? " · " + o.cp : ""}`], ...(conAcc ? [["Accesorios", acc.length ? "Ver cargos adicionales" : "Ninguno"]] : [])])}</div>
       </div>
     </section>
-    <section class="sec"><h2>Tela y color</h2>
-      <div class="telas">${bloqueTela("Tela principal", D.tela)}${D.cojin ? bloqueTela("Cojines (obsequio)", D.cojin, `${D.cojin.cant} cojines`) : (cama ? "" : `<div class="tela" style="grid-template-columns:1fr"><div><div class="lbl">Cojines</div><div class="nom">No lleva cojines</div></div></div>`)}</div>
-    </section>
-    <section class="sec"><h2>Despiece</h2>${despiece}</section>
+    ${!conTela ? "" : `<section class="sec"><h2>Tela y color</h2>
+      <div class="telas">${bloqueTela("Tela principal", D.tela)}${D.cojin ? bloqueTela("Cojines (obsequio)", D.cojin, `${D.cojin.cant} cojines`) : (F !== "sofas" ? "" : `<div class="tela" style="grid-template-columns:1fr"><div><div class="lbl">Cojines</div><div class="nom">No lleva cojines</div></div></div>`)}</div>
+    </section>`}
+    ${despiece ? `<section class="sec"><h2>Despiece</h2>${despiece}</section>` : ""}
     ${cargos}
   </div>${pie(1)}</article>
 
@@ -312,9 +351,71 @@ function render(){
       <div style="margin-top:8px;border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-height:34px"><span style="font-size:.74rem;color:#615d56">Notas del taller:</span></div>
       <div class="firmas" style="margin-top:16px"><div>Recibido por (taller)</div><div>Fecha de inicio</div><div>Fecha de entrega</div></div>
     </section>
-  </div>${pie(3)}</article>`;
+  </div>${pie(3)}</article>${est ? hojaEstructura(est, cab, pie) : ""}`;
+}
+function hojaEstructura(r, cab, pie){
+  const f = Estructura.fmt, x = r.x;
+  const corte = c => c === "Recto" ? "" : ` <i>∠${esc(c.replace(" en ambos extremos", "").replace("45°", "45°"))}</i>`;
+  const tablaGr = gr => `<table class="t est-t"><thead><tr><th colspan="3">${esc(gr.t)} × ${gr.cant}<span>${esc(gr.med)}</span></th></tr></thead><tbody>`
+    + gr.piezas.map(p => `<tr><td>${esc(p.n)}</td><td class="c">${p.c * gr.cant}</td><td class="r">${f(p.l)} cm${corte(p.corte)}</td></tr>`).join("")
+    + (gr.tablas || []).map(t => `<tr><td>${esc(t.n)}</td><td class="c">${t.c}</td><td class="r">${esc(t.med.replace(/ cm$/, ""))}</td></tr>`).join("")
+    + gr.mdf.map(m => `<tr><td>${esc(m.n)} <i>MDF</i></td><td class="c">${m.c * gr.cant}</td><td class="r">${f(m.an)} × ${f(m.al)}</td></tr>`).join("") + `</tbody></table>`;
+  /* Reparte los grupos en dos columnas equilibradas */
+  const filasDe = gr => gr.piezas.length + (gr.tablas || []).length + gr.mdf.length + 2, total = r.grupos.reduce((t, gr) => t + filasDe(gr), 0);
+  const col = [[], []]; let acum = 0; r.grupos.forEach(gr => { col[acum < total / 2 ? 0 : 1].push(gr); acum += filasDe(gr); });
+  const enlace = "https://mueblesideal2020-commits.github.io/muebles-ideal-panel/planos.html#" + Estructura.aHash(r.prm);
+  return `
+  <article class="hoja compacta estructura"><div class="cuerpo">
+    ${cab(4)}
+    <section class="sec"><h2>Estructura de madera</h2>
+      ${r.avisos.map(a => `<p style="color:#b3261e;font-size:.78rem;margin:2px 0">⚠ ${esc(a)}</p>`).join("")}
+      <div class="est-top"><div class="est-plano">${r.general}</div>
+        <div class="est-res"><div><span>Puesto</span><b>${f(r.W)} × ${f(r.D)}</b></div><div><span>Listón ${f(x.la)}×${f(x.lb)}</span><b>${r.barras.length} de ${f(x.largoListon / 100)} m</b></div>
+          <div><span>MDF ${f(x.mdf * 10)} mm</span><b>${r.laminas} lám.</b></div><div><span>Alto del asiento</span><b>${f(r.alturas.asiento)} cm</b></div><div><span>Cincha / goma ${f(x.gomaPulg)}"</span><b>${(r.compra.find(c => /^Cincha/.test(c.n)) || {}).c} m / ${(r.compra.find(c => /^Goma/.test(c.n)) || {}).c} pzas</b></div></div></div></section>
+    <section class="sec"><h2>Lista de cortes</h2>
+      <div class="est-cols">${col.map(c => `<div>${c.map(tablaGr).join("")}</div>`).join("")}</div>
+      <p style="font-size:.72rem;color:#615d56;margin:5px 0 0">Planos con vistas y cotas de cada pieza: <a href="${esc(enlace)}" target="_blank" rel="noopener">abrir planos de estructura</a>. Medidas calculadas a partir de la medida del modelo; confírmalas antes de cortar.</p></section>
+  </div>${pie(4)}</article>`;
 }
 document.getElementById("imprimir").addEventListener("click", () => window.print());
+
+/* ===== Descargar PDF (funciona también dentro de la app de Gmail) ===== */
+function cargarScript(src){ return new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+const notaPdf = t => { const n = document.getElementById("pdf-nota"); n.textContent = t; n.hidden = !t; };
+document.getElementById("pdf").addEventListener("click", async () => {
+  const btn = document.getElementById("pdf"); btn.disabled = true; btn.textContent = "Generando PDF…"; notaPdf("");
+  try {
+    if (!window.html2canvas) await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+    if (!window.jspdf) await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const hojas = [...document.querySelectorAll(".hoja")];
+    const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "letter", orientation: "portrait", compress: true });
+    for (let i = 0; i < hojas.length; i++) {
+      btn.textContent = `Generando hoja ${i + 1} de ${hojas.length}…`;
+      const canvas = await html2canvas(hojas[i], {
+        scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: 1000,
+        onclone: doc => doc.body.classList.add("captura")
+      });
+      if (i) pdf.addPage("letter", "portrait");
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, 215.9, 279.4);
+    }
+    const nombre = `Orden-${D.n}.pdf`;
+    const blob = pdf.output("blob");
+    const archivo = new File([blob], nombre, { type: "application/pdf" });
+    if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+      try { await navigator.share({ files: [archivo], title: `Orden de fabricación ${D.n}` }); notaPdf("Listo. Desde ese menú puedes imprimir, guardar en Archivos o enviarlo al taller."); }
+      catch (e) { if (e && e.name !== "AbortError") throw e; }
+    } else {
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      notaPdf(`Se descargó ${nombre}. Si no lo ves, revisa tus descargas.`);
+    }
+  } catch (e) {
+    console.error(e);
+    notaPdf("No se pudo generar el PDF aquí. Abre esta página en Safari o Chrome (menú ⋯ → Abrir en el navegador) y vuelve a intentarlo.");
+  } finally { btn.disabled = false; btn.textContent = "DESCARGAR PDF"; }
+});
 window.addEventListener("hashchange", () => location.reload());
 function pintarQR(){
   const el = document.getElementById("qr"); if (!el || !D || !D.c.mapa) return;
