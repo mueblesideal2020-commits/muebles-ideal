@@ -379,7 +379,7 @@ footer ul a:hover::after, footer ul a:focus-visible::after { transform: scaleX(1
 .sheet-photo { position: relative; overflow: hidden; background: #f1e9de; min-height: 320px; display: grid; place-items: center; padding: clamp(28px, 5vw, 64px); isolation: isolate; }
 .sheet-photo::before { content: ""; position: absolute; inset: -40px; z-index: -2; background: var(--m-img) center / cover no-repeat; filter: blur(22px) saturate(1.1); transform: scale(1.1); }
 .sheet-photo::after { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(15,14,13,.28); }
-.sheet-photo img { width: 100%; max-width: 520px; aspect-ratio: 1; height: auto; object-fit: cover; border-radius: 22px; box-shadow: 0 30px 60px -24px rgba(0,0,0,.6); animation: flotar 6s ease-in-out infinite; }
+.sheet-photo img#m-img { width: auto; max-width: 100%; max-height: min(62vh, 560px); height: auto; object-fit: contain; border-radius: 22px; box-shadow: 0 30px 60px -24px rgba(0,0,0,.6); animation: flotar 6s ease-in-out infinite; }
 .sheet-info { padding: clamp(26px, 4.5vw, 60px) clamp(22px, 4.5vw, 60px); display: flex; flex-direction: column; gap: 30px; min-width: 0; }
 .sheet-info .lead { line-height: 1.7; }
 .feat { gap: 12px !important; }
@@ -497,6 +497,21 @@ footer img { animation: flotar 6s ease-in-out infinite; }
 .ped-quitar { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: .85rem; padding: 6px 0; }
 .ped-vacio { text-align: center; color: var(--muted); padding: 30px 10px; }
 .ped-total { font-family: var(--font-display); font-size: .95rem; color: var(--muted); }
+.n-fotos { position: absolute; right: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; background: rgba(59,48,41,.72); color: #fff; font-size: .78rem; font-weight: 700; backdrop-filter: blur(4px); }
+.n-fotos svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.foto-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,253,249,.88); color: var(--ink); display: grid; place-items: center; cursor: pointer; box-shadow: 0 6px 18px -8px rgba(0,0,0,.4); z-index: 2; }
+.foto-nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.foto-nav.prev { left: 12px; } .foto-nav.next { right: 12px; }
+.foto-nav[hidden] { display: none; }
+.foto-fija { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.foto-marco { position: relative; display: grid; place-items: center; max-width: 100%; }
+.foto-nav.prev { left: -6px; } .foto-nav.next { right: -6px; }
+@media (min-width: 761px) { .sheet-photo { align-items: start; } .foto-fija { position: sticky; top: clamp(28px, 5vw, 64px); } }
+.m-fotos { display: flex; gap: 8px; margin-top: 16px; max-width: 100%; overflow-x: auto; padding: 2px; scrollbar-width: none; }
+.m-fotos[hidden] { display: none; }
+.m-fotos button { flex: none; width: 58px; height: 58px; padding: 0; border: 2px solid transparent; border-radius: 10px; overflow: hidden; cursor: pointer; background: rgba(255,255,255,.4); opacity: .75; }
+.m-fotos button[aria-current="true"] { border-color: #fff; opacity: 1; }
+.m-fotos img { width: 100%; height: 100%; object-fit: cover; display: block; animation: none !important; box-shadow: none !important; border-radius: 0 !important; max-height: none !important; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -789,7 +804,10 @@ footer img { animation: flotar 6s ease-in-out infinite; }
   <div class="modal-bg" data-close></div>
   <div class="sheet">
     <button class="close" data-close aria-label="Cerrar">×</button>
-    <div class="sheet-photo"><img id="m-img" src="cama-chevron.jpg" alt=""></div>
+    <div class="sheet-photo"><div class="foto-fija"><div class="foto-marco"><img id="m-img" src="cama-chevron.jpg" alt="">
+      <button type="button" class="foto-nav prev" id="m-prev" aria-label="Foto anterior" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button type="button" class="foto-nav next" id="m-next" aria-label="Foto siguiente" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
+      <div class="m-fotos" id="m-fotos" hidden></div></div></div>
     <div class="sheet-info">
       <div style="display:flex; flex-direction:column; gap:8px">
         <span class="eyebrow" id="m-cat">Camas</span>
@@ -932,9 +950,9 @@ const waLink = txt => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}
 function card(p){
   const tiene = p.precio !== "" && p.precio != null;
   return `<article class="card">
-    <a class="ph" href="#p-${p.id}" aria-label="Ver detalles de ${p.nombre}">${(() => { const t = p.destacado ? (fam(p) === "camas" ? "Más vendida" : "Más vendido") : p.tag; return t ? `<span class="tag">${t}</span>` : ""; })()}<img src="${p.img}" alt="${p.nombre}" loading="lazy"></a>
+    <a class="ph" href="#p-${p.id}" aria-label="Ver detalles de ${p.nombre}">${(() => { const t = p.destacado ? (fam(p) === "camas" ? "Más vendida" : "Más vendido") : p.tag; return t ? `<span class="tag">${t}</span>` : ""; })()}<img src="${p.img}" alt="${p.nombre}" loading="lazy">${(p.fotos || []).length > 1 ? `<span class="n-fotos" aria-label="${p.fotos.length} fotos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>${p.fotos.length}</span>` : ""}</a>
     <div class="body">
-      ${p.linea ? `<span class="card-linea">Línea ${LINEAS[p.linea].nombre}</span>` : `<span class="card-linea">Sofás</span>`}
+      ${p.linea && LINEAS[p.linea] ? `<span class="card-linea">Línea ${LINEAS[p.linea].nombre}</span>` : `<span class="card-linea">${(catDe(p) || { nombre: "Muebles" }).nombre}</span>`}
       <h3><a href="#p-${p.id}">${p.nombre}</a></h3>
     </div>
   </article>`;
@@ -1043,14 +1061,17 @@ const FICHA = {
   noir:      { asiento:"3 puestos + chaise", patas:"Metálicas cromadas", feat:["Asiento y chaise capitoneados","Brazos anchos y rectos","Mostrado en tela negra"] },
   grafito:   { asiento:"4 puestos + chaise", patas:"Ocultas", feat:["Gran formato para salas amplias","Asientos de doble capa muy cómodos","Mostrado en gris grafito"] }
 };
+/* Cómo los fabricamos (igual en todos los modelos) */
+const ESTRUCTURA = "Madera seca al horno de 2,5\", trabada con grapas de 50 mm y tornillos de 2\"";
+const RELLENO = "Goma espuma de alta densidad (morada, azul y rosada según la pieza)";
 function especificaciones(p, f){
   if (fam(p) === "tapizado" || fam(p) === "otro") return [
     ["Categoría", (catDe(p) || {}).nombre || "Mueble"], ...Object.entries(f).filter(([k, v]) => k !== "feat" && typeof v === "string" && v).map(([k, v]) => [k[0].toUpperCase() + k.slice(1), v]),
-    ...(f.medidas ? [] : [["Medidas", "Estándar o a la medida que necesites"]]), ...(conTela(p) ? [["Tapizado", "Tela y color a elegir"]] : []),
+    ...(f.medidas ? [] : [["Medidas", "Estándar o a la medida que necesites"]]), ...(conTela(p) ? [["Tapizado", "Tela y color a elegir"], ["Estructura", ESTRUCTURA], ["Relleno", RELLENO]] : []),
     ["Fabricación", "Hecho a mano en Mariara, Carabobo"], ["Entrega", "Retiro en fábrica o delivery a todo el país"]];
   if (fam(p) === "camas") return [
     ["Línea", p.linea ? LINEAS[p.linea].nombre : "—"],["Tipo","Cama tapizada con base"],["Cabecero",f.cabecero],["Base",f.base],["Base para subir","En una pieza (casa) o en dos piezas (apartamento)"],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],["Gavetas laterales","Opcionales, con costo adicional"],
-    ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
+    ["Estructura",ESTRUCTURA],["Relleno",RELLENO],
     ["Tapizado",p.tela === "Bouclé" ? "Bouclé (otras telas disponibles)" : "Lino, pana o felpa a elegir"],
     ["Colchón","No incluido (consúltanos)"],["Fabricación","Hecha a mano en Mariara, Carabobo"],["Entrega","Retiro en fábrica o delivery a todo el país"]
   ];
@@ -1059,12 +1080,37 @@ function especificaciones(p, f){
     ["Medidas", FABRICACION[p.id] && FABRICACION[p.id].medidasConfirmadas ? medidasSofa(p.id) + " (ancho × fondo)" : "Por confirmar · también a medida"],
     ["Diván","A la izquierda o a la derecha, tú eliges"],["Cojines decorativos","De obsequio, en la tela y color que elijas"],
     ["Accesorios","Puerto USB (+$50), portavasos (+$25) y más"],["Soporte","Patas de metal (plateada, dorada o negra) o deslizadores"],
-    ["Estructura","Madera tratada y reforzada"],["Relleno","Goma espuma de alta densidad"],
+    ["Estructura",ESTRUCTURA],["Relleno",RELLENO],
     ["Fabricación","Hecho a mano en Mariara, Carabobo"],["Entrega","Retiro en fábrica o delivery a todo el país"]
   ];
 }
 
 const modal = document.getElementById("modal");
+/* Galería de fotos del producto: miniaturas, flechas y deslizar con el dedo */
+let FOTOS_M = [], FOTO_I = 0;
+function verFoto(i){
+  if (!FOTOS_M.length) return;
+  FOTO_I = (i + FOTOS_M.length) % FOTOS_M.length;
+  const src = FOTOS_M[FOTO_I], im = document.getElementById("m-img");
+  im.src = src; im.alt = `${actual ? actual.nombre : ""} · foto ${FOTO_I + 1} de ${FOTOS_M.length}`;
+  modal.querySelector(".sheet-photo").style.setProperty("--m-img", `url("${src}")`);
+  document.querySelectorAll("#m-fotos button").forEach((b, k) => b.setAttribute("aria-current", k === FOTO_I ? "true" : "false"));
+}
+function galeria(p){
+  FOTOS_M = (p.fotos && p.fotos.length ? p.fotos : [p.img]).filter(Boolean);
+  const varias = FOTOS_M.length > 1, cont = document.getElementById("m-fotos");
+  cont.hidden = !varias; document.getElementById("m-prev").hidden = !varias; document.getElementById("m-next").hidden = !varias;
+  cont.innerHTML = varias ? FOTOS_M.map((f, k) => `<button type="button" data-foto="${k}" aria-label="Ver foto ${k + 1}"><img src="${f}" alt="" loading="lazy"></button>`).join("") : "";
+  cont.querySelectorAll("[data-foto]").forEach(b => b.addEventListener("click", () => verFoto(+b.dataset.foto)));
+  actual = p; verFoto(0);
+}
+document.getElementById("m-prev").addEventListener("click", () => verFoto(FOTO_I - 1));
+document.getElementById("m-next").addEventListener("click", () => verFoto(FOTO_I + 1));
+(() => { let x0 = null; const z = document.querySelector("#modal .sheet-photo");
+  z.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+  z.addEventListener("touchend", e => { if (x0 === null || FOTOS_M.length < 2) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) verFoto(FOTO_I + (dx < 0 ? 1 : -1)); }, { passive: true });
+  document.addEventListener("keydown", e => { if (modal.hidden || FOTOS_M.length < 2 || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return; if (e.key === "ArrowLeft") verFoto(FOTO_I - 1); if (e.key === "ArrowRight") verFoto(FOTO_I + 1); });
+})();
 const $ = id => document.getElementById(id);
 let actual = null, talla = "", color = "";
 
@@ -1222,8 +1268,7 @@ function abrir(id){
   elec = {}; PREGUNTAS.forEach(q => { if (q.defecto && aplica(q, p)) elec[q.id] = q.defecto; });
   $("m-dir-box").hidden = true;
   pickTela.reset(); pickCojin.reset(); $("m-medida-box").hidden = true;
-  $("m-img").src = p.img; $("m-img").alt = p.nombre;
-  modal.querySelector(".sheet-photo").style.setProperty("--m-img", `url("${p.img}")`);
+  galeria(p);
   $("m-cat").textContent = p.linea && LINEAS[p.linea] && fam(p) === "camas" ? `Línea ${LINEAS[p.linea].nombre} · Hecha a medida` : `${(catDe(p) || { nombre: "Muebles" }).nombre} · Hecho a medida`;
   $("m-nombre").textContent = p.nombre;
   $("m-desc").textContent = p.desc;
@@ -1711,7 +1756,8 @@ async function cargarCatalogo(){
         PRODUCTOS.splice(0, PRODUCTOS.length, ...lista.map(p => {
           FICHA[p.id] = p.ficha || {}; if (fam(p) === "sofas" && p.fab) FABRICACION[p.id] = p.fab;
           if (p.materiales) MATERIALES[p.id] = p.materiales;
-          return { id: p.id, cat: p.cat, linea: p.linea || undefined, nombre: p.nombre, img: resolverImg(p.img), desc: p.desc || "", tela: "Tela a elegir", precio: p.precio == null ? "" : p.precio, destacado: !!p.destacado, tag: p.tag || "" };
+          const fotos = (Array.isArray(p.fotos) && p.fotos.length ? p.fotos : [p.img]).filter(Boolean).map(resolverImg);
+          return { id: p.id, cat: p.cat, linea: p.linea || undefined, nombre: p.nombre, img: fotos[0] || resolverImg(p.img), fotos, desc: p.desc || "", tela: "Tela a elegir", precio: p.precio == null ? "" : p.precio, destacado: !!p.destacado, tag: p.tag || "" };
         }));
       }
     }
