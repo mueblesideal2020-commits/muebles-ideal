@@ -273,6 +273,9 @@ input[aria-invalid="true"] { border-color: #c0392b; }
 .linea-t { font-family: var(--font-display); font-weight: 500; font-size: 1.15rem; text-transform: uppercase; letter-spacing: .04em; }
 .linea-d { color: var(--muted); font-size: .93rem; line-height: 1.5; }
 .linea-c { margin-top: auto; padding-top: 6px; font-family: var(--font-display); font-size: .85rem; font-weight: 500; color: var(--accent); }
+.card-precio { display: block; text-align: center; font-family: var(--font-display); font-weight: 600; font-size: .98rem; margin-top: -4px; font-variant-numeric: tabular-nums; }
+.tabla-tallas { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .86rem; color: var(--muted); margin-top: 4px; }
+.tabla-tallas b { color: var(--ink, inherit); font-weight: 600; }
 .card-linea { display: block; text-align: center; font-family: var(--font-display); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: -6px; }
 @media (max-width: 760px) { .lineas { grid-template-columns: 1fr; } }
 
@@ -945,6 +948,30 @@ const tiraStyle = t => {
 };
 
 const fmt = n => "$" + Number(n).toLocaleString("es-VE");
+/* Precios de camas por tamaño (USD). Se ajustan en el panel: Catálogo → Precios y opciones.
+   Cada cama usa la tabla "estandar" o "nube", o sus propios precios por tamaño. */
+const PRECIOS_CAMA = {
+  estandar: { Individual: 200, Matrimonial: 280, Queen: 320, King: 410 },
+  nube:     { Individual: 250, Matrimonial: 300, Queen: 350, King: 440 }
+};
+const claveTalla = t => { const w = String(t || "").trim().split(/\s+/)[0].toLowerCase(); return ["individual", "matrimonial", "queen", "king"].find(k => k === w) || ""; };
+const KEY = { individual: "Individual", matrimonial: "Matrimonial", queen: "Queen", king: "King" };
+function tablaCama(p){
+  if (!p || fam(p) !== "camas") return null;
+  const t = p.tablaPrecio || (/nube/i.test(`${p.id} ${p.nombre} ${p.desc}`) ? "nube" : "estandar");
+  if (t === "ninguna") return null;
+  const m = t === "propia" ? (p.preciosTalla || {}) : (PRECIOS_CAMA[t] || {});
+  return Object.values(m).some(v => +v > 0) ? m : null;
+}
+function precioTalla(p, t){ const m = tablaCama(p), k = claveTalla(t); if (!m || !k) return null; const v = +m[KEY[k]]; return v > 0 ? v : null; }
+function precioDesde(p){ const m = tablaCama(p); if (!m) return null; const vs = Object.values(m).map(Number).filter(v => v > 0); return vs.length ? Math.min(...vs) : null; }
+function textoPrecio(p, t){
+  const m = tablaCama(p);
+  if (m) { if (t && t !== "Medida especial") { const v = precioTalla(p, t); return v ? { txt: fmt(v), ask: false } : { txt: "Precio a consultar", ask: true }; }
+    if (t === "Medida especial") return { txt: "Medida especial: a consultar", ask: true };
+    const d = precioDesde(p); return { txt: "Desde " + fmt(d), ask: false }; }
+  const tiene = p.precio !== "" && p.precio != null; return { txt: tiene ? fmt(p.precio) : "Precio a consultar", ask: !tiene };
+}
 const waLink = txt => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`;
 
 function card(p){
@@ -954,6 +981,7 @@ function card(p){
     <div class="body">
       ${p.linea && LINEAS[p.linea] ? `<span class="card-linea">Línea ${LINEAS[p.linea].nombre}</span>` : `<span class="card-linea">${(catDe(p) || { nombre: "Muebles" }).nombre}</span>`}
       <h3><a href="#p-${p.id}">${p.nombre}</a></h3>
+      ${(() => { const d = precioDesde(p), x = d ? "Desde " + fmt(d) : (p.precio !== "" && p.precio != null ? fmt(p.precio) : ""); return x ? `<span class="card-precio">${x}</span>` : ""; })()}
     </div>
   </article>`;
 }
@@ -1237,7 +1265,7 @@ function piezas(){
 function mensaje(){
   const art = fam(actual) === "camas" ? "la" : "el";
   let t = `Hola Muebles Ideal, me interesa ${art} ${actual.nombre}.`;
-  if (talla) t += ` ${fam(actual) === "camas" ? "Tamaño" : "Medidas"}: ${talla}.`;
+  if (talla) t += ` ${fam(actual) === "camas" ? "Tamaño" : "Medidas"}: ${talla}${precioTalla(actual, talla) ? ` (${fmt(precioTalla(actual, talla))})` : ""}.`;
   if (elec.lado) t += ` ${elec.lado}.`;
   if (elec.accesorios && elec.accesorios.length) t += ` Accesorios: ${elec.accesorios.map(a => PRECIOS_EXTRA[a] ? `${a} (+$${PRECIOS_EXTRA[a]})` : a).join(", ")}.`;
   if (elec.vivienda) t += ` Va para: ${elec.vivienda}.`;
@@ -1251,12 +1279,12 @@ function mensaje(){
 function opciones(cont, lista, esColor){
   cont.innerHTML = lista.map(x => esColor
     ? `<button type="button" class="opt color-opt" aria-pressed="false" data-v="${x[0]}"><i style="background:${x[1]}"></i>${x[0]}</button>`
-    : `<button type="button" class="opt" aria-pressed="false" data-v="${x}">${x}</button>`).join("");
+    : `<button type="button" class="opt" aria-pressed="false" data-v="${x}">${x}${(() => { const v = actual && precioTalla(actual, x); return v ? `<em class="extra">${fmt(v)}</em>` : ""; })()}</button>`).join("");
   cont.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
     const on = b.getAttribute("aria-pressed") !== "true";
     cont.querySelectorAll(".opt").forEach(o => o.setAttribute("aria-pressed", "false"));
     b.setAttribute("aria-pressed", on);
-    if (esColor) color = on ? b.dataset.v : ""; else { talla = on ? b.dataset.v : ""; $("m-medida-box").hidden = talla !== "Medida especial"; }
+    if (esColor) color = on ? b.dataset.v : ""; else { talla = on ? b.dataset.v : ""; $("m-medida-box").hidden = talla !== "Medida especial"; pintarPrecio(); }
     mensaje();
   }));
 }
@@ -1277,15 +1305,19 @@ function abrir(id){
   opciones($("m-sizes"), fam(p) === "camas" ? TAMANOS_CAMA : fam(p) !== "sofas" ? ["Estándar", "Medida especial"] : [`Estándar ${FABRICACION[p.id] && FABRICACION[p.id].medidasConfirmadas ? "(" + medidasSofa(p.id) + ")" : "(medidas por confirmar)"}`, "Medida especial"], false);
   renderPreguntas();
   $("m-specs").innerHTML = especificaciones(p, f).map(([k,v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
-  const tiene = p.precio !== "" && p.precio != null;
-  $("m-price").className = tiene ? "price" : "price ask";
-  $("m-price").textContent = tiene ? fmt(p.precio) : "Precio a consultar";
+  pintarPrecio();
   mensaje(); ponerCantidad(1); botonesPedido();
   document.getElementById("m-estado").hidden = true;
   if (modal.hidden) volverA = document.activeElement;
   modal.hidden = false; document.body.classList.add("lock");
   modal.querySelector(".sheet").scrollTop = 0;
   modal.querySelector(".close").focus({ preventScroll: true });
+}
+function pintarPrecio(){
+  const p = actual; if (!p) return; const r = textoPrecio(p, talla), m = tablaCama(p);
+  $("m-price").className = r.ask ? "price ask" : "price"; $("m-price").textContent = r.txt;
+  let tt = $("m-tallas"); if (!tt) { tt = document.createElement("div"); tt.id = "m-tallas"; tt.className = "tabla-tallas"; $("m-price").closest(".price-row").after(tt); }
+  tt.innerHTML = m ? Object.entries(m).filter(([, v]) => +v > 0).map(([k, v]) => `<span>${k} <b>${fmt(v)}</b></span>`).join("") : ""; tt.hidden = !m;
 }
 function cerrar(){
   if (modal.hidden) return;
@@ -1590,6 +1622,7 @@ function camposItem(it){
   if (!esCama || !actual.linea) c.push(["Categoría", (catDe(actual) || { nombre: "Mueble" }).nombre]);
   if (esCama && actual.linea && LINEAS[actual.linea]) c.push(["Línea", LINEAS[actual.linea].nombre]);
   c.push([esCama ? "Tamaño" : "Medidas", (talla || "Por definir") + (talla === "Medida especial" && it.medida ? `: ${it.medida}` : "")]);
+  if (precioTalla(actual, talla)) c.push(["Precio", fmt(precioTalla(actual, talla)) + (it.cantidad > 1 ? " c/u" : "")]);
   if (F === "sofas") { c.push(["Tipo", (FABRICACION[actual.id] || {}).tipo || "Sofá"]); c.push(["Diván", elec.lado || "No aplica"]); }
   if (F !== "otro") { c.push(["Tela", elec.tela || "Por asesorar"]);
     c.push(["Color", elec.telaCodigo ? `${elec.telaNombre}|${elec.telaCodigo}|${elec.telaHex}` : "Por asesorar"]); }
@@ -1613,7 +1646,8 @@ function datosItem(it){
     lado: elec.lado || "", accesorios: (elec.accesorios || []).join(", "), cojines: fam(actual) !== "sofas" ? "" : (quiere ? `Sí · ${(FABRICACION[actual.id] || {}).cojines || 4} unidades · ${elec.cojin}` : "No"),
     colorCojines: elec.cojinCodigo ? `${elec.cojin} · ${elec.cojinNombre} (ref. ${elec.cojinCodigo})` : (elec.cojin || ""),
     linea: esCama && actual.linea && LINEAS[actual.linea] ? LINEAS[actual.linea].nombre : (catDe(actual) || { nombre: "" }).nombre, categoria: (catDe(actual) || { nombre: "" }).nombre, vivienda: elec.vivienda || "", piezas: piezas(),
-    gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte || "", colorPatas: elec.colorPatas || "", entrega: elec.entrega || "" };
+    gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte || "", colorPatas: elec.colorPatas || "", entrega: elec.entrega || "",
+    precioUnit: precioTalla(actual, talla) || (actual.precio !== "" && actual.precio != null && !tablaCama(actual) ? +actual.precio || 0 : 0) };
 }
 async function enviarPedido(items, cli, btn, est, textoBtn){
   const orden = numeroOrden(), n = items.length, piezasTot = items.reduce((a, x) => a + x.cantidad, 0);
@@ -1735,6 +1769,7 @@ async function cargarCatalogo(){
       const c = cf.data();
       if (c.lineas) { Object.keys(LINEAS).forEach(k => delete LINEAS[k]); Object.assign(LINEAS, c.lineas); }
       if (c.preciosExtra) { Object.keys(PRECIOS_EXTRA).forEach(k => delete PRECIOS_EXTRA[k]); Object.assign(PRECIOS_EXTRA, c.preciosExtra); }
+      if (c.preciosCama) ["estandar", "nube"].forEach(k => { if (c.preciosCama[k]) PRECIOS_CAMA[k] = Object.assign({}, PRECIOS_CAMA[k], c.preciosCama[k]); });
       if (Array.isArray(c.tamanosCama) && c.tamanosCama.length) TAMANOS_CAMA.splice(0, TAMANOS_CAMA.length, ...c.tamanosCama);
       if (typeof c.envioGratis === "boolean") ENVIO_GRATIS = c.envioGratis;
       if (Array.isArray(c.accesorios)) { const q = PREGUNTAS.find(x => x.id === "accesorios"); if (q) q.opciones = c.accesorios.map(v => ({ v, extra: true })); }
@@ -1757,7 +1792,7 @@ async function cargarCatalogo(){
           FICHA[p.id] = p.ficha || {}; if (fam(p) === "sofas" && p.fab) FABRICACION[p.id] = p.fab;
           if (p.materiales) MATERIALES[p.id] = p.materiales;
           const fotos = (Array.isArray(p.fotos) && p.fotos.length ? p.fotos : [p.img]).filter(Boolean).map(resolverImg);
-          return { id: p.id, cat: p.cat, linea: p.linea || undefined, nombre: p.nombre, img: fotos[0] || resolverImg(p.img), fotos, desc: p.desc || "", tela: "Tela a elegir", precio: p.precio == null ? "" : p.precio, destacado: !!p.destacado, tag: p.tag || "" };
+          return { id: p.id, cat: p.cat, linea: p.linea || undefined, nombre: p.nombre, img: fotos[0] || resolverImg(p.img), fotos, desc: p.desc || "", tela: "Tela a elegir", precio: p.precio == null ? "" : p.precio, destacado: !!p.destacado, tag: p.tag || "", tablaPrecio: p.tablaPrecio || "", preciosTalla: p.preciosTalla || null };
         }));
       }
     }
