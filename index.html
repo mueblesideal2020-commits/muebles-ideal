@@ -959,7 +959,7 @@ const KEY = { individual: "Individual", matrimonial: "Matrimonial", queen: "Quee
 function tablaCama(p){
   if (!p || fam(p) !== "camas") return null;
   const t = p.tablaPrecio || (/nube/i.test(`${p.id} ${p.nombre} ${p.desc}`) ? "nube" : "estandar");
-  if (t === "ninguna") return null;
+  if (t === "ninguna" || t === "unico") return null;
   const m = t === "propia" ? (p.preciosTalla || {}) : (PRECIOS_CAMA[t] || {});
   return Object.values(m).some(v => +v > 0) ? m : null;
 }
@@ -1442,12 +1442,14 @@ const conLimite = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(
 const escHtml = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const valorHtml = (k, v) => {
   const m = /^(.*)\|(\d{4})\|(#[0-9a-f]{6})$/i.exec(String(v));
-  if (/^MAPA\|/.test(String(v))) return `<a href="${escHtml(String(v).slice(5))}" target="_blank" style="color:#9a7230;font-weight:bold">Ver ubicación en Google Maps</a>`;
+  if (/^FOTO\|/.test(String(v))) return `<img src="${escHtml(String(v).slice(5))}" alt="" width="180" style="display:block;width:180px;max-width:100%;height:auto;border-radius:10px">`;
+  if (/^TIENDA\|/.test(String(v))) return `<a href="${escHtml(String(v).slice(7))}" target="_blank" style="color:#9a7230;font-weight:bold">Ver la foto en la tienda</a>`;
+  if (/^MAPA\|/.test(String(v))) return`<a href="${escHtml(String(v).slice(5))}" target="_blank" style="color:#9a7230;font-weight:bold">Ver ubicación en Google Maps</a>`;
   if (/^ORDEN\|/.test(String(v))) return `<a href="${String(v).slice(6)}" target="_blank" style="display:inline-block;padding:13px 22px;background:#141414;color:#ffffff;border-radius:999px;font-weight:bold;font-size:13px;letter-spacing:1px;text-decoration:none">ABRIR ORDEN DE FABRICACIÓN</a><br><span style="font-size:11px;color:#7a7368;font-weight:normal">Ábrela e imprímela o guárdala en PDF.</span>`;
   if (m) return `<span style="display:inline-block;width:22px;height:22px;border-radius:5px;background:${m[3]};border:1px solid #cfc8bb;vertical-align:middle;margin-right:10px"></span><span style="font-size:16px;vertical-align:middle">${escHtml(m[1])}</span> <span style="font-size:11px;color:#7a7368;font-weight:normal;vertical-align:middle">ref. ${m[2]}</span>`;
   return escHtml(v);
 };
-const valorTexto = v => String(v).replace(/^(.*)\|(\d{4})\|#[0-9a-f]{6}$/i, "$1 (ref. $2)").replace(/^(ORDEN|MAPA)\|/, "");
+const valorTexto = v => String(v).replace(/^(.*)\|(\d{4})\|#[0-9a-f]{6}$/i, "$1 (ref. $2)").replace(/^(ORDEN|MAPA|FOTO|TIENDA)\|/, "");
 const filasHtml = pares => pares.map(([k, v]) =>
   `<tr><td style="padding:11px 12px 11px 0;border-bottom:1px solid #e6e1d6;color:#7a7368;font-size:13px;width:40%;vertical-align:top">${escHtml(k)}</td>` +
   `<td style="padding:11px 0;border-bottom:1px solid #e6e1d6;color:#141414;font-size:14px;font-weight:bold;vertical-align:top">${valorHtml(k, v)}</td></tr>`).join("");
@@ -1460,10 +1462,11 @@ async function enviarCotizacion(campos, asunto, respuesta, registro, op = {}){
   const titulo = esClub ? "¡Bienvenido al Club!" : "¡Recibimos tu solicitud!";
   const etiquetas = { name: "Nombre", email: "Correo" };
   const pares = op.pares ? [["Nombre", campos.name], ["Correo", campos.email]].concat(op.pares) : Object.entries(campos).map(([k, v]) => [etiquetas[k] || k, v]);
-  const detalle = pares.map(([k, v]) => `${k}: ${valorTexto(v)}`).join("  |  ");
+  const detalle = pares.filter(([, v]) => !/^(FOTO|TIENDA)\|/.test(String(v))).map(([k, v]) => `${k}: ${valorTexto(v)}`).join("  |  ");
   const SITIO = "https://mueblesideal2020-commits.github.io/muebles-ideal/";
   const prod = PRODUCTOS.find(p => p.nombre === campos.Modelo || p.nombre === campos["Producto de interés"]);
-  const foto = SITIO + "email-" + (prod && !/^data:/.test(prod.img) ? prod.img.replace(/^img\//, "") : "hero-cama.jpg");
+  /* Foto de cabecera: la del mueble que se pidió. Si el producto tiene foto subida desde el panel (data:), no puede ir por correo y sale el logo */
+  const foto = op.foto || (prod ? (prod.img && !/^data:/.test(prod.img) ? SITIO + "email-" + prod.img.replace(/^img\//, "") : SITIO + "logo-v.png") : SITIO + "email-hero-cama.jpg");
   const modeloFoto = prod ? prod.nombre : "Muebles Ideal";
   const paraCliente = esClub
     ? [["Membresía", "Club Muebles Ideal"], ["Correo registrado", campos.email]]
@@ -1561,13 +1564,13 @@ function numeroOrden(){
   const d = new Date(), p = n => String(n).padStart(2, "0");
   return `MI-${String(d.getFullYear()).slice(2)}${p(d.getMonth() + 1)}${p(d.getDate())}-${Math.floor(1000 + Math.random() * 9000)}`;
 }
-function enlaceOrden(orden, v, extra){
+function enlaceOrden(orden, v, extra, foto){
   const esCama = fam(actual) === "camas";
   const tel = k => elec[k + "Codigo"] ? { n: elec[k], c: elec[k + "Codigo"], h: elec[k + "Hex"], sp: elec[k + "Sp"], nm: elec[k + "Nombre"] } : { n: elec[k] || "Por asesorar" };
   const datos = {
     v: 1, n: orden, f: new Date().toISOString(),
     c: { n: v("m-nom"), e: v("m-email"), t: v("m-tel"), ci: v("m-ciudad"), d: v("m-dir"), mapa: /^https?:\/\//.test(v("m-mapa")) ? v("m-mapa") : "" },
-    p: { id: actual.id, n: actual.nombre, cat: actual.cat, fam: fam(actual), cn: (catDe(actual) || {}).nombre || "", l: actual.linea ? LINEAS[actual.linea].nombre : "", img: /^data:/.test(actual.img) ? "" : actual.img.replace(/^img\//, "") },
+    p: { id: actual.id, n: actual.nombre, cat: actual.cat, fam: fam(actual), cn: (catDe(actual) || {}).nombre || "", l: actual.linea ? LINEAS[actual.linea].nombre : "", img: foto ? foto.replace(/^img\//, "") : "" },
     o: { talla: talla || "", medida: v("m-medida"), viv: elec.vivienda, base: piezas(), gav: elec.gavetas || "", sop: elec.soporte, cp: elec.colorPatas || "",
          lado: elec.lado || "", acc: elec.accesorios || [], precios: PRECIOS_EXTRA, coj: elec.cojines || "", ent: elec.entrega, envGratis: ENVIO_GRATIS },
     tela: tel("tela"),
@@ -1606,8 +1609,22 @@ function validarEleccion(est){
   if (g) { g.scrollIntoView({ behavior: "smooth", block: "center" }); g.classList.add("aviso"); setTimeout(() => g.classList.remove("aviso"), 1600); }
   return false;
 }
+/* Foto que el cliente tenía en pantalla (puede no ser la principal). Las subidas desde el panel (data:) se guardan como miniatura liviana */
+function fotoElegida(){
+  const sel = FOTOS_M[FOTO_I] || "", subida = /^data:/.test(sel);
+  return { img: subida ? "" : sel, thumb: subida ? miniatura($("m-img")) : "", fi: FOTO_I };
+}
+function miniatura(im){
+  try {
+    if (!im || !im.complete || !im.naturalWidth) return "";
+    const k = Math.min(1, 240 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas");
+    c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", .72);
+  } catch (e) { return ""; }
+}
 function capturar(){
-  return { pid: actual.id, nombre: actual.nombre, cat: actual.cat, linea: actual.linea || "", img: /^data:/.test(actual.img) ? "" : actual.img,
+  return { pid: actual.id, nombre: actual.nombre, cat: actual.cat, linea: actual.linea || "", ...fotoElegida(),
     cantidad: CANT, elec: JSON.parse(JSON.stringify(elec)), talla, medida: $("m-medida").value.trim() };
 }
 /* Ejecuta fn con el estado del modal (actual, elec, talla) de un mueble guardado */
@@ -1649,6 +1666,15 @@ function datosItem(it){
     gavetas: esCama ? (elec.gavetas || "Sin gavetas") : "", soporte: elec.soporte || "", colorPatas: elec.colorPatas || "", entrega: elec.entrega || "",
     precioUnit: precioTalla(actual, talla) || (actual.precio !== "" && actual.precio != null && !tablaCama(actual) ? +actual.precio || 0 : 0) };
 }
+const TIENDA_URL = "https://mueblesideal2020-commits.github.io/muebles-ideal/";
+/* Foto del mueble para el correo: solo sirve una dirección pública de la tienda. Las fotos subidas desde el panel (data:) no pueden viajar por correo */
+function fotoCorreo(it){
+  const f = fotoDeItem(it);
+  if (!f || /^data:/.test(f)) return "";
+  if (/^https?:/.test(f)) return f;
+  const nombre = f.replace(/^img\//, "");
+  return TIENDA_URL + (it.fi ? nombre : "email-" + nombre);
+}
 async function enviarPedido(items, cli, btn, est, textoBtn){
   const orden = numeroOrden(), n = items.length, piezasTot = items.reduce((a, x) => a + x.cantidad, 0);
   const vv = it => id => ({ "m-nom": cli.nom, "m-email": cli.email, "m-tel": cli.tel, "m-ciudad": cli.ciudad, "m-dir": cli.dir, "m-mapa": cli.mapa, "m-medida": it.medida || "" })[id] || "";
@@ -1659,7 +1685,10 @@ async function enviarPedido(items, cli, btn, est, textoBtn){
     if (n > 1) pares.push([`PRODUCTO ${i + 1} DE ${n}`, `${it.cantidad} × ${actual.nombre}`]);
     else if (it.cantidad > 1) pares.push(["Cantidad", `${it.cantidad} unidades`]);
     pares.push(...camposItem(it).filter(([k]) => !(n > 1 && k === "Modelo")));
-    const link = "ORDEN|" + enlaceOrden(sub, vv(it), { q: it.cantidad, i: n > 1 ? [i + 1, n] : null, ped: n > 1 ? orden : "" });
+    const fc = fotoCorreo(it), fo = fotoDeItem(it);
+    if (fc) { if (n > 1) pares.push(["Foto", "FOTO|" + fc]); }
+    else pares.push(["Foto", "TIENDA|" + TIENDA_URL + "#p-" + actual.id]);
+    const link = "ORDEN|" + enlaceOrden(sub, vv(it), { q: it.cantidad, i: n > 1 ? [i + 1, n] : null, ped: n > 1 ? orden : "" }, /^data:/.test(fo) ? "" : fo);
     if (n > 1) { pares.push(["N° de orden", sub]); pares.push(["Orden de fabricación", link]); } else ordenUnica = link;
     regItems.push(Object.assign(datosItem(it), { orden: sub }));
   }));
@@ -1674,7 +1703,7 @@ async function enviarPedido(items, cli, btn, est, textoBtn){
     entrega: entregas.join(" / "), direccion: delivery ? cli.dir : "", mapa: delivery ? cli.mapa : "", cantidad: piezasTot, items: regItems });
   const asunto = n > 1 ? `Nuevo pedido ${orden}: ${piezasTot} muebles — ${cli.nom}` : `Nueva cotización ${orden}: ${items[0].cantidad > 1 ? items[0].cantidad + " × " : ""}${items[0].nombre} — ${cli.nom}`;
   const texto = n > 1 ? `tu pedido de ${piezasTot} muebles` : items[0].cantidad > 1 ? `${items[0].cantidad} unidades de ${items[0].nombre}` : "";
-  return procesar(btn, est, { name: cli.nom, email: cli.email, Modelo: items[0].nombre }, asunto, textoBtn, { col: "cotizaciones", data }, { pares, texto });
+  return procesar(btn, est, { name: cli.nom, email: cli.email, Modelo: items[0].nombre }, asunto, textoBtn, { col: "cotizaciones", data }, { pares, texto, foto: fotoCorreo(items[0]) || TIENDA_URL + "logo-v.png" });
 }
 function pasarDatos(){
   [["m-nom", "p-nom"], ["m-email", "p-email"], ["m-tel", "p-tel"], ["m-ciudad", "p-ciudad"], ["m-dir", "p-dir"], ["m-mapa", "p-mapa"]]
@@ -1706,10 +1735,17 @@ function resumenItem(it){
   return [it.talla || (fam(it) === "camas" ? "Tamaño por definir" : "Medidas por definir"), e.tela ? e.tela + (e.telaNombre ? " · " + e.telaNombre : "") : "",
     e.lado, e.gavetas, e.accesorios && e.accesorios.length ? e.accesorios.join(", ") : "", e.entrega].filter(Boolean).join(" · ");
 }
+/* Foto del mueble en el pedido: la que eligió el cliente; si el pedido es antiguo, la principal del catálogo */
+function fotoDeItem(it){
+  if (it.img) return it.img;
+  if (it.thumb) return it.thumb;
+  const p = PRODUCTOS.find(x => x.id === it.pid), lista = p ? (p.fotos && p.fotos.length ? p.fotos : [p.img]).filter(Boolean) : [];
+  return lista[0] || "";
+}
 function pintarPedido(){
   const L = $("ped-lista"), tot = totalPiezas();
   L.innerHTML = CARRITO.length ? CARRITO.map((it, i) => {
-    const p = PRODUCTOS.find(x => x.id === it.pid), img = p ? p.img : (it.img || IMG_BASE + "hero-cama.jpg");
+    const img = fotoDeItem(it) || IMG_BASE + "logo-mark.png";
     return `<div class="ped-item" style="margin-bottom:10px"><img src="${escHtml(img)}" alt=""><div><h3>${escHtml(it.nombre)}</h3><p>${escHtml(resumenItem(it))}</p>
       <div class="fila-ped"><div class="stepper"><button type="button" data-ped-menos="${i}" aria-label="Uno menos">−</button><output>${it.cantidad}</output><button type="button" data-ped-mas="${i}" aria-label="Uno más">+</button></div>
       <button type="button" class="ped-quitar" data-ped-quitar="${i}">Quitar</button></div></div></div>`; }).join("")
@@ -1797,6 +1833,7 @@ async function cargarCatalogo(){
       }
     }
     renderLineas(); pintarChips(); filtrar(filtroActual);
+    if (CARRITO.length) pintarPedido();
     if (!panel.hidden) filtrarPanel(filtroActual);
     if (location.hash.startsWith("#p-")) leerHash();
   } catch (e) { /* sin conexión: se mantiene el catálogo incluido */ }

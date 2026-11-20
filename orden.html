@@ -315,7 +315,7 @@ function render(){
       <div class="num"><b>${esc(D.n)}</b><small>${esc(fecha(D.f))}</small>${D.i ? `<small>Mueble ${D.i[0]} de ${D.i[1]} · pedido ${esc(D.ped || "")}</small>` : ""}</div>
     </header>
     <section class="sec"><h2>Producto</h2>
-      <div class="prod"><img src="${esc(D.p.img)}" alt="${esc(D.p.n)}">
+      <div class="prod">${D.p.img ? `<img src="${esc(D.p.img)}" alt="${esc(D.p.n)}">` : ""}
         <div><h3 style="font-size:1.2rem;text-transform:uppercase;margin-bottom:4px">${esc(D.p.n)}${(D.q || 1) > 1 ? ` <span style="display:inline-block;background:#141414;color:#fff;border-radius:6px;padding:1px 9px;font-size:1rem">× ${D.q} UNIDADES</span>` : ""}</h3>
         ${(D.q || 1) > 1 ? `<p style="margin:0 0 6px;font-size:.8rem;font-weight:700">Fabricar ${D.q} unidades iguales. El despiece y los materiales de esta orden son por unidad.</p>` : ""}
         ${kv([["Línea", D.p.l], ...resumenProd, ["Soporte", `${o.sop || ""}${o.cp ? " · " + o.cp : ""}`], ...(conAcc ? [["Accesorios", acc.length ? "Ver cargos adicionales" : "Ninguno"]] : [])])}</div>
